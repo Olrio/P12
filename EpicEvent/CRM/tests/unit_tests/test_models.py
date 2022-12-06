@@ -4,19 +4,20 @@ from authentication.models import User
 
 import datetime
 
-
 class ClientTest(TestCase):
     """ Test for Client model """
 
     def setUp(self):
-        self.user_sales1 = User.object.create(
+        self.user_sales1 = User.objects.create(
             pk=20,
+            username="supersaler",
             first_name="Yves",
             last_name="Antou",
             role=2,
         )
-        self.user_sales2 = User.object.create(
+        self.user_sales2 = User.objects.create(
             pk=21,
+            username="pacomik",
             first_name="Pacome",
             last_name="Hercial",
             role=2,
@@ -34,7 +35,7 @@ class ClientTest(TestCase):
             company_name="PipoBidon",
             date_created=self.date_now,
             date_updated=self.date_update1,
-            sales_contact=20,
+            sales_contact=self.user_sales1,
         )
         self.client2 = Client.objects.create(
             first_name="Marie",
@@ -45,7 +46,7 @@ class ClientTest(TestCase):
             company_name="MG inc",
             date_created=self.date_now,
             date_updated=self.date_update2,
-            sales_contact=21,
+            sales_contact=self.user_sales2,
         )
 
     def test_client_firstname(self):

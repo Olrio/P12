@@ -15,8 +15,16 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from authentication.views import UserViewset
+from CRM.views import ClientViewset
+from rest_framework_nested import routers
+
+
+router = routers.SimpleRouter()
+router.register("user", UserViewset, basename="user")
+router.register("client", ClientViewset, basename="client")
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('CRM.urls')),
+    path('', include(router.urls)),
 ]

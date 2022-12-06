@@ -38,7 +38,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
-    'CRM'
+    'CRM',
+    'authentication',
 ]
 
 MIDDLEWARE = [
@@ -115,7 +116,9 @@ TIME_ZONE = 'UTC'
 
 USE_I18N = True
 
-USE_TZ = True
+USE_TZ = False
+
+DATETIME_INPUT_FORMATS = ["%d-%m-%Y %H:%M:%S"]
 
 
 # Static files (CSS, JavaScript, Images)
@@ -127,3 +130,11 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+REST_FRAMEWORK = {
+    "DATETIME_FORMAT": "%Y/%m/%d %H:%M",
+    "DATETIME_INPUT_FORMATS": "%d-%m-%Y %H:%M:%S",
+
+}
+
+AUTH_USER_MODEL = "authentication.User"
