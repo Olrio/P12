@@ -8,8 +8,17 @@ import datetime
 class DataTest(TestCase):
     def create_dates(self):
         self.date_now = datetime.datetime.now()
-        self.date_update100 = self.date_now + datetime.timedelta(days=100)
-        self.date_update200 = self.date_now + datetime.timedelta(days=200)
+        self.date_past = self.date_now - datetime.timedelta(days=30)
+        self.date_update_client_100 = self.date_now + datetime.timedelta(days=100)
+        self.date_update_client_200 = self.date_now + datetime.timedelta(days=200)
+        self.date_update_contract_25 = self.date_now + datetime.timedelta(days=25)
+        self.date_update_contract_10 = self.date_now + datetime.timedelta(days=10)
+        self.date_due_contract_20 = self.date_now + datetime.timedelta(days=20)
+        self.date_due_contract_30 = self.date_now + datetime.timedelta(days=30)
+        self.date_event_10 = self.date_now + datetime.timedelta(days=10)
+        self.date_event_0 = self.date_now
+        self.date_update_event_5 = self.date_now + datetime.timedelta(days=5)
+
 
     def create_user(self, pk, username, first_name, last_name, role):
         self.user = User.objects.create(
@@ -37,6 +46,32 @@ class DataTest(TestCase):
         )
         return self.client
 
+    def create_contract(self, client, sales_contact, status, amount, payment_due,
+                        date_created=datetime.datetime.now(), date_updated=datetime.datetime.now()):
+        self.contract = Contract.objects.create(
+            client=client,
+            sales_contact=sales_contact,
+            status=status,
+            amount=amount,
+            payment_due=payment_due,
+            date_created=date_created,
+            date_updated=date_updated
+        )
+        return self.contract
+
+    def create_event(self, client, support_contact, event_status, attendees, event_date,
+                     date_created=datetime.datetime.now(), date_updated=datetime.datetime.now()):
+        self.event = Event.objects.create(
+            client=client,
+            support_contact=support_contact,
+            event_status=event_status,
+            attendees= attendees,
+            event_date=event_date,
+            date_created=date_created,
+            date_updated=date_updated
+        )
+        return self.event
+
     def get_users(self):
         self.user_sales1 = self.create_user(21, "supersaler", "Yves", "Antou", 2)
         self.user_sales2 = self.create_user(22, "ellach", "Ella", "Chette", 2)
@@ -53,7 +88,7 @@ class DataTest(TestCase):
                                           "PipoBidon",
                                           self.user_sales1,
                                           date_created=self.date_now,
-                                          date_updated=self.date_update100
+                                          date_updated=self.date_update_client_100
                                           )
         self.client2 = self.create_client("Marie",
                                           "Golade",
@@ -63,8 +98,68 @@ class DataTest(TestCase):
                                           "MG inc",
                                           self.user_sales2,
                                           date_created=self.date_now,
-                                          date_updated=self.date_update200,
+                                          date_updated=self.date_update_client_200,
                                           )
+        self.client3 = self.create_client("Ray",
+                                          "Tro",
+                                          "retro@jurassic.com",
+                                          "112233445",
+                                          "333333333",
+                                          "Jurassic Prod",
+                                          self.user_sales2,
+                                          date_created=self.date_past,
+                                          date_updated=self.date_past,
+
+        )
+
+    def get_contracts(self):
+        self.contract1 = self.create_contract(self.client1,
+                                              self.user_sales1,
+                                              False,
+                                              10000,
+                                              self.date_due_contract_30,
+                                              date_updated=self.date_update_contract_25,
+        )
+        self.contract2 = self.create_contract(self.client2,
+                                              self.user_sales2,
+                                              True,
+                                              12345.67,
+                                              self.date_due_contract_20,
+                                              date_updated=self.date_update_contract_10,
+                                              )
+        self.contract3 = self.create_contract(self.client3,
+                                              self.user_sales2,
+                                              True,
+                                              5432.66,
+                                              self.date_past,
+                                              date_updated=self.date_past,
+                                              )
+
+    def get_events(self):
+        self.event1 = self.create_event(self.client1,
+                                        self.user_support1,
+                                        1,
+                                        150,
+                                        self.date_event_10,
+                                        self.date_now,
+                                        self.date_update_event_5,
+                                        )
+        self.event2 = self.create_event(self.client2,
+                                        self.user_support1,
+                                        2,
+                                        500,
+                                        self.date_event_0,
+                                        self.date_now,
+                                        self.date_now,
+                                        )
+        self.event3 = self.create_event(self.client3,
+                                        self.user_support1,
+                                        3,
+                                        1000,
+                                        self.date_past,
+                                        self.date_past,
+                                        self.date_past,
+                                        )
 
 
 class UserTest(DataTest):
@@ -127,9 +222,93 @@ class ClientTest(DataTest):
         self.assertEqual(self.client2.date_created, self.date_now)
 
     def test_client_date_updated(self):
-        self.assertEqual(self.client1.date_updated, self.date_update100)
-        self.assertEqual(self.client2.date_updated, self.date_update200)
+        self.assertEqual(self.client1.date_updated, self.date_update_client_100)
+        self.assertEqual(self.client2.date_updated, self.date_update_client_200)
 
     def test_client_sales_contact(self):
         self.assertEqual(self.client1.sales_contact.last_name, "Antou")
         self.assertEqual(self.client2.sales_contact.first_name, "Ella")
+
+
+class ContractTest(DataTest):
+    """Test for Contract Model """
+
+    def setUp(self):
+        self.create_dates()
+        self.get_users()
+        self.get_clients()
+        self.get_contracts()
+
+    def test_contract_client(self):
+        self.assertEqual(self.contract1.client.company_name, "PipoBidon")
+        self.assertEqual(self.contract2.client.email, "gag@calembour.com")
+
+    def test_contract_sales_contact(self):
+        self.assertEqual(self.contract1.sales_contact.role, "2")
+        self.assertEqual(self.contract2.sales_contact.username, "ellach")
+
+    def test_contract_date_created(self):
+        self.assertEqual(self.contract1.date_created, self.date_now)
+        self.assertEqual(self.contract2.date_created, self.date_now)
+
+    def test_contract_date_updated(self):
+        self.assertEqual(self.contract1.date_updated, self.date_update_contract_25)
+        self.assertEqual(self.contract2.date_updted, self.date_update_contract_10)
+
+    def test_contract_status(self):
+        self.assertEqual(self.contract1.status, False)
+        self.assertEqual(self.contract2.status, True)
+
+    def test_contract_amount(self):
+        self.assertEqual(self.contract1.amount, 10000)
+        self.assertEqual(self.contract2.amount, 12345.67)
+
+    def test_contract_date_due(self):
+        self.assertEqual(self.contract1.payment_due, self.date_due_contract_30)
+        self.assertEqual(self.contract2.payment_due, self.date_due_contract_20)
+
+
+class EventTest(DataTest):
+    """Test for Event Model """
+
+    def setUp(self):
+        self.create_dates()
+        self.get_users()
+        self.get_clients()
+        self.get_contracts()
+        self.get_events()
+
+    def test_event_client(self):
+        self.assertEqual(self.event1.client.mobile, "111111111")
+        self.assertEqual(self.event2.client.company_name, "MG inc")
+        self.assertEqual(self.event3.client.last_name, "Tro")
+
+    def test_event_support_contact(self):
+        self.assertEqual(self.event1.support_contact.first_name, "Alex")
+        self.assertEqual(self.event2.support_contact.username, "technico")
+        self.assertEqual(self.event3.support_contact.last_name, "Perience")
+
+    def test_event_status(self):
+        self.assertEqual(self.event1.status, 1)
+        self.assertEqual(self.event2.status, 2)
+        status_name = next(status[1] for status in self.event3.STATUS if status[0] == str(self.event3.status))
+        self.assertEqual(status_name, 'Closed')
+
+    def test_event_attendees(self):
+        self.assertEqual(self.event1.attendees, 150)
+        self.assertEqual(self.event2.attendees, 500)
+
+    def test_event_date(self):
+        self.assertEqual(self.event1.event_date, self.date_event_10)
+        self.assertEqual(self.event2.event_date, self.date_event_0)
+        self.assertEqual(self.event3.event_date, self.date_past)
+
+    def test_event_date_created(self):
+        self.assertEqual(self.event1.date_created, self.date_now)
+        self.assertEqual(self.event2.date_created, self.date_now)
+        self.assertEqual(self.event3.date_created, self.date_past)
+
+    def test_event_date_updated(self):
+        self.assertEqual(self.event1.date_updated, self.date_update_event_5)
+        self.assertEqual(self.event2.date_updated, self.date_now)
+        self.assertEqual(self.event3.date_updated, self.date_past)
