@@ -1,5 +1,5 @@
 from django.test import TestCase
-from CRM.models import Client
+from CRM.models import Client, Contract, Event
 from authentication.models import User
 
 import datetime
@@ -118,6 +118,7 @@ class DataTest(TestCase):
                                               False,
                                               10000,
                                               self.date_due_contract_30,
+                                              date_created=self.date_now,
                                               date_updated=self.date_update_contract_25,
         )
         self.contract2 = self.create_contract(self.client2,
@@ -125,6 +126,7 @@ class DataTest(TestCase):
                                               True,
                                               12345.67,
                                               self.date_due_contract_20,
+                                              date_created=self.date_now,
                                               date_updated=self.date_update_contract_10,
                                               )
         self.contract3 = self.create_contract(self.client3,
@@ -132,6 +134,7 @@ class DataTest(TestCase):
                                               True,
                                               5432.66,
                                               self.date_past,
+                                              date_created=self.date_now,
                                               date_updated=self.date_past,
                                               )
 
@@ -244,7 +247,7 @@ class ContractTest(DataTest):
         self.assertEqual(self.contract2.client.email, "gag@calembour.com")
 
     def test_contract_sales_contact(self):
-        self.assertEqual(self.contract1.sales_contact.role, "2")
+        self.assertEqual(self.contract1.sales_contact.role, 2)
         self.assertEqual(self.contract2.sales_contact.username, "ellach")
 
     def test_contract_date_created(self):
@@ -253,7 +256,7 @@ class ContractTest(DataTest):
 
     def test_contract_date_updated(self):
         self.assertEqual(self.contract1.date_updated, self.date_update_contract_25)
-        self.assertEqual(self.contract2.date_updted, self.date_update_contract_10)
+        self.assertEqual(self.contract2.date_updated, self.date_update_contract_10)
 
     def test_contract_status(self):
         self.assertEqual(self.contract1.status, False)
@@ -289,9 +292,9 @@ class EventTest(DataTest):
         self.assertEqual(self.event3.support_contact.last_name, "Perience")
 
     def test_event_status(self):
-        self.assertEqual(self.event1.status, 1)
-        self.assertEqual(self.event2.status, 2)
-        status_name = next(status[1] for status in self.event3.STATUS if status[0] == str(self.event3.status))
+        self.assertEqual(self.event1.event_status, 1)
+        self.assertEqual(self.event2.event_status, 2)
+        status_name = next(status[1] for status in self.event3.STATUS if status[0] == str(self.event3.event_status))
         self.assertEqual(status_name, 'Closed')
 
     def test_event_attendees(self):
