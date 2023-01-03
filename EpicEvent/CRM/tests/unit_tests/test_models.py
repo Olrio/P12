@@ -1,6 +1,7 @@
 from django.test import TestCase
 from CRM.models import Client, Contract, Event
 from authentication.models import User
+from django.contrib.auth.models import Group
 
 import datetime
 
@@ -19,15 +20,22 @@ class DataTest(TestCase):
         self.date_event_0 = self.date_now
         self.date_update_event_5 = self.date_now + datetime.timedelta(days=5)
 
+    def create_groups(self, pk, name):
+        self.group = Group.objects.create(
+            pk=pk,
+            name=name
+        )
+        return self.group
 
-    def create_user(self, pk, username, first_name, last_name, role):
+
+    def create_user(self, pk, username, first_name, last_name, group):
         self.user = User.objects.create(
             pk=pk,
             username=username,
             first_name=first_name,
             last_name=last_name,
-            role=role,
         )
+        Group.objects.get(name=group.name).user_set.add(self.user)
         return self.user
 
     def create_client(self, first_name, last_name, email, phone, mobile, company_name,
@@ -72,11 +80,16 @@ class DataTest(TestCase):
         )
         return self.event
 
+    def get_groups(self):
+        self.management = self.create_groups(1, "Management")
+        self.sales = self.create_groups(2, "Sales")
+        self.support = self.create_groups(3, "Support")
+
     def get_users(self):
-        self.user_sales1 = self.create_user(21, "supersaler", "Yves", "Antou", 2)
-        self.user_sales2 = self.create_user(22, "ellach", "Ella", "Chette", 2)
-        self.user_manager1 = self.create_user(11, "pacomik", "Pacome", "Hercial", 1)
-        self.user_support1 = self.create_user(31, "technico", "Alex", "Perience", 3)
+        self.user_sales1 = self.create_user(21, "supersaler", "Yves", "Antou", self.sales)
+        self.user_sales2 = self.create_user(22, "ellach", "Ella", "Chette", self.sales)
+        self.user_manager1 = self.create_user(11, "pacomik", "Pacome", "Hercial", self.management)
+        self.user_support1 = self.create_user(31, "technico", "Alex", "Perience", self.support)
 
 
     def get_clients(self):
@@ -169,6 +182,7 @@ class UserTest(DataTest):
     """Test for User Model """
 
     def setUp(self):
+        self.get_groups()
         self.get_users()
 
     def test_user_username(self):
@@ -183,9 +197,7 @@ class UserTest(DataTest):
         self.assertEqual(self.user_sales2.last_name, "Chette")
 
     def test_user_role(self):
-        self.assertEqual(self.user_manager1.role, 1)
-        role_name = next(role[1] for role in self.user_support1.ROLES if role[0]==str(self.user_support1.role))
-        self.assertEqual(role_name, 'Support')
+        self.assertTrue(self.user_manager1.groups.filter(name="Management").exists())
 
 
 class ClientTest(DataTest):
@@ -193,6 +205,7 @@ class ClientTest(DataTest):
 
     def setUp(self):
         self.create_dates()
+        self.get_groups()
         self.get_users()
         self.get_clients()
 
@@ -238,6 +251,7 @@ class ContractTest(DataTest):
 
     def setUp(self):
         self.create_dates()
+        self.get_groups()
         self.get_users()
         self.get_clients()
         self.get_contracts()
@@ -247,7 +261,7 @@ class ContractTest(DataTest):
         self.assertEqual(self.contract2.client.email, "gag@calembour.com")
 
     def test_contract_sales_contact(self):
-        self.assertEqual(self.contract1.sales_contact.role, 2)
+        self.assertTrue(self.contract1.sales_contact.groups.filter(name="Sales").exists())
         self.assertEqual(self.contract2.sales_contact.username, "ellach")
 
     def test_contract_date_created(self):
@@ -276,6 +290,7 @@ class EventTest(DataTest):
 
     def setUp(self):
         self.create_dates()
+        self.get_groups()
         self.get_users()
         self.get_clients()
         self.get_contracts()

@@ -1,5 +1,6 @@
 from django.db import models
 from authentication.models import User
+import datetime
 
 
 class Client(models.Model):
@@ -14,10 +15,11 @@ class Client(models.Model):
     sales_contact = models.ForeignKey(
         to=User,
         on_delete=models.PROTECT,
+        limit_choices_to={'groups__name': "Sales team"}
     )
 
     def __str__(self):
-        return self.first_name, self.last_name
+        return f"{self.first_name} {self.last_name}"
 
 
 class Contract(models.Model):
@@ -29,15 +31,18 @@ class Contract(models.Model):
         to=User,
         on_delete=models.PROTECT,
     )
-
-    status = models.BooleanField()
+    status = models.BooleanField(default=False)
     amount = models.FloatField()
     payment_due = models.DateTimeField()
     date_created = models.DateTimeField()
     date_updated = models.DateTimeField()
 
+    def __str__(self):
+        return f"{self.client} from {self.client.company_name}"
+
 
 class Event(models.Model):
+    name = models.CharField(max_length=250)
     client = models.ForeignKey(
         to=Client,
         on_delete=models.CASCADE,
@@ -58,3 +63,7 @@ class Event(models.Model):
     event_date = models.DateTimeField()
     date_created = models.DateTimeField()
     date_updated = models.DateTimeField()
+    notes = models.TextField(blank=True, null=True)
+
+    def __str__(self):
+        return f"{self.name} ({self.client}) "

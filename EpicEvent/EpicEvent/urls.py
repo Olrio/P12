@@ -15,16 +15,11 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from authentication.views import UserViewset
-from CRM.views import ClientViewset
 from rest_framework_nested import routers
 
-
-router = routers.SimpleRouter()
-router.register("user", UserViewset, basename="user")
-router.register("client", ClientViewset, basename="client")
+admin.sites.AdminSite.site_header = 'Epic Events CRM'
+admin.sites.AdminSite.index_title = 'Items'
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('', include(router.urls)),
+    path('', admin.site.urls),
 ]
