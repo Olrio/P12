@@ -74,11 +74,10 @@ class UserChangeForm(forms.ModelForm):
         fields = ('username',)
 
 
+
 class UserAdmin(BaseUserAdmin):
     form = UserChangeForm
     add_form = UserCreationForm
-
-    readonly_fields = ['username']
 
     list_display = ('username', 'last_name', 'first_name',
                     'number_of_clients', 'management', 'sales', 'support')
@@ -124,11 +123,14 @@ class ClientChangeForm(forms.ModelForm):
     def clean(self):
         Validators.check_letters_hyphen(self.cleaned_data.get('first_name'), "first_name")
         Validators.check_letters_hyphen(self.cleaned_data.get('last_name'), "last_name")
-        Validators.check_phone_number(self.cleaned_data.get('phone'), "phone")
-        Validators.check_phone_number(self.cleaned_data.get('mobile'), "mobile")
+        Validators.check_is_phone_number(self.cleaned_data.get('phone'), "phone")
+        Validators.check_is_phone_number(self.cleaned_data.get('mobile'), "mobile")
 
     def save(self, commit=True):
         client = super().save(commit=False)
+        contract = Contract.objects.get(client=client.id)
+        contract.sales_contact = client.sales_contact
+        contract.save()
         client.date_updated = datetime.datetime.now()
         client.save()
         return client
@@ -137,8 +139,8 @@ class ClientCreationForm(forms.ModelForm):
     def clean(self):
         Validators.check_letters_hyphen(self.cleaned_data.get('first_name'), "first_name")
         Validators.check_letters_hyphen(self.cleaned_data.get('last_name'), "last_name")
-        Validators.check_phone_number(self.cleaned_data.get('phone'), "phone")
-        Validators.check_phone_number(self.cleaned_data.get('mobile'), "mobile")
+        Validators.check_is_phone_number(self.cleaned_data.get('phone'), "phone")
+        Validators.check_is_phone_number(self.cleaned_data.get('mobile'), "mobile")
 
     def save(self, commit=True):
         client = super().save(commit=False)
@@ -165,7 +167,9 @@ class ClientAdmin(admin.ModelAdmin):
 
     def has_change_permission(self, request, obj=None):
         if obj:
-            if request.user == obj.sales_contact or request.user.is_superuser:
+            if request.user == obj.sales_contact \
+                    or request.user.is_superuser \
+                    or request.user.groups.filter(name="Management team").exists():
                 return True
             else:
                 return False
@@ -180,16 +184,15 @@ class ClientAdmin(admin.ModelAdmin):
         if not obj:
             return ['first_name', 'last_name', 'email', 'phone', 'mobile', 'company_name', 'date_created', 'date_updated', 'sales_contact_no_link']
         else:
-            if request.user.is_superuser:
+            if request.user.is_superuser or request.user.groups.filter(name="Management team").exists():
                 return ['first_name', 'last_name', 'email', 'phone', 'mobile', 'company_name', 'date_created', 'date_updated', 'sales_contact']
             else:
                 return ['first_name', 'last_name', 'email', 'phone', 'mobile', 'company_name', 'date_created', 'date_updated', 'sales_contact_no_link']
 
 
-class ContractChangeForm(forms.ModelForm):
-    class Meta:
-        model = Contract
-        fields = "__all__"
+class ContractCreationForm(forms.ModelForm):
+    def clean(self):
+        Validators.check_is_float(self.cleaned_data.get('amount'), "Amount")
 
     def save(self, commit=True):
         contract = super().save(commit=False)
@@ -197,15 +200,41 @@ class ContractChangeForm(forms.ModelForm):
         contract.save()
         return contract
 
+
+class ContractChangeForm(forms.ModelForm):
+    def clean(self):
+        Validators.check_is_float(self.cleaned_data.get('amount'), "Amount")
+
+    def save(self, commit=True):
+        contract = super().save(commit=False)
+        client = Client.objects.get(id=contract.client.id)
+        client.sales_contact = contract.sales_contact
+        client.save()
+        contract.date_updated = datetime.datetime.now()
+        contract.save()
+        return contract
+
 class ContractAdmin(admin.ModelAdmin):
-    form = ContractChangeForm
+    change_form = ContractChangeForm
+    add_form = ContractCreationForm
 
     list_display = ['client', 'sales_contact', 'amount', 'my_status']
-    readonly_fields = ['client', 'sales_contact_no_link', 'my_status', 'date_created', 'date_updated']
+    readonly_fields = ['sales_contact_no_link', 'my_status', 'date_created', 'date_updated']
+
+
+    def get_form(self, request, obj=None, change=False, **kwargs):
+        if not obj:
+            self.form = self.add_form
+        else:
+            self.form = self.change_form
+        self.form.current_user = request.user
+        return super(ContractAdmin, self).get_form(request, **kwargs)
 
     def has_change_permission(self, request, obj=None):
         if obj:
-            if request.user == obj.sales_contact or request.user.is_superuser:
+            if request.user == obj.client.sales_contact \
+                    or request.user.is_superuser \
+                    or request.user.groups.filter(name="Management team").exists():
                 return True
             else:
                 return False
@@ -221,15 +250,23 @@ class ContractAdmin(admin.ModelAdmin):
     my_status.boolean = True
 
     def get_fields(self, request, obj=None):
-        if request.user.is_superuser:
-            return ['client', 'sales_contact', 'my_status', 'amount', 'payment_due', 'date_created', 'date_updated']
+        if not obj:
+            return ['client']
         else:
-            return ['client', 'sales_contact_no_link', 'my_status', 'amount', 'payment_due', 'date_created', 'date_updated']
+            if request.user.is_superuser or request.user.groups.filter(name="Management team").exists():
+                self.readonly_fields = ['my_status', 'date_created', 'date_updated']
+                self.fields = ['client', 'sales_contact', 'my_status', 'amount', 'payment_due', 'date_created',
+                               'date_updated']
+                return self.fields
+            else:
+                self.readonly_fields = ['sales_contact_no_link', 'my_status', 'client', 'date_created', 'date_updated']
+                self.fields = ['client', 'sales_contact_no_link', 'my_status', 'amount', 'payment_due', 'date_created', 'date_updated']
+                return self.fields
 
 
     @admin.display
     def sales_contact_no_link(self, obj):
-        return format_html("{}", obj.sales_contact)
+        return format_html("{}", obj.client.sales_contact)
     sales_contact_no_link.short_description = "Sales contact"
 
 class EventChangeForm(forms.ModelForm):

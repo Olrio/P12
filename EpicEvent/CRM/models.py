@@ -28,9 +28,10 @@ class Contract(models.Model):
         on_delete=models.CASCADE,
     )
     sales_contact = models.ForeignKey(
-        to=User,
-        on_delete=models.PROTECT,
-    )
+            to=User,
+            on_delete=models.PROTECT,
+            limit_choices_to={'groups__name': "Sales team"}
+        )
     status = models.BooleanField(default=False)
     amount = models.FloatField()
     payment_due = models.DateTimeField()
