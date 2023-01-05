@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.db.models import Q
 from .models import User
 from CRM.models import Client, Contract, Event
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
@@ -6,7 +7,7 @@ from django.contrib.auth.models import Group, Permission
 from django.urls import reverse
 from django import forms
 from django.db import IntegrityError
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ValidationError, ObjectDoesNotExist
 from .validators import Validators
 from django.contrib.auth.forms import ReadOnlyPasswordHashField
 from django.utils.html import format_html
@@ -89,7 +90,6 @@ class UserAdmin(BaseUserAdmin):
 
     add_fieldsets = (
         (None, {
-            'classes': ('wide',),
             'fields': ('first_name', 'last_name', 'password1', 'password2'),
         }),
         ('Permissions', {'fields': ('groups', )}),
@@ -128,9 +128,12 @@ class ClientChangeForm(forms.ModelForm):
 
     def save(self, commit=True):
         client = super().save(commit=False)
-        contract = Contract.objects.get(client=client.id)
-        contract.sales_contact = client.sales_contact
-        contract.save()
+        try:
+            contract = Contract.objects.get(client=client.id)
+            contract.sales_contact = client.sales_contact
+            contract.save()
+        except ObjectDoesNotExist:
+            pass
         client.date_updated = datetime.datetime.now()
         client.save()
         return client
@@ -146,7 +149,8 @@ class ClientCreationForm(forms.ModelForm):
         client = super().save(commit=False)
         client.date_created = datetime.datetime.now()
         client.date_updated = datetime.datetime.now()
-        client.sales_contact = self.current_user
+        if self.current_user:
+            client.sales_contact = self.current_user
         client.save()
         return client
 
@@ -159,11 +163,23 @@ class ClientAdmin(admin.ModelAdmin):
             self.form = self.add_form
         else:
             self.form = self.change_form
-        self.form.current_user = request.user
+        if request.user.groups.filter(name="Sales team").exists():
+            self.form.current_user = request.user
+        else:
+            self.form.current_user = None
         return super(ClientAdmin, self).get_form(request, **kwargs)
 
     list_display = ['last_name', 'first_name', 'company_name', 'sales_contact']
     readonly_fields = ['sales_contact_no_link', 'date_created', 'date_updated']
+
+    def has_delete_permission(self, request, obj=None):
+        if obj:
+            if request.user == obj.sales_contact \
+                    or request.user.is_superuser \
+                    or request.user.groups.filter(name="Management team").exists():
+                return True
+            else:
+                return False
 
     def has_change_permission(self, request, obj=None):
         if obj:
@@ -182,7 +198,11 @@ class ClientAdmin(admin.ModelAdmin):
 
     def get_fields(self, request, obj=None):
         if not obj:
-            return ['first_name', 'last_name', 'email', 'phone', 'mobile', 'company_name', 'date_created', 'date_updated', 'sales_contact_no_link']
+            if request.user.is_superuser or request.user.groups.filter(name="Management team").exists():
+                return ['first_name', 'last_name', 'email', 'phone', 'mobile', 'company_name', 'date_created', 'date_updated', 'sales_contact']
+            else:
+                return ['first_name', 'last_name', 'email', 'phone', 'mobile', 'company_name', 'date_created',
+                        'date_updated', 'sales_contact_no_link']
         else:
             if request.user.is_superuser or request.user.groups.filter(name="Management team").exists():
                 return ['first_name', 'last_name', 'email', 'phone', 'mobile', 'company_name', 'date_created', 'date_updated', 'sales_contact']
@@ -196,7 +216,13 @@ class ContractCreationForm(forms.ModelForm):
 
     def save(self, commit=True):
         contract = super().save(commit=False)
+        contract.date_created = datetime.datetime.now()
         contract.date_updated = datetime.datetime.now()
+        if self.current_user:
+            contract.sales_contact = self.current_user
+        client = Client.objects.get(id=contract.client.id)
+        client.sales_contact = contract.sales_contact
+        client.save()
         contract.save()
         return contract
 
@@ -204,6 +230,7 @@ class ContractCreationForm(forms.ModelForm):
 class ContractChangeForm(forms.ModelForm):
     def clean(self):
         Validators.check_is_float(self.cleaned_data.get('amount'), "Amount")
+
 
     def save(self, commit=True):
         contract = super().save(commit=False)
@@ -218,17 +245,44 @@ class ContractAdmin(admin.ModelAdmin):
     change_form = ContractChangeForm
     add_form = ContractCreationForm
 
-    list_display = ['client', 'sales_contact', 'amount', 'my_status']
-    readonly_fields = ['sales_contact_no_link', 'my_status', 'date_created', 'date_updated']
+    list_display = ['client', 'sales_contact', 'amount', 'status']
+    readonly_fields = ['sales_contact_no_link', 'date_created', 'date_updated']
 
+    # a user member belonging to 'sales' group can create a contract only for his clients
+    # a superuser or a user belonging to 'management' group can create a contract for any client
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if "/add/" in request.path:
+            if db_field.name == "client" and request.user.is_superuser:
+                kwargs["queryset"] = Client.objects.all()
+            elif db_field.name == "client" and request.user.groups.filter(name="Sales team").exists():
+                kwargs["queryset"] = Client.objects.filter(sales_contact=request.user)
+            return super().formfield_for_foreignkey(db_field, request, **kwargs)
+        if "/change/" in request.path:
+            if db_field.name == "client" and request.user.is_superuser:
+                kwargs["queryset"] = Client.objects.all()
+            elif db_field.name == "client" and request.user.groups.filter(name="Sales team").exists():
+                kwargs["queryset"] = Client.objects.filter(sales_contact=request.user)
+            return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
     def get_form(self, request, obj=None, change=False, **kwargs):
         if not obj:
             self.form = self.add_form
         else:
             self.form = self.change_form
-        self.form.current_user = request.user
+        if request.user.groups.filter(name="Sales team").exists() and not request.user.is_superuser:
+            self.form.current_user = request.user
+        else:
+            self.form.current_user = None
         return super(ContractAdmin, self).get_form(request, **kwargs)
+
+    def has_delete_permission(self, request, obj=None):
+        if obj:
+            if request.user == obj.client.sales_contact \
+                    or request.user.is_superuser \
+                    or request.user.groups.filter(name="Management team").exists():
+                return True
+            else:
+                return False
 
     def has_change_permission(self, request, obj=None):
         if obj:
@@ -239,28 +293,24 @@ class ContractAdmin(admin.ModelAdmin):
             else:
                 return False
 
-    def my_status(self, obj):
-        """ status will be True only if at least one event isn't closed """
-        if Event.objects.filter(client=obj.client_id).filter(event_date__gte=str(datetime.datetime.now())).exists():
-            obj.status = True
-        else:
-            obj.status = False
-        obj.save()
-        return obj.status
-    my_status.boolean = True
 
     def get_fields(self, request, obj=None):
         if not obj:
-            return ['client']
+            if request.user.is_superuser or request.user.groups.filter(name="Management team").exists():
+                return ['client', 'sales_contact', 'amount', 'payment_due', 'status']
+            else:
+                self.readonly_fields = []
+                self.fields = ['client', 'amount', 'payment_due']
+                return self.fields
         else:
             if request.user.is_superuser or request.user.groups.filter(name="Management team").exists():
-                self.readonly_fields = ['my_status', 'date_created', 'date_updated']
-                self.fields = ['client', 'sales_contact', 'my_status', 'amount', 'payment_due', 'date_created',
+                self.readonly_fields = ['date_created', 'date_updated']
+                self.fields = ['client', 'sales_contact', 'status', 'amount', 'payment_due', 'date_created',
                                'date_updated']
                 return self.fields
             else:
-                self.readonly_fields = ['sales_contact_no_link', 'my_status', 'client', 'date_created', 'date_updated']
-                self.fields = ['client', 'sales_contact_no_link', 'my_status', 'amount', 'payment_due', 'date_created', 'date_updated']
+                self.readonly_fields = ['sales_contact_no_link', 'status', 'date_created', 'date_updated']
+                self.fields = ['client', 'sales_contact_no_link', 'status', 'amount', 'payment_due', 'date_created', 'date_updated']
                 return self.fields
 
 

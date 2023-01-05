@@ -1,4 +1,5 @@
 from django.core.exceptions import ValidationError
+from CRM.models import Contract
 
 class Validators:
     @staticmethod
