@@ -1,6 +1,5 @@
 from django.db import models
 from authentication.models import User
-import datetime
 
 
 class Client(models.Model):
@@ -30,7 +29,7 @@ class Contract(models.Model):
     sales_contact = models.ForeignKey(
             to=User,
             on_delete=models.PROTECT,
-            limit_choices_to={'groups__name': "Sales team"}
+            limit_choices_to={'groups__name': "Sales team"},
         )
     status = models.BooleanField(default=False)
     amount = models.FloatField()

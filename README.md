@@ -12,8 +12,7 @@ Cette API utilise PostgreSQL pour la gestion de la base de données.
 PostgreSQL doit donc être installé localement.
 
 Sous Windows :  
-&emsp;- Télécharger l'installer via le site https://www.enterprisedb.
-com/downloads/postgres-postgresql-downloads  
+&emsp;- Télécharger l'installer via le site https://www.enterprisedb.com/downloads/postgres-postgresql-downloads  
 &emsp;- Installer PostgreSQL en suivant les instructions de l'assistant 
 d'installation  
 &emsp;- Créer la Database 'epicdb' et l'utilisateur principal 'olrio' (cf. 
@@ -25,10 +24,17 @@ recherche de Windows
 [postgres]`  
 &emsp;&emsp;* Entrer le mot de passe qui a été saisi lors de l'installation de 
 Postgres  
+  
+Sous Linux :  
+&emsp;- Dans le terminal, saisir `sudo apt-get install postgresql`  
+&emsp;- Lancer le Shell de PostgreSQL au moyen de la commande `sudo -u postgres psql`  
+
+Etape suivante :  
 &emsp;- L'invite de commande `postgres=#` est affichée   
 &emsp;- Saisir `CREATE USER olrio WITH PASSWORD 'toto123';` pour créer 
 l'utilisateur principal  
 &emsp;- Saisir `CREATE DATABASE epicdb OWNER olrio;` pour créer la base de données
+&emsp;- Quitter le Shell en tapant `exit`  
 
 
 Se placer dans le dossier EpicEvent/
