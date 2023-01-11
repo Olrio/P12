@@ -4,7 +4,6 @@ from .models import User
 from CRM.models import Client, Contract, Event
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.models import Group, Permission
-from django.urls import reverse
 from django import forms
 from django.db import IntegrityError
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
@@ -22,45 +21,45 @@ class UserCreationForm(forms.ModelForm):
     password1 = forms.CharField(label='Password', widget=forms.PasswordInput)
     password2 = forms.CharField(label='Password confirmation', widget=forms.PasswordInput)
 
-    class Meta:
-        model = User
-        fields = ('username',)
-
-    def clean(self):
-        Validators.check_letters_hyphen(self.cleaned_data.get('first_name'), "first_name")
-        Validators.check_letters_hyphen(self.cleaned_data.get('last_name'), "last_name")
-
-    def clean_password2(self):
-        # Check that the two password entries match
-        password1 = self.cleaned_data.get("password1")
-        password2 = self.cleaned_data.get("password2")
-        if password1 and password2 and password1 != password2:
-            raise ValidationError("Password error : your two entries differ !")
-        return password2
-
-    def save(self, commit=True):
-        user = super().save(commit=False)
-        user.set_password(self.cleaned_data["password1"])
-        user.first_name = user.first_name.title()
-        user.last_name = user.last_name.title()
-
-        initials = ''.join([name[0] for name in user.first_name.split("-")])
-        # let's set the username from first_name and last_name
-        # it's the lower first(s) letter(s) of first_name completed with the lower last_name
-        # if this username already exists, a number is added, starting from 2
-        counter = 2
-        if User.objects.filter(username=initials.lower()+user.last_name.lower()).exists():
-            while True:
-                if User.objects.filter(username=initials.lower()+user.last_name.lower() + str(counter)).exists():
-                    counter +=1
-                else:
-                    break
-            user.username = initials.lower()+user.last_name.lower() + str(counter)
-        else:
-            user.username = initials.lower()+user.last_name.lower()
-        if commit:
-            user.save()
-        return user
+    # class Meta:
+    #     model = User
+    #     fields = ('username',)
+    #
+    # def clean(self):
+    #     Validators.check_letters_hyphen(self.cleaned_data.get('first_name'), "first_name")
+    #     Validators.check_letters_hyphen(self.cleaned_data.get('last_name'), "last_name")
+    #
+    # def clean_password2(self):
+    #     # Check that the two password entries match
+    #     password1 = self.cleaned_data.get("password1")
+    #     password2 = self.cleaned_data.get("password2")
+    #     if password1 and password2 and password1 != password2:
+    #         raise ValidationError("Password error : your two entries differ !")
+    #     return password2
+    #
+    # def save(self, commit=True):
+    #     user = super().save(commit=False)
+    #     user.set_password(self.cleaned_data["password1"])
+    #     user.first_name = user.first_name.title()
+    #     user.last_name = user.last_name.title()
+    #
+    #     initials = ''.join([name[0] for name in user.first_name.split("-")])
+    #     # let's set the username from first_name and last_name
+    #     # it's the lower first(s) letter(s) of first_name completed with the lower last_name
+    #     # if this username already exists, a number is added, starting from 2
+    #     counter = 2
+    #     if User.objects.filter(username=initials.lower()+user.last_name.lower()).exists():
+    #         while True:
+    #             if User.objects.filter(username=initials.lower()+user.last_name.lower() + str(counter)).exists():
+    #                 counter +=1
+    #             else:
+    #                 break
+    #         user.username = initials.lower()+user.last_name.lower() + str(counter)
+    #     else:
+    #         user.username = initials.lower()+user.last_name.lower()
+    #     if commit:
+    #         user.save()
+    #     return user
 
 
 class UserChangeForm(forms.ModelForm):
@@ -76,7 +75,7 @@ class UserChangeForm(forms.ModelForm):
 
 
 
-class UserAdmin(BaseUserAdmin):
+class CustomUserAdmin(BaseUserAdmin):
     form = UserChangeForm
     add_form = UserCreationForm
 
@@ -128,12 +127,6 @@ class ClientChangeForm(forms.ModelForm):
 
     def save(self, commit=True):
         client = super().save(commit=False)
-        try:
-            contract = Contract.objects.get(client=client.id)
-            contract.sales_contact = client.sales_contact
-            contract.save()
-        except ObjectDoesNotExist:
-            pass
         client.date_updated = datetime.datetime.now()
         client.save()
         return client
@@ -245,7 +238,7 @@ class ContractAdmin(admin.ModelAdmin):
     change_form = ContractChangeForm
     add_form = ContractCreationForm
 
-    list_display = ['client', 'sales_contact', 'amount', 'status']
+    list_display = ['client', 'amount', 'status']
     readonly_fields = ['sales_contact_no_link', 'date_created', 'date_updated']
 
     # a user member belonging to 'sales' group can create a contract only for his clients
@@ -373,16 +366,20 @@ class EventAdmin(admin.ModelAdmin):
         return obj.notes
 
     def get_fields(self, request, obj=None):
-        if request.user.is_superuser:
-            return ['name', 'client', 'support_contact', 'event_status', 'event_date',
-                    'attendees', 'date_created', 'date_updated',  'notes']
-        else:
-            if request.user == obj.support_contact:
-                return ['name', 'client_no_link', 'support_contact_no_link', 'event_status', 'event_date',
-                        'attendees', 'date_created', 'date_updated', 'my_notes']
+        if obj:
+            if request.user.is_superuser:
+                return ['name', 'client', 'support_contact', 'event_status', 'event_date',
+                        'attendees', 'date_created', 'date_updated',  'notes']
             else:
-                return ['name', 'client', 'support_contact_no_link', 'event_status', 'event_date',
-                    'attendees', 'date_created', 'date_updated',  'my_notes']
+                if request.user == obj.support_contact:
+                    return ['name', 'client_no_link', 'support_contact_no_link', 'event_status', 'event_date',
+                            'attendees', 'date_created', 'date_updated', 'my_notes']
+                else:
+                    return ['name', 'client', 'support_contact_no_link', 'event_status', 'event_date',
+                        'attendees', 'date_created', 'date_updated',  'my_notes']
+        else:
+            return ['name', 'client', 'support_contact', 'event_status', 'event_date',
+                    'attendees', 'date_created', 'date_updated', 'notes']
 
     @admin.display
     def client_no_link(self, obj):
@@ -394,7 +391,7 @@ class EventAdmin(admin.ModelAdmin):
         return format_html("{}", obj.support_contact)
     support_contact_no_link.short_description = "Support contact"
 
-admin.site.register(User, UserAdmin)
+admin.site.register(User, CustomUserAdmin)
 admin.site.register(Client, ClientAdmin)
 admin.site.register(Contract, ContractAdmin)
 admin.site.register(Event, EventAdmin)

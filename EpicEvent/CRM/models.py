@@ -1,5 +1,11 @@
 from django.db import models
 from authentication.models import User
+from django.contrib.contenttypes.models import ContentType
+from django.contrib.auth.models import Group, Permission
+
+import authentication.permissions
+
+
 
 
 class Client(models.Model):
@@ -26,11 +32,11 @@ class Contract(models.Model):
         to=Client,
         on_delete=models.CASCADE,
     )
-    sales_contact = models.ForeignKey(
-            to=User,
-            on_delete=models.PROTECT,
-            limit_choices_to={'groups__name': "Sales team"},
-        )
+    # sales_contact = models.ForeignKey(
+    #         to=User,
+    #         on_delete=models.PROTECT,
+    #         limit_choices_to={'groups__name': "Sales team"},
+    #     )
     status = models.BooleanField(default=False)
     amount = models.FloatField()
     payment_due = models.DateTimeField()
