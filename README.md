@@ -48,3 +48,31 @@ Créer un superutilisateur qui pourra se connecter au site Django admin :
 Lancer le serveur avec la commande `python manage.py runserver`  
 
 Se logger avec les `username` et `password` du superutilisateur juste créé.
+
+
+Seuls les membres de l'équipe de gestion peuvent utiliser cette interface.  
+Elle leur permet de créer les autres utilisateurs de l'entreprise relevant des équipes de vente et de support.  
+Les membres de l'équipe de vente et de l'équipe de support se voient attribuer un identifiant (username) et un mot de passe.  
+Ils peuvent envoyer des requêtes à l'API REST CRM via le logiciel **Postman** (https://www.postman.com/)  
+
+Tout d'abord, il convient de récupérer un Token d'identification.  
+Pour ce faire, envoyer une requête POST à http://127.0.0.1:8000/crm/login/ en renseignant dans le Body les champs `username` et `password`  
+
+Si la requête réussit, la réponse retournera un Token de rafraichissement et un Token d'accès.  
+
+**Le Token d'accès doit être inclus dans toute requête effectuée à l'API.**  
+Pour Postman, il faut cliquer sur `Authorization` et sélectionner `Bearer Token` comme `Type`  
+Puis copier la valeur du Token d'accès dans le champ `Token` à droite. 
+
+Si le Token d'accès a expiré, il convient de le rafraichir.  
+Envoyer une requête POST à http://127.0.0.1:8000/crm/token/refresh/ en renseignant dans le Body le champs `refresh` qui prend comme valeur le Token de rafraichissement obtenu lors du `login`  
+Veiller à ce que l'onglet `Authorization` soit bien configuré sur `No Auth` (à ce moment là, l'utilisateur ne dispose plus de Token d'accès valide)  
+
+Exemples de requêtes pouvant être faites à l'API :  
+&emsp;- Récupérer la liste des clients : requête GET à http://127.0.0.1:8000/crm/clients/  
+&emsp;- Créer un nouveau client : requête POST à http://127.0.0.1:8000/crm/clients/  
+&emsp; Le Body doit comprendre les champs nécessaires à la création du Client, à savoir `first_name`, `last_name`, `email`, `phone`, `mobile` et `company_name`  
+
+
+
+
