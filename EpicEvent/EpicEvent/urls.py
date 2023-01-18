@@ -17,6 +17,7 @@ from django.contrib import admin
 from django.urls import path, include
 from rest_framework_simplejwt.views import TokenRefreshView, TokenObtainPairView
 from rest_framework_nested import routers
+from authentication.admin import MyLoginView
 from authentication.views import RegisterUserViewset
 from CRM.views import ClientViewset
 
@@ -28,6 +29,7 @@ router.register("clients", ClientViewset, basename="clients")
 
 
 urlpatterns = [
+    path("admin/login/", MyLoginView.as_view(), {'template_name': 'admin/login.html'}, name="admin_login"),
     path("admin/", admin.site.urls),
     path("crm/token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
     path("crm/", include(router.urls)),

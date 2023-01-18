@@ -57,6 +57,7 @@ class Event(models.Model):
     support_contact = models.ForeignKey(
         to=User,
         on_delete=models.PROTECT,
+        limit_choices_to={'groups__name': "Support team"},
     )
     STATUS = [
         ("1", "Incoming"),

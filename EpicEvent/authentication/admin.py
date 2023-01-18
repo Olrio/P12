@@ -8,12 +8,23 @@ from django import forms
 from django.db import IntegrityError
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
 from .validators import Validators
-from django.contrib.auth.forms import ReadOnlyPasswordHashField
+from django.contrib.auth.forms import ReadOnlyPasswordHashField, AuthenticationForm
+from django.contrib.auth.views import LoginView
 from django.utils.html import format_html
+from django.utils.translation import gettext_lazy as _
 import datetime
 
 import logging
 
+
+class MyAuthForm(AuthenticationForm):
+    def confirm_login_allowed(self, user):
+        if not user.is_staff:
+            raise ValidationError(_("Only members of management team are allowed to use this site."), code="not staff")
+
+
+class MyLoginView(LoginView):
+    authentication_form = MyAuthForm
 
 class UserCreationForm(forms.ModelForm):
     """A form for creating new users. Includes all the required
@@ -21,45 +32,45 @@ class UserCreationForm(forms.ModelForm):
     password1 = forms.CharField(label='Password', widget=forms.PasswordInput)
     password2 = forms.CharField(label='Password confirmation', widget=forms.PasswordInput)
 
-    # class Meta:
-    #     model = User
-    #     fields = ('username',)
-    #
-    # def clean(self):
-    #     Validators.check_letters_hyphen(self.cleaned_data.get('first_name'), "first_name")
-    #     Validators.check_letters_hyphen(self.cleaned_data.get('last_name'), "last_name")
-    #
-    # def clean_password2(self):
-    #     # Check that the two password entries match
-    #     password1 = self.cleaned_data.get("password1")
-    #     password2 = self.cleaned_data.get("password2")
-    #     if password1 and password2 and password1 != password2:
-    #         raise ValidationError("Password error : your two entries differ !")
-    #     return password2
-    #
-    # def save(self, commit=True):
-    #     user = super().save(commit=False)
-    #     user.set_password(self.cleaned_data["password1"])
-    #     user.first_name = user.first_name.title()
-    #     user.last_name = user.last_name.title()
-    #
-    #     initials = ''.join([name[0] for name in user.first_name.split("-")])
-    #     # let's set the username from first_name and last_name
-    #     # it's the lower first(s) letter(s) of first_name completed with the lower last_name
-    #     # if this username already exists, a number is added, starting from 2
-    #     counter = 2
-    #     if User.objects.filter(username=initials.lower()+user.last_name.lower()).exists():
-    #         while True:
-    #             if User.objects.filter(username=initials.lower()+user.last_name.lower() + str(counter)).exists():
-    #                 counter +=1
-    #             else:
-    #                 break
-    #         user.username = initials.lower()+user.last_name.lower() + str(counter)
-    #     else:
-    #         user.username = initials.lower()+user.last_name.lower()
-    #     if commit:
-    #         user.save()
-    #     return user
+    class Meta:
+        model = User
+        fields = ('username',)
+
+    def clean(self):
+        Validators.check_letters_hyphen(self.cleaned_data.get('first_name'), "first_name")
+        Validators.check_letters_hyphen(self.cleaned_data.get('last_name'), "last_name")
+
+    def clean_password2(self):
+        # Check that the two password entries match
+        password1 = self.cleaned_data.get("password1")
+        password2 = self.cleaned_data.get("password2")
+        if password1 and password2 and password1 != password2:
+            raise ValidationError("Password error : your two entries differ !")
+        return password2
+
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        user.set_password(self.cleaned_data["password1"])
+        user.first_name = user.first_name.title()
+        user.last_name = user.last_name.title()
+
+        initials = ''.join([name[0] for name in user.first_name.split("-")])
+        # let's set the username from first_name and last_name
+        # it's the lower first(s) letter(s) of first_name completed with the lower last_name
+        # if this username already exists, a number is added, starting from 2
+        counter = 2
+        if User.objects.filter(username=initials.lower()+user.last_name.lower()).exists():
+            while True:
+                if User.objects.filter(username=initials.lower()+user.last_name.lower() + str(counter)).exists():
+                    counter +=1
+                else:
+                    break
+            user.username = initials.lower()+user.last_name.lower() + str(counter)
+        else:
+            user.username = initials.lower()+user.last_name.lower()
+        if commit:
+            user.save()
+        return user
 
 
 class UserChangeForm(forms.ModelForm):
@@ -162,7 +173,7 @@ class ClientAdmin(admin.ModelAdmin):
             self.form.current_user = None
         return super(ClientAdmin, self).get_form(request, **kwargs)
 
-    list_display = ['last_name', 'first_name', 'company_name', 'sales_contact']
+    list_display = ['last_name', 'first_name', 'company_name', 'signed_contract', 'sales_contact']
     readonly_fields = ['sales_contact_no_link', 'date_created', 'date_updated']
 
     def has_delete_permission(self, request, obj=None):
@@ -188,6 +199,13 @@ class ClientAdmin(admin.ModelAdmin):
         return format_html("{}", obj.sales_contact)
     sales_contact_no_link.short_description = "Sales contact"
 
+    @admin.display
+    def signed_contract(self, obj):
+        if Contract.objects.filter(client=obj).exists():
+            return True
+        else:
+            return False
+
 
     def get_fields(self, request, obj=None):
         if not obj:
@@ -211,11 +229,6 @@ class ContractCreationForm(forms.ModelForm):
         contract = super().save(commit=False)
         contract.date_created = datetime.datetime.now()
         contract.date_updated = datetime.datetime.now()
-        if self.current_user:
-            contract.sales_contact = self.current_user
-        client = Client.objects.get(id=contract.client.id)
-        client.sales_contact = contract.sales_contact
-        client.save()
         contract.save()
         return contract
 
@@ -227,9 +240,6 @@ class ContractChangeForm(forms.ModelForm):
 
     def save(self, commit=True):
         contract = super().save(commit=False)
-        client = Client.objects.get(id=contract.client.id)
-        client.sales_contact = contract.sales_contact
-        client.save()
         contract.date_updated = datetime.datetime.now()
         contract.save()
         return contract
@@ -238,8 +248,8 @@ class ContractAdmin(admin.ModelAdmin):
     change_form = ContractChangeForm
     add_form = ContractCreationForm
 
-    list_display = ['client', 'amount', 'status']
-    readonly_fields = ['sales_contact_no_link', 'date_created', 'date_updated']
+    list_display = ['client', 'amount', 'status', 'sales_contact']
+    readonly_fields = ['sales_contact', 'date_created', 'date_updated']
 
     # a user member belonging to 'sales' group can create a contract only for his clients
     # a superuser or a user belonging to 'management' group can create a contract for any client
@@ -290,27 +300,50 @@ class ContractAdmin(admin.ModelAdmin):
     def get_fields(self, request, obj=None):
         if not obj:
             if request.user.is_superuser or request.user.groups.filter(name="Management team").exists():
-                return ['client', 'sales_contact', 'amount', 'payment_due', 'status']
+                self.readonly_fields = ['sales_contact', 'date_created', 'date_updated']
+                self.fields = ['client', 'status', 'amount', 'payment_due', 'sales_contact', 'date_created',
+                               'date_updated']
+                return self.fields
             else:
                 self.readonly_fields = []
                 self.fields = ['client', 'amount', 'payment_due']
                 return self.fields
         else:
             if request.user.is_superuser or request.user.groups.filter(name="Management team").exists():
-                self.readonly_fields = ['date_created', 'date_updated']
-                self.fields = ['client', 'sales_contact', 'status', 'amount', 'payment_due', 'date_created',
+                self.readonly_fields = ['sales_contact', 'date_created', 'date_updated']
+                self.fields = ['client', 'status', 'amount', 'payment_due', 'sales_contact', 'date_created',
                                'date_updated']
                 return self.fields
             else:
-                self.readonly_fields = ['sales_contact_no_link', 'status', 'date_created', 'date_updated']
-                self.fields = ['client', 'sales_contact_no_link', 'status', 'amount', 'payment_due', 'date_created', 'date_updated']
+                self.readonly_fields = ['sales_contact', 'status', 'date_created', 'date_updated']
+                self.fields = ['client', 'sales_contact', 'status', 'amount', 'payment_due', 'date_created', 'date_updated']
                 return self.fields
 
 
     @admin.display
-    def sales_contact_no_link(self, obj):
+    def sales_contact(self, obj):
         return format_html("{}", obj.client.sales_contact)
-    sales_contact_no_link.short_description = "Sales contact"
+
+
+class EventCreationForm(forms.ModelForm):
+    @staticmethod
+    def check_event_status(status, date_event):
+        if date_event > datetime.datetime.now() and status in ["2", "3"]:
+            raise ValidationError(
+                f"Error in field <Event status>: This event can't be in progress or closed since its date is later than the current date")
+        elif date_event < datetime.datetime.now() and status == "1":
+            raise ValidationError(
+                f"Error in field <Event status>: This event can't be incoming since its date is earlier than the current date")
+
+    def clean(self):
+        self.check_event_status(self.cleaned_data.get('event_status'), self.cleaned_data.get('event_date'))
+
+    def save(self, commit=True):
+        event = super().save(commit=False)
+        event.date_created = datetime.datetime.now()
+        event.date_updated = datetime.datetime.now()
+        event.save()
+        return event
 
 class EventChangeForm(forms.ModelForm):
     class Meta:
@@ -334,13 +367,21 @@ class EventChangeForm(forms.ModelForm):
         return event
 
 class EventAdmin(admin.ModelAdmin):
-    form = EventChangeForm
+    change_form = EventChangeForm
+    add_form = EventCreationForm
 
     list_display = ['name', 'client', 'support_contact', 'event_status', 'event_date']
     readonly_fields = ['client_no_link', 'support_contact_no_link', 'my_notes', 'date_created', 'date_updated']
 
+    def get_form(self, request, obj=None, change=False, **kwargs):
+        if not obj:
+            self.form = self.add_form
+        else:
+            self.form = self.change_form
+        return super(EventAdmin, self).get_form(request, **kwargs)
+
     def formfield_for_foreignkey(self, db_field, request=None, **kwargs):
-        if request.user.is_superuser:
+        if request.user.is_superuser or request.user.groups.filter(name="Management team").exists():
             if db_field.name == "client":
                 kwargs["queryset"] = Client.objects.all()
                 return super(EventAdmin, self).formfield_for_foreignkey(db_field, request, **kwargs)
@@ -356,7 +397,7 @@ class EventAdmin(admin.ModelAdmin):
 
     def has_change_permission(self, request, obj=None):
         if obj:
-            if request.user == obj.client.sales_contact or request.user.is_superuser or request.user == obj.support_contact:
+            if request.user == obj.client.sales_contact or request.user.is_superuser or request.user == obj.support_contact or request.user.groups.filter(name="Management team").exists():
                 return True
             else:
                 return False
@@ -367,7 +408,7 @@ class EventAdmin(admin.ModelAdmin):
 
     def get_fields(self, request, obj=None):
         if obj:
-            if request.user.is_superuser:
+            if request.user.is_superuser or request.user.groups.filter(name="Management team").exists():
                 return ['name', 'client', 'support_contact', 'event_status', 'event_date',
                         'attendees', 'date_created', 'date_updated',  'notes']
             else:
