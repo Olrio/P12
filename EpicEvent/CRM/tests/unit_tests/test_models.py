@@ -58,7 +58,6 @@ class DataTest(TestCase):
                         date_created=datetime.datetime.now(), date_updated=datetime.datetime.now()):
         self.contract = Contract.objects.create(
             client=client,
-            sales_contact=sales_contact,
             status=status,
             amount=amount,
             payment_due=payment_due,
@@ -67,10 +66,10 @@ class DataTest(TestCase):
         )
         return self.contract
 
-    def create_event(self, client, support_contact, event_status, attendees, event_date,
+    def create_event(self, contract, support_contact, event_status, attendees, event_date,
                      date_created=datetime.datetime.now(), date_updated=datetime.datetime.now()):
         self.event = Event.objects.create(
-            client=client,
+            contract=contract,
             support_contact=support_contact,
             event_status=event_status,
             attendees= attendees,
@@ -152,7 +151,7 @@ class DataTest(TestCase):
                                               )
 
     def get_events(self):
-        self.event1 = self.create_event(self.client1,
+        self.event1 = self.create_event(self.contract1,
                                         self.user_support1,
                                         1,
                                         150,
@@ -160,7 +159,7 @@ class DataTest(TestCase):
                                         self.date_now,
                                         self.date_update_event_5,
                                         )
-        self.event2 = self.create_event(self.client2,
+        self.event2 = self.create_event(self.contract2,
                                         self.user_support1,
                                         2,
                                         500,
@@ -168,7 +167,7 @@ class DataTest(TestCase):
                                         self.date_now,
                                         self.date_now,
                                         )
-        self.event3 = self.create_event(self.client3,
+        self.event3 = self.create_event(self.contract3,
                                         self.user_support1,
                                         3,
                                         1000,
@@ -260,10 +259,6 @@ class ContractTest(DataTest):
         self.assertEqual(self.contract1.client.company_name, "PipoBidon")
         self.assertEqual(self.contract2.client.email, "gag@calembour.com")
 
-    def test_contract_sales_contact(self):
-        self.assertTrue(self.contract1.sales_contact.groups.filter(name="Sales").exists())
-        self.assertEqual(self.contract2.sales_contact.username, "ellach")
-
     def test_contract_date_created(self):
         self.assertEqual(self.contract1.date_created, self.date_now)
         self.assertEqual(self.contract2.date_created, self.date_now)
@@ -296,10 +291,10 @@ class EventTest(DataTest):
         self.get_contracts()
         self.get_events()
 
-    def test_event_client(self):
-        self.assertEqual(self.event1.client.mobile, "111111111")
-        self.assertEqual(self.event2.client.company_name, "MG inc")
-        self.assertEqual(self.event3.client.last_name, "Tro")
+    def test_event_contract(self):
+        self.assertEqual(self.event1.contract.client.last_name, "Bidon")
+        self.assertEqual(self.event2.contract.amount, 12345.67)
+        self.assertEqual(self.event3.contract.status, True)
 
     def test_event_support_contact(self):
         self.assertEqual(self.event1.support_contact.first_name, "Alex")

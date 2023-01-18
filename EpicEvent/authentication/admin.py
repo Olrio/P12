@@ -173,7 +173,7 @@ class ClientAdmin(admin.ModelAdmin):
             self.form.current_user = None
         return super(ClientAdmin, self).get_form(request, **kwargs)
 
-    list_display = ['last_name', 'first_name', 'company_name', 'signed_contract', 'sales_contact']
+    list_display = ['last_name', 'first_name', 'company_name', 'status', 'sales_contact']
     readonly_fields = ['sales_contact_no_link', 'date_created', 'date_updated']
 
     def has_delete_permission(self, request, obj=None):
@@ -200,11 +200,11 @@ class ClientAdmin(admin.ModelAdmin):
     sales_contact_no_link.short_description = "Sales contact"
 
     @admin.display
-    def signed_contract(self, obj):
+    def status(self, obj):
         if Contract.objects.filter(client=obj).exists():
-            return True
+            return "existing"
         else:
-            return False
+            return "prospect"
 
 
     def get_fields(self, request, obj=None):
@@ -248,8 +248,9 @@ class ContractAdmin(admin.ModelAdmin):
     change_form = ContractChangeForm
     add_form = ContractCreationForm
 
-    list_display = ['client', 'amount', 'status', 'sales_contact']
+    list_display = ['pk', 'client', 'amount', 'status', 'sales_contact']
     readonly_fields = ['sales_contact', 'date_created', 'date_updated']
+
 
     # a user member belonging to 'sales' group can create a contract only for his clients
     # a superuser or a user belonging to 'management' group can create a contract for any client
@@ -315,7 +316,7 @@ class ContractAdmin(admin.ModelAdmin):
                                'date_updated']
                 return self.fields
             else:
-                self.readonly_fields = ['sales_contact', 'status', 'date_created', 'date_updated']
+                self.readonly_fields = ['sales_contact', 'date_created', 'date_updated']
                 self.fields = ['client', 'sales_contact', 'status', 'amount', 'payment_due', 'date_created', 'date_updated']
                 return self.fields
 
@@ -335,8 +336,14 @@ class EventCreationForm(forms.ModelForm):
             raise ValidationError(
                 f"Error in field <Event status>: This event can't be incoming since its date is earlier than the current date")
 
+
     def clean(self):
         self.check_event_status(self.cleaned_data.get('event_status'), self.cleaned_data.get('event_date'))
+        if not Contract.objects.filter(client__sales_contact=self.user).filter(status=True).exclude(Q(event__isnull=False)):
+            raise ValidationError('You have no available client with a signed contract.'
+                                  'Please ensure that the client associated with this event has signed a contract.'
+                                  'Remember that a contract can be associated with only one event')
+
 
     def save(self, commit=True):
         event = super().save(commit=False)
@@ -370,26 +377,27 @@ class EventAdmin(admin.ModelAdmin):
     change_form = EventChangeForm
     add_form = EventCreationForm
 
-    list_display = ['name', 'client', 'support_contact', 'event_status', 'event_date']
-    readonly_fields = ['client_no_link', 'support_contact_no_link', 'my_notes', 'date_created', 'date_updated']
+    list_display = ['name', 'contract', 'support_contact', 'event_status', 'event_date']
+    readonly_fields = ['contract_no_link', 'support_contact_no_link', 'my_notes', 'date_created', 'date_updated']
 
     def get_form(self, request, obj=None, change=False, **kwargs):
         if not obj:
             self.form = self.add_form
         else:
             self.form = self.change_form
+        self.form.user = request.user
         return super(EventAdmin, self).get_form(request, **kwargs)
 
     def formfield_for_foreignkey(self, db_field, request=None, **kwargs):
         if request.user.is_superuser or request.user.groups.filter(name="Management team").exists():
-            if db_field.name == "client":
+            if db_field.name == "contract":
                 kwargs["queryset"] = Client.objects.all()
                 return super(EventAdmin, self).formfield_for_foreignkey(db_field, request, **kwargs)
             if db_field.name == "support_contact":
                 kwargs["queryset"] = User.objects.all()
                 return super(EventAdmin, self).formfield_for_foreignkey(db_field, request, **kwargs)
-        if db_field.name == "client":
-            kwargs["queryset"] = Client.objects.filter(sales_contact=request.user)
+        if db_field.name == "contract":
+            kwargs["queryset"] = Contract.objects.filter(client__sales_contact=request.user).filter(status=True).exclude(Q(event__isnull=False))
             return super(EventAdmin, self).formfield_for_foreignkey(db_field, request, **kwargs)
         if db_field.name == "support_contact":
             kwargs["queryset"] = User.objects.filter(groups__name="Support team")
@@ -397,7 +405,7 @@ class EventAdmin(admin.ModelAdmin):
 
     def has_change_permission(self, request, obj=None):
         if obj:
-            if request.user == obj.client.sales_contact or request.user.is_superuser or request.user == obj.support_contact or request.user.groups.filter(name="Management team").exists():
+            if request.user == obj.contract.client.sales_contact or request.user.is_superuser or request.user == obj.support_contact or request.user.groups.filter(name="Management team").exists():
                 return True
             else:
                 return False
@@ -409,23 +417,27 @@ class EventAdmin(admin.ModelAdmin):
     def get_fields(self, request, obj=None):
         if obj:
             if request.user.is_superuser or request.user.groups.filter(name="Management team").exists():
-                return ['name', 'client', 'support_contact', 'event_status', 'event_date',
+                return ['name', 'contract', 'support_contact', 'event_status', 'event_date',
                         'attendees', 'date_created', 'date_updated',  'notes']
             else:
                 if request.user == obj.support_contact:
-                    return ['name', 'client_no_link', 'support_contact_no_link', 'event_status', 'event_date',
+                    return ['name', 'contract_no_link', 'support_contact_no_link', 'event_status', 'event_date',
                             'attendees', 'date_created', 'date_updated', 'my_notes']
                 else:
-                    return ['name', 'client', 'support_contact_no_link', 'event_status', 'event_date',
+                    return ['name', 'contract', 'support_contact_no_link', 'event_status', 'event_date',
                         'attendees', 'date_created', 'date_updated',  'my_notes']
         else:
-            return ['name', 'client', 'support_contact', 'event_status', 'event_date',
-                    'attendees', 'date_created', 'date_updated', 'notes']
+            if request.user.is_superuser or request.user.groups.filter(name="Management team").exists():
+                return ['name', 'contract', 'support_contact', 'event_status', 'event_date',
+                        'attendees', 'date_created', 'date_updated', 'notes']
+            else:
+                return ['name', 'contract', 'support_contact_no_link', 'event_status', 'event_date',
+                        'attendees', 'date_created', 'date_updated', 'notes']
 
     @admin.display
-    def client_no_link(self, obj):
-        return format_html("{}", obj.client)
-    client_no_link.short_description = "Client"
+    def contract_no_link(self, obj):
+        return format_html("{}", obj.contract)
+    contract_no_link.short_description = "Contrat"
 
     @admin.display
     def support_contact_no_link(self, obj):

@@ -45,16 +45,17 @@ class Contract(models.Model):
 
 
     def __str__(self):
-        return f"{self.client} from {self.client.company_name}"
+        return f"{self.client} - Contract N° {self.pk}"
 
 
 class Event(models.Model):
     name = models.CharField(max_length=250)
-    client = models.ForeignKey(
-        to=Client,
+    contract = models.OneToOneField(
+        to=Contract,
         on_delete=models.CASCADE,
     )
     support_contact = models.ForeignKey(
+        null=True,
         to=User,
         on_delete=models.PROTECT,
         limit_choices_to={'groups__name': "Support team"},
@@ -74,4 +75,4 @@ class Event(models.Model):
     notes = models.TextField(blank=True, null=True)
 
     def __str__(self):
-        return f"{self.name} ({self.client}) "
+        return f"{self.name} ({self.contract}) "
