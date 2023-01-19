@@ -201,7 +201,7 @@ class ClientAdmin(admin.ModelAdmin):
 
     @admin.display
     def status(self, obj):
-        if Contract.objects.filter(client=obj).exists():
+        if Contract.objects.filter(client=obj).filter(status=True).exists():
             return "existing"
         else:
             return "prospect"
