@@ -3,10 +3,8 @@ from django.db.models import Q
 from .models import User
 from CRM.models import Client, Contract, Event
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
-from django.contrib.auth.models import Group, Permission
 from django import forms
-from django.db import IntegrityError
-from django.core.exceptions import ValidationError, ObjectDoesNotExist
+from django.core.exceptions import ValidationError
 from .validators import Validators
 from django.contrib.auth.forms import ReadOnlyPasswordHashField, AuthenticationForm
 from django.contrib.auth.views import LoginView
@@ -84,6 +82,13 @@ class UserChangeForm(forms.ModelForm):
         model = User
         fields = ('username',)
 
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        user.first_name = user.first_name.title()
+        user.last_name = user.last_name.title()
+        user.save()
+        return user
+
 
 
 class CustomUserAdmin(BaseUserAdmin):
@@ -95,14 +100,14 @@ class CustomUserAdmin(BaseUserAdmin):
     list_filter = ('is_admin',)
     fieldsets = (
         (None, {'fields': ('first_name', 'last_name', 'username')}),
-        ('Permissions', {'fields': ('groups', 'user_permissions')}),
+        ('Permissions', {'fields': ('groups', 'user_permissions', 'is_staff')}),
     )
 
     add_fieldsets = (
         (None, {
             'fields': ('first_name', 'last_name', 'password1', 'password2'),
         }),
-        ('Permissions', {'fields': ('groups', )}),
+        ('Permissions', {'fields': ('groups', 'is_staff')}),
     )
     search_fields = ('username',)
     ordering = ('username',)

@@ -7,14 +7,17 @@ class IsAuthenticated(BasePermission):
         return bool(request.user and request.user.is_authenticated)
 
 class IsManagementTeam(BasePermission):
+    message = "Sorry, only members of the management team can perform this action"
     def has_permission(self, request, view):
         return bool(request.user.groups.filter(name="Management team").exists())
 
 class IsSalesTeam(BasePermission):
+    message = "Sorry, only members of the sales team can perform this action"
     def has_permission(self, request, view):
         return bool(request.user.groups.filter(name="Sales team").exists())
 
 class IsSupportTeam(BasePermission):
+    message = "Sorry, only members of the support team can perform this action"
     def has_permission(self, request, view):
         return bool(request.user.groups.filter(name="Support team").exists())
 

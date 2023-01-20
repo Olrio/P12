@@ -1,13 +1,10 @@
 from rest_framework.viewsets import ModelViewSet
 from django.core.exceptions import ObjectDoesNotExist
 from rest_framework.exceptions import NotFound
-from rest_framework import serializers
-from django.contrib.auth.models import Group
 from .models import Client
 from .serializers import ClientListSerializer, ClientDetailSerializer
 from .permissions import IsAuthenticated, \
     IsManagementTeam, IsSalesTeam, IsSupportTeam, IsClientSalesContact
-import datetime
 
 class MultipleSerializerMixin:
     detail_serializer_class = None
@@ -21,8 +18,6 @@ class MultipleSerializerMixin:
 class ClientViewset(MultipleSerializerMixin, ModelViewSet):
     serializer_class = ClientListSerializer
     detail_serializer_class = ClientDetailSerializer
-    # permission_classes = [IsManagementTeam|IsSalesTeam|IsSupportTeam]
-
 
     def get_permissions(self):
         if self.request.method == 'GET' and "pk" not in self.request.parser_context["kwargs"]:
@@ -48,13 +43,3 @@ class ClientViewset(MultipleSerializerMixin, ModelViewSet):
                 id=client_pk
             )
             return queryset
-
-    def perform_create(self, serializer):
-        if self.request.user.groups.filter(name="Sales team").exists() and not self.request.user.is_superuser:
-            serializer.save(sales_contact=self.request.user,
-                            date_created = datetime.datetime.now(),
-                            date_updated = datetime.datetime.now())
-        else:
-            serializer.save(date_created=datetime.datetime.now(),
-                            date_updated=datetime.datetime.now())
-
