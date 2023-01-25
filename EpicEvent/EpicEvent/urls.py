@@ -28,7 +28,6 @@ router = routers.SimpleRouter()
 router.register("clients", ClientViewset, basename="clients")
 router.register("users", UserViewset, basename="user")
 
-
 urlpatterns = [
     path("admin/login/", MyLoginView.as_view(), {'template_name': 'admin/login.html'}, name="admin_login"),
     path("admin/", admin.site.urls),

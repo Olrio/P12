@@ -1,29 +1,33 @@
 from rest_framework.viewsets import ModelViewSet
 from django.core.exceptions import ObjectDoesNotExist
-from rest_framework.exceptions import NotFound
+from rest_framework.exceptions import NotFound, PermissionDenied
 from .models import Client
-from .serializers import ClientListSerializer, ClientDetailSerializer
+from .serializers import ClientListSerializer #, ClientDetailSerializer
 from .permissions import IsAuthenticated, \
     IsManagementTeam, IsSalesTeam, IsSupportTeam, IsClientSalesContact
 
 class MultipleSerializerMixin:
-    detail_serializer_class = None
+    # detail_serializer_class = None
     permission_classes = [IsAuthenticated]
 
-    def get_serializer_class(self):
-        if self.action == "retrieve" and self.detail_serializer_class is not None:
-            return self.detail_serializer_class
-        return super().get_serializer_class()
+    # def get_serializer_class(self):
+    #     if self.action == "retrieve" and self.detail_serializer_class is not None:
+    #         return self.detail_serializer_class
+    #     return super().get_serializer_class()
 
 class ClientViewset(MultipleSerializerMixin, ModelViewSet):
     serializer_class = ClientListSerializer
-    detail_serializer_class = ClientDetailSerializer
+    # detail_serializer_class = ClientDetailSerializer
 
     def get_permissions(self):
         if self.request.method == 'GET' and "pk" not in self.request.parser_context["kwargs"]:
             permission_classes =  [IsManagementTeam|IsSalesTeam|IsSupportTeam]
         elif self.request.method == 'GET' and "pk" in self.request.parser_context["kwargs"]:
-            permission_classes =  [IsManagementTeam|IsSalesTeam, IsClientSalesContact]
+            permission_classes =  [IsManagementTeam|(IsSalesTeam & IsClientSalesContact)]
+        elif self.request.method == 'DELETE' and "pk" in self.request.parser_context["kwargs"]:
+            permission_classes =  [IsManagementTeam|(IsSalesTeam & IsClientSalesContact)]
+        elif self.request.method == 'PUT' and "pk" in self.request.parser_context["kwargs"]:
+            permission_classes =  [IsManagementTeam|(IsSalesTeam & IsClientSalesContact)]
         elif self.request.method == 'POST':
             permission_classes =  [IsManagementTeam|IsSalesTeam]
         return [permission() for permission in permission_classes]

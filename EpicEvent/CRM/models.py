@@ -1,5 +1,6 @@
 from django.db import models
 from authentication.models import User
+from .validators import validate_amount
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth.models import Group, Permission
 

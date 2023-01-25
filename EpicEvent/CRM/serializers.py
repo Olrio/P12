@@ -27,6 +27,10 @@ class ClientListSerializer(serializers.ModelSerializer):
         return data
 
     def create(self, validated_data):
+        if self.context['request'].user.groups.filter(name="Management team").exists():
+            sales_contact = validated_data["sales_contact"]
+        else:
+            sales_contact = self.context['request'].user
         client = Client.objects.create(
             first_name=validated_data["first_name"].title(),
             last_name=validated_data["last_name"].title(),
@@ -34,15 +38,20 @@ class ClientListSerializer(serializers.ModelSerializer):
             phone=validated_data["phone"],
             mobile=validated_data["mobile"],
             company_name=validated_data["company_name"],
-            sales_contact=self.context['request'].user,
+            sales_contact=sales_contact,
             date_created=datetime.datetime.now(),
             date_updated = datetime.datetime.now()
         )
         client.save()
         return client
 
-class ClientDetailSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Client
-        fields = ['pk', 'first_name', 'last_name', 'email', 'phone', 'mobile', 'company_name', 'sales_contact', 'date_created', 'date_updated']
-        read_only_fields = ['date_created', 'date_updated']
+    def update(self, instance, validated_data):
+        instance = super().update(instance, validated_data)
+        instance.date_updated = datetime.datetime.now()
+        return instance
+
+# class ClientDetailSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = Client
+#         fields = ['pk', 'first_name', 'last_name', 'email', 'phone', 'mobile', 'company_name', 'sales_contact', 'date_created', 'date_updated']
+#         read_only_fields = ['date_created', 'date_updated']

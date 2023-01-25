@@ -2,6 +2,8 @@ from django.contrib import admin
 from django.db.models import Q
 from .models import User
 from CRM.models import Client, Contract, Event
+from CRM.serializers import ClientListSerializer #, ClientDetailSerializer
+from authentication.serializers import UserSerializer
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django import forms
 from django.core.exceptions import ValidationError
@@ -34,16 +36,29 @@ class UserCreationForm(forms.ModelForm):
         model = User
         fields = ('username',)
 
-    def clean(self):
-        Validators.check_letters_hyphen(self.cleaned_data.get('first_name'), "first_name")
-        Validators.check_letters_hyphen(self.cleaned_data.get('last_name'), "last_name")
+    def clean_first_name(self):
+        Validators.check_letters_hyphen(self.cleaned_data['first_name'], "first_name")
+        return self.cleaned_data['first_name']
+
+    def clean_last_name(self):
+        Validators.check_letters_hyphen(self.cleaned_data['last_name'], "last_name")
+        return self.cleaned_data['last_name']
+
+    def clean_groups(self):
+        if not self.cleaned_data['groups']:
+            raise ValidationError("Please affect this user to a group")
+        return self.cleaned_data['groups']
+
+    def clean_password1(self):
+        password1 = self.cleaned_data.get("password1")
+        Validators.has_8_length(password1)
+        Validators.contains_letters_and_numbers(password1)
+        return password1
 
     def clean_password2(self):
-        # Check that the two password entries match
         password1 = self.cleaned_data.get("password1")
         password2 = self.cleaned_data.get("password2")
-        if password1 and password2 and password1 != password2:
-            raise ValidationError("Password error : your two entries differ !")
+        Validators.two_entries_differ(password1, password2)
         return password2
 
     def save(self, commit=True):
@@ -66,6 +81,10 @@ class UserCreationForm(forms.ModelForm):
             user.username = initials.lower()+user.last_name.lower() + str(counter)
         else:
             user.username = initials.lower()+user.last_name.lower()
+
+        if self.cleaned_data['groups'].first().name=="Management team":
+            user.is_staff = True
+
         if commit:
             user.save()
         return user
@@ -76,16 +95,51 @@ class UserChangeForm(forms.ModelForm):
     the user, but replaces the password field with admin's
     disabled password hash display field.
     """
-    password = ReadOnlyPasswordHashField()
+    # password = ReadOnlyPasswordHashField()
+    password1 = forms.CharField(label='Password', widget=forms.PasswordInput, required=False)
+    password2 = forms.CharField(label='Password confirmation', widget=forms.PasswordInput, required=False)
 
     class Meta:
         model = User
         fields = ('username',)
 
+    def clean_first_name(self):
+        Validators.check_letters_hyphen(self.cleaned_data['first_name'], "first_name")
+        return self.cleaned_data['first_name']
+
+    def clean_last_name(self):
+        Validators.check_letters_hyphen(self.cleaned_data['last_name'], "last_name")
+        return self.cleaned_data['last_name']
+
+    def clean_groups(self):
+        if not self.cleaned_data['groups']:
+            raise ValidationError("Please affect this user to a group")
+        return self.cleaned_data['groups']
+
+    def clean_password1(self):
+        password1 = self.cleaned_data.get("password1")
+        if password1:
+            Validators.has_8_length(password1)
+            Validators.contains_letters_and_numbers(password1)
+        return password1
+
+    def clean_password2(self):
+        password1 = self.cleaned_data.get("password1")
+        password2 = self.cleaned_data.get("password2")
+        if password1 and password2:
+            Validators.two_entries_differ(password1, password2)
+        return password2
+
     def save(self, commit=True):
         user = super().save(commit=False)
         user.first_name = user.first_name.title()
         user.last_name = user.last_name.title()
+        if self.cleaned_data['password1']:
+            user.set_password(self.cleaned_data["password1"])
+        if self.cleaned_data['groups'].filter(name='Management team').exists():
+            user.is_staff = True
+        else:
+            user.is_staff = False
         user.save()
         return user
 
@@ -100,14 +154,18 @@ class CustomUserAdmin(BaseUserAdmin):
     list_filter = ('is_admin',)
     fieldsets = (
         (None, {'fields': ('first_name', 'last_name', 'username')}),
-        ('Permissions', {'fields': ('groups', 'user_permissions', 'is_staff')}),
+        ('Change password', {
+            'classes': ('collapse',),
+            'fields': ('password1', 'password2'),
+        }),
+        ('Permissions', {'fields': ('groups',)}),
     )
 
     add_fieldsets = (
         (None, {
             'fields': ('first_name', 'last_name', 'password1', 'password2'),
         }),
-        ('Permissions', {'fields': ('groups', 'is_staff')}),
+        ('Permissions', {'fields': ('groups',)}),
     )
     search_fields = ('username',)
     ordering = ('username',)
@@ -226,32 +284,41 @@ class ClientAdmin(admin.ModelAdmin):
                 return ['first_name', 'last_name', 'email', 'phone', 'mobile', 'company_name', 'date_created', 'date_updated', 'sales_contact_no_link']
 
 
-class ContractCreationForm(forms.ModelForm):
+class ContractForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(ContractForm, self).__init__(*args, **kwargs)
+        self.fields['client'].error_messages = {'required': ''}
+        self.fields['amount'].error_messages = {'required': ''}
+        self.fields['payment_due'].error_messages = {'required': ''}
+
     def clean(self):
-        Validators.check_is_float(self.cleaned_data.get('amount'), "Amount")
+        errors = dict()
+        try:
+            self.cleaned_data['payment_due']
+        except KeyError:
+            errors['payment_due'] = 'You must specify a date and a time for the payment due !'
+        try:
+            self.cleaned_data['client']
+        except KeyError:
+            errors['client'] = 'Any contract needs to be related to a client !'
+        try:
+            self.cleaned_data['amount']
+        except KeyError:
+            errors['amount'] = 'Amount field is required and must be filled with a float or integer !'
+        if errors:
+                raise ValidationError(errors)
 
     def save(self, commit=True):
         contract = super().save(commit=False)
-        contract.date_created = datetime.datetime.now()
+        if contract.pk is None:
+            contract.date_created = datetime.datetime.now()
         contract.date_updated = datetime.datetime.now()
         contract.save()
         return contract
 
-
-class ContractChangeForm(forms.ModelForm):
-    def clean(self):
-        Validators.check_is_float(self.cleaned_data.get('amount'), "Amount")
-
-
-    def save(self, commit=True):
-        contract = super().save(commit=False)
-        contract.date_updated = datetime.datetime.now()
-        contract.save()
-        return contract
 
 class ContractAdmin(admin.ModelAdmin):
-    change_form = ContractChangeForm
-    add_form = ContractCreationForm
+    form = ContractForm
 
     list_display = ['pk', 'client', 'amount', 'status', 'sales_contact']
     readonly_fields = ['sales_contact', 'date_created', 'date_updated']
@@ -273,16 +340,6 @@ class ContractAdmin(admin.ModelAdmin):
                 kwargs["queryset"] = Client.objects.filter(sales_contact=request.user)
             return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
-    def get_form(self, request, obj=None, change=False, **kwargs):
-        if not obj:
-            self.form = self.add_form
-        else:
-            self.form = self.change_form
-        if request.user.groups.filter(name="Sales team").exists() and not request.user.is_superuser:
-            self.form.current_user = request.user
-        else:
-            self.form.current_user = None
-        return super(ContractAdmin, self).get_form(request, **kwargs)
 
     def has_delete_permission(self, request, obj=None):
         if obj:
