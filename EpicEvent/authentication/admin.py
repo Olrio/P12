@@ -399,7 +399,7 @@ class EventAdmin(admin.ModelAdmin):
 
     def get_fields(self, request, obj=None):
         if obj:
-            self.fields = ['name', 'contract', 'support_contact', 'event_status', 'event_date',
+            self.fields = ['nam', 'contract', 'support_contact', 'event_status', 'event_date',
                         'attendees', 'date_created', 'date_updated',  'notes']
         else:
             self.fields =  ['name', 'contract', 'support_contact', 'event_status', 'event_date',
