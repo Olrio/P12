@@ -39,6 +39,8 @@ l'utilisateur principal
 
 Se placer dans le dossier EpicEvent/
 
+Y copier le fichier .env contenant la SECRET_KEY nécessaire au projet
+
 Effectuer les migrations avec la commande `python manage.py migrate`
 
 Créer un superutilisateur qui pourra se connecter au site Django admin : 
@@ -73,6 +75,6 @@ Exemples de requêtes pouvant être faites à l'API :
 &emsp;- Créer un nouveau client : requête POST à http://127.0.0.1:8000/crm/clients/  
 &emsp; Le Body doit comprendre les champs nécessaires à la création du Client, à savoir `first_name`, `last_name`, `email`, `phone`, `mobile` et `company_name`  
 
-
+Noter que les erreurs et exceptions sont consignées dans le fichier CRM/log/debug.log
 
 
