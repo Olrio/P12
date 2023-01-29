@@ -1,14 +1,13 @@
 from django.contrib import admin
+from django.urls import resolve
 from django.db.models import Q
 from .models import User
 from CRM.models import Client, Contract, Event
-from CRM.serializers import ClientListSerializer #, ClientDetailSerializer
-from authentication.serializers import UserSerializer
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django import forms
 from django.core.exceptions import ValidationError
 from .validators import Validators
-from django.contrib.auth.forms import ReadOnlyPasswordHashField, AuthenticationForm
+from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.views import LoginView
 from django.utils.html import format_html
 from django.utils.translation import gettext_lazy as _
@@ -95,7 +94,6 @@ class UserChangeForm(forms.ModelForm):
     the user, but replaces the password field with admin's
     disabled password hash display field.
     """
-    # password = ReadOnlyPasswordHashField()
     password1 = forms.CharField(label='Password', widget=forms.PasswordInput, required=False)
     password2 = forms.CharField(label='Password confirmation', widget=forms.PasswordInput, required=False)
 
@@ -216,8 +214,6 @@ class ClientCreationForm(forms.ModelForm):
         client = super().save(commit=False)
         client.date_created = datetime.datetime.now()
         client.date_updated = datetime.datetime.now()
-        if self.current_user:
-            client.sales_contact = self.current_user
         client.save()
         return client
 
@@ -230,37 +226,11 @@ class ClientAdmin(admin.ModelAdmin):
             self.form = self.add_form
         else:
             self.form = self.change_form
-        if request.user.groups.filter(name="Sales team").exists():
-            self.form.current_user = request.user
-        else:
-            self.form.current_user = None
         return super(ClientAdmin, self).get_form(request, **kwargs)
 
     list_display = ['last_name', 'first_name', 'company_name', 'status', 'sales_contact']
-    readonly_fields = ['sales_contact_no_link', 'date_created', 'date_updated']
+    readonly_fields = ['date_created', 'date_updated']
 
-    def has_delete_permission(self, request, obj=None):
-        if obj:
-            if request.user == obj.sales_contact \
-                    or request.user.is_superuser \
-                    or request.user.groups.filter(name="Management team").exists():
-                return True
-            else:
-                return False
-
-    def has_change_permission(self, request, obj=None):
-        if obj:
-            if request.user == obj.sales_contact \
-                    or request.user.is_superuser \
-                    or request.user.groups.filter(name="Management team").exists():
-                return True
-            else:
-                return False
-
-    @admin.display
-    def sales_contact_no_link(self, obj):
-        return format_html("{}", obj.sales_contact)
-    sales_contact_no_link.short_description = "Sales contact"
 
     @admin.display
     def status(self, obj):
@@ -270,22 +240,16 @@ class ClientAdmin(admin.ModelAdmin):
             return "prospect"
 
 
-    def get_fields(self, request, obj=None):
-        if not obj:
-            if request.user.is_superuser or request.user.groups.filter(name="Management team").exists():
-                return ['first_name', 'last_name', 'email', 'phone', 'mobile', 'company_name', 'date_created', 'date_updated', 'sales_contact']
-            else:
-                return ['first_name', 'last_name', 'email', 'phone', 'mobile', 'company_name', 'date_created',
-                        'date_updated', 'sales_contact_no_link']
-        else:
-            if request.user.is_superuser or request.user.groups.filter(name="Management team").exists():
-                return ['first_name', 'last_name', 'email', 'phone', 'mobile', 'company_name', 'date_created', 'date_updated', 'sales_contact']
-            else:
-                return ['first_name', 'last_name', 'email', 'phone', 'mobile', 'company_name', 'date_created', 'date_updated', 'sales_contact_no_link']
-
-
 class ContractForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
+        """
+        If form is change form, an instance of contract exists and has a date created
+        If form is an add form, there's no instance yet, so no created date. Created date is current datetime
+        """
+        try:
+            self.date_created = kwargs['instance'].date_created
+        except (AttributeError, KeyError):
+            self.date_created = datetime.datetime.now()
         super(ContractForm, self).__init__(*args, **kwargs)
         self.fields['client'].error_messages = {'required': ''}
         self.fields['amount'].error_messages = {'required': ''}
@@ -293,18 +257,32 @@ class ContractForm(forms.ModelForm):
 
     def clean(self):
         errors = dict()
+        """
+        Validation of payment_due date
+        This field is required so if it is empty, a keyerror is catched and an error is raised
+        If payment_due date exists, it is compared with created date which is current date or existing created date
+        """
         try:
-            self.cleaned_data['payment_due']
+            if self.cleaned_data['payment_due'] < self.date_created:
+                errors['payment_due'] = "Payment due date can't be prior to creation date"
         except KeyError:
-            errors['payment_due'] = 'You must specify a date and a time for the payment due !'
+            errors['payment_due'] = "You must specify a date and a time for the payment due !"
         try:
             self.cleaned_data['client']
         except KeyError:
-            errors['client'] = 'Any contract needs to be related to a client !'
+            errors['client'] = "Any contract needs to be related to a client !"
         try:
             self.cleaned_data['amount']
         except KeyError:
-            errors['amount'] = 'Amount field is required and must be filled with a float or integer !'
+            errors['amount'] = "Amount field is required and must be filled with a float or integer !"
+        try:
+            if self.cleaned_data['status'] == False\
+                    and  self.initial['status'] == True \
+                    and Event.objects.filter(contract=self.instance).exists():
+                errors['status'] = "There's already an event associated with this signed contract. You can't cancel signature !"
+        except KeyError:
+            # it's a create form, without status field
+            pass
         if errors:
                 raise ValidationError(errors)
 
@@ -324,63 +302,18 @@ class ContractAdmin(admin.ModelAdmin):
     readonly_fields = ['sales_contact', 'date_created', 'date_updated']
 
 
-    # a user member belonging to 'sales' group can create a contract only for his clients
-    # a superuser or a user belonging to 'management' group can create a contract for any client
-    def formfield_for_foreignkey(self, db_field, request, **kwargs):
-        if "/add/" in request.path:
-            if db_field.name == "client" and request.user.is_superuser:
-                kwargs["queryset"] = Client.objects.all()
-            elif db_field.name == "client" and request.user.groups.filter(name="Sales team").exists():
-                kwargs["queryset"] = Client.objects.filter(sales_contact=request.user)
-            return super().formfield_for_foreignkey(db_field, request, **kwargs)
-        if "/change/" in request.path:
-            if db_field.name == "client" and request.user.is_superuser:
-                kwargs["queryset"] = Client.objects.all()
-            elif db_field.name == "client" and request.user.groups.filter(name="Sales team").exists():
-                kwargs["queryset"] = Client.objects.filter(sales_contact=request.user)
-            return super().formfield_for_foreignkey(db_field, request, **kwargs)
-
-
-    def has_delete_permission(self, request, obj=None):
-        if obj:
-            if request.user == obj.client.sales_contact \
-                    or request.user.is_superuser \
-                    or request.user.groups.filter(name="Management team").exists():
-                return True
-            else:
-                return False
-
-    def has_change_permission(self, request, obj=None):
-        if obj:
-            if request.user == obj.client.sales_contact \
-                    or request.user.is_superuser \
-                    or request.user.groups.filter(name="Management team").exists():
-                return True
-            else:
-                return False
-
-
     def get_fields(self, request, obj=None):
         if not obj:
-            if request.user.is_superuser or request.user.groups.filter(name="Management team").exists():
-                self.readonly_fields = ['sales_contact', 'date_created', 'date_updated']
-                self.fields = ['client', 'status', 'amount', 'payment_due', 'sales_contact', 'date_created',
-                               'date_updated']
-                return self.fields
-            else:
-                self.readonly_fields = []
-                self.fields = ['client', 'amount', 'payment_due']
-                return self.fields
+            self.readonly_fields = ['sales_contact', 'date_created', 'date_updated']
+            self.fields = ['client', 'amount', 'payment_due', 'sales_contact', 'date_created',
+                           'date_updated']
+            return self.fields
         else:
-            if request.user.is_superuser or request.user.groups.filter(name="Management team").exists():
-                self.readonly_fields = ['sales_contact', 'date_created', 'date_updated']
-                self.fields = ['client', 'status', 'amount', 'payment_due', 'sales_contact', 'date_created',
-                               'date_updated']
-                return self.fields
-            else:
-                self.readonly_fields = ['sales_contact', 'date_created', 'date_updated']
-                self.fields = ['client', 'sales_contact', 'status', 'amount', 'payment_due', 'date_created', 'date_updated']
-                return self.fields
+            self.readonly_fields = ['sales_contact', 'date_created', 'date_updated']
+            self.fields = ['client', 'status', 'amount', 'payment_due', 'sales_contact', 'date_created',
+                           'date_updated']
+            return self.fields
+
 
 
     @admin.display
@@ -391,20 +324,16 @@ class ContractAdmin(admin.ModelAdmin):
 class EventCreationForm(forms.ModelForm):
     @staticmethod
     def check_event_status(status, date_event):
-        if date_event > datetime.datetime.now() and status in ["2", "3"]:
+        if date_event and date_event > datetime.datetime.now() and status in ["2", "3"]:
             raise ValidationError(
                 f"Error in field <Event status>: This event can't be in progress or closed since its date is later than the current date")
-        elif date_event < datetime.datetime.now() and status == "1":
+        elif date_event and date_event < datetime.datetime.now() and status == "1":
             raise ValidationError(
                 f"Error in field <Event status>: This event can't be incoming since its date is earlier than the current date")
 
 
     def clean(self):
         self.check_event_status(self.cleaned_data.get('event_status'), self.cleaned_data.get('event_date'))
-        if not Contract.objects.filter(client__sales_contact=self.user).filter(status=True).exclude(Q(event__isnull=False)):
-            raise ValidationError('You have no available client with a signed contract.'
-                                  'Please ensure that the client associated with this event has signed a contract.'
-                                  'Remember that a contract can be associated with only one event')
 
 
     def save(self, commit=True):
@@ -440,7 +369,7 @@ class EventAdmin(admin.ModelAdmin):
     add_form = EventCreationForm
 
     list_display = ['name', 'contract', 'support_contact', 'event_status', 'event_date']
-    readonly_fields = ['contract_no_link', 'support_contact_no_link', 'my_notes', 'date_created', 'date_updated']
+    readonly_fields = ['my_notes', 'date_created', 'date_updated']
 
     def get_form(self, request, obj=None, change=False, **kwargs):
         if not obj:
@@ -451,26 +380,18 @@ class EventAdmin(admin.ModelAdmin):
         return super(EventAdmin, self).get_form(request, **kwargs)
 
     def formfield_for_foreignkey(self, db_field, request=None, **kwargs):
-        if request.user.is_superuser or request.user.groups.filter(name="Management team").exists():
-            if db_field.name == "contract":
-                kwargs["queryset"] = Client.objects.all()
-                return super(EventAdmin, self).formfield_for_foreignkey(db_field, request, **kwargs)
-            if db_field.name == "support_contact":
-                kwargs["queryset"] = User.objects.all()
-                return super(EventAdmin, self).formfield_for_foreignkey(db_field, request, **kwargs)
         if db_field.name == "contract":
-            kwargs["queryset"] = Contract.objects.filter(client__sales_contact=request.user).filter(status=True).exclude(Q(event__isnull=False))
-            return super(EventAdmin, self).formfield_for_foreignkey(db_field, request, **kwargs)
+            if resolve(request.path)[2]:
+                event_id = resolve(request.path)[2]['object_id']
+                kwargs["queryset"] = Contract.objects.filter(status=True).filter(Q(event__contract__isnull=True)|Q(event__id=event_id))
+                return super(EventAdmin, self).formfield_for_foreignkey(db_field, request, **kwargs)
+            else:
+                kwargs["queryset"] = Contract.objects.filter(status=True).exclude(event__contract__isnull=False)
+                return super(EventAdmin, self).formfield_for_foreignkey(db_field, request, **kwargs)
         if db_field.name == "support_contact":
             kwargs["queryset"] = User.objects.filter(groups__name="Support team")
             return super(EventAdmin, self).formfield_for_foreignkey(db_field, request, **kwargs)
 
-    def has_change_permission(self, request, obj=None):
-        if obj:
-            if request.user == obj.contract.client.sales_contact or request.user.is_superuser or request.user == obj.support_contact or request.user.groups.filter(name="Management team").exists():
-                return True
-            else:
-                return False
 
     @admin.display(empty_value='***Nothing***')
     def my_notes(self, obj):
@@ -478,33 +399,13 @@ class EventAdmin(admin.ModelAdmin):
 
     def get_fields(self, request, obj=None):
         if obj:
-            if request.user.is_superuser or request.user.groups.filter(name="Management team").exists():
-                return ['name', 'contract', 'support_contact', 'event_status', 'event_date',
+            self.fields = ['name', 'contract', 'support_contact', 'event_status', 'event_date',
                         'attendees', 'date_created', 'date_updated',  'notes']
-            else:
-                if request.user == obj.support_contact:
-                    return ['name', 'contract_no_link', 'support_contact_no_link', 'event_status', 'event_date',
-                            'attendees', 'date_created', 'date_updated', 'my_notes']
-                else:
-                    return ['name', 'contract', 'support_contact_no_link', 'event_status', 'event_date',
-                        'attendees', 'date_created', 'date_updated',  'my_notes']
         else:
-            if request.user.is_superuser or request.user.groups.filter(name="Management team").exists():
-                return ['name', 'contract', 'support_contact', 'event_status', 'event_date',
+            self.fields =  ['name', 'contract', 'support_contact', 'event_status', 'event_date',
                         'attendees', 'date_created', 'date_updated', 'notes']
-            else:
-                return ['name', 'contract', 'support_contact_no_link', 'event_status', 'event_date',
-                        'attendees', 'date_created', 'date_updated', 'notes']
+        return self.fields
 
-    @admin.display
-    def contract_no_link(self, obj):
-        return format_html("{}", obj.contract)
-    contract_no_link.short_description = "Contrat"
-
-    @admin.display
-    def support_contact_no_link(self, obj):
-        return format_html("{}", obj.support_contact)
-    support_contact_no_link.short_description = "Support contact"
 
 admin.site.register(User, CustomUserAdmin)
 admin.site.register(Client, ClientAdmin)

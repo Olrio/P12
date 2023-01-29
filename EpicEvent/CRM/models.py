@@ -54,9 +54,11 @@ class Event(models.Model):
     contract = models.OneToOneField(
         to=Contract,
         on_delete=models.CASCADE,
+        limit_choices_to={'status': True},
     )
     support_contact = models.ForeignKey(
         null=True,
+        blank=True,
         to=User,
         on_delete=models.PROTECT,
         limit_choices_to={'groups__name': "Support team"},

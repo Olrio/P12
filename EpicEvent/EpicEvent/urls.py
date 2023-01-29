@@ -19,13 +19,15 @@ from rest_framework_simplejwt.views import TokenRefreshView, TokenObtainPairView
 from rest_framework_nested import routers
 from authentication.admin import MyLoginView
 from authentication.views import UserViewset
-from CRM.views import ClientViewset
+from CRM.views import ClientViewset, ContractViewset, EventViewset
 
 admin.sites.AdminSite.site_header = 'Epic Events CRM'
 admin.sites.AdminSite.index_title = 'Items'
 
 router = routers.SimpleRouter()
 router.register("clients", ClientViewset, basename="clients")
+router.register("contracts", ContractViewset, basename="contracts")
+router.register("events", EventViewset, basename="events")
 router.register("users", UserViewset, basename="user")
 
 urlpatterns = [
