@@ -10,24 +10,18 @@ from .validators import Validators
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.views import LoginView
 from django.utils.html import format_html
-from django.utils.translation import gettext_lazy as _
 import datetime
-
-import logging
 
 
 class MyAuthForm(AuthenticationForm):
     def confirm_login_allowed(self, user):
         if not user.is_staff:
-            raise ValidationError(_("Only members of management team are allowed to use this site."), code="not staff")
-
+            raise ValidationError("Only members of management team are allowed to use this site.")
 
 class MyLoginView(LoginView):
     authentication_form = MyAuthForm
 
-class UserCreationForm(forms.ModelForm):
-    """A form for creating new users. Includes all the required
-    fields, plus a repeated password."""
+class UserForm(forms.ModelForm):
     password1 = forms.CharField(label='Password', widget=forms.PasswordInput)
     password2 = forms.CharField(label='Password confirmation', widget=forms.PasswordInput)
 
@@ -46,72 +40,8 @@ class UserCreationForm(forms.ModelForm):
     def clean_groups(self):
         if not self.cleaned_data['groups']:
             raise ValidationError("Please affect this user to a group")
-        return self.cleaned_data['groups']
-
-    def clean_password1(self):
-        password1 = self.cleaned_data.get("password1")
-        Validators.has_8_length(password1)
-        Validators.contains_letters_and_numbers(password1)
-        return password1
-
-    def clean_password2(self):
-        password1 = self.cleaned_data.get("password1")
-        password2 = self.cleaned_data.get("password2")
-        Validators.two_entries_differ(password1, password2)
-        return password2
-
-    def save(self, commit=True):
-        user = super().save(commit=False)
-        user.set_password(self.cleaned_data["password1"])
-        user.first_name = user.first_name.title()
-        user.last_name = user.last_name.title()
-
-        initials = ''.join([name[0] for name in user.first_name.split("-")])
-        # let's set the username from first_name and last_name
-        # it's the lower first(s) letter(s) of first_name completed with the lower last_name
-        # if this username already exists, a number is added, starting from 2
-        counter = 2
-        if User.objects.filter(username=initials.lower()+user.last_name.lower()).exists():
-            while True:
-                if User.objects.filter(username=initials.lower()+user.last_name.lower() + str(counter)).exists():
-                    counter +=1
-                else:
-                    break
-            user.username = initials.lower()+user.last_name.lower() + str(counter)
-        else:
-            user.username = initials.lower()+user.last_name.lower()
-
-        if self.cleaned_data['groups'].first().name=="Management team":
-            user.is_staff = True
-
-        if commit:
-            user.save()
-        return user
-
-
-class UserChangeForm(forms.ModelForm):
-    """A form for updating users. Includes all the fields on
-    the user, but replaces the password field with admin's
-    disabled password hash display field.
-    """
-    password1 = forms.CharField(label='Password', widget=forms.PasswordInput, required=False)
-    password2 = forms.CharField(label='Password confirmation', widget=forms.PasswordInput, required=False)
-
-    class Meta:
-        model = User
-        fields = ('username',)
-
-    def clean_first_name(self):
-        Validators.check_letters_hyphen(self.cleaned_data['first_name'], "first_name")
-        return self.cleaned_data['first_name']
-
-    def clean_last_name(self):
-        Validators.check_letters_hyphen(self.cleaned_data['last_name'], "last_name")
-        return self.cleaned_data['last_name']
-
-    def clean_groups(self):
-        if not self.cleaned_data['groups']:
-            raise ValidationError("Please affect this user to a group")
+        if len(self.cleaned_data['groups']) > 1:
+            raise ValidationError("A user can belong to only one group")
         return self.cleaned_data['groups']
 
     def clean_password1(self):
@@ -132,20 +62,33 @@ class UserChangeForm(forms.ModelForm):
         user = super().save(commit=False)
         user.first_name = user.first_name.title()
         user.last_name = user.last_name.title()
+        # in add form, username is set automatically
+        if self.base_fields['password1'].required:
+            initials = ''.join([name[0] for name in user.first_name.split("-")])
+            # let's set the username from first_name and last_name
+            # it's the lower first(s) letter(s) of first_name completed with the lower last_name
+            # if this username already exists, a number is added, starting from 2
+            counter = 2
+            if User.objects.filter(username=initials.lower()+user.last_name.lower()).exists():
+                while True:
+                    if User.objects.filter(username=initials.lower()+user.last_name.lower() + str(counter)).exists():
+                        counter +=1
+                    else:
+                        break
+                user.username = initials.lower()+user.last_name.lower() + str(counter)
+            else:
+                user.username = initials.lower()+user.last_name.lower()
         if self.cleaned_data['password1']:
             user.set_password(self.cleaned_data["password1"])
-        if self.cleaned_data['groups'].filter(name='Management team').exists():
+        if self.cleaned_data['groups'].first().name=="Management team":
             user.is_staff = True
-        else:
-            user.is_staff = False
         user.save()
         return user
 
 
-
 class CustomUserAdmin(BaseUserAdmin):
-    form = UserChangeForm
-    add_form = UserCreationForm
+    form = UserForm
+    add_form = UserForm
 
     list_display = ('username', 'last_name', 'first_name',
                     'number_of_clients', 'management', 'sales', 'support')
@@ -188,6 +131,13 @@ class CustomUserAdmin(BaseUserAdmin):
         else :
             return format_html("<b><i>{}</i></b>", Client.objects.filter(sales_contact=obj).count())
     number_of_clients.short_description = "nb of clients"
+
+    def get_form(self, request, obj=None, **kwargs):
+        form = super().get_form(request, obj, **kwargs)
+        if obj:
+            form.base_fields['password1'].required=False
+            form.base_fields['password2'].required = False
+        return form
 
 
 class ClientChangeForm(forms.ModelForm):

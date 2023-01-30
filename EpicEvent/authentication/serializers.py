@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from authentication.models import User
-from django.contrib.auth.models import Group, Permission
+from django.contrib.auth.models import Group
 
 from .validators import Validators
 

@@ -395,3 +395,245 @@ Traceback (most recent call last):
     raise FieldError(
 django.core.exceptions.FieldError: Unknown field(s) (nam) specified for Event. Check fields/fieldsets/exclude attributes of class EventAdmin.
 [2023/01/29 21:15:51] ERROR "GET /admin/CRM/event/97/change/ HTTP/1.1" 500 145
+[2023/01/30 07:32:59] ERROR Internal Server Error: /admin/authentication/user/add/
+Traceback (most recent call last):
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/contrib/admin/options.py", line 807, in get_form
+    return modelform_factory(self.model, **defaults)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/forms/models.py", line 648, in modelform_factory
+    return type(form)(class_name, (form,), form_class_attrs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/forms/models.py", line 327, in __new__
+    raise FieldError(message)
+django.core.exceptions.FieldError: Unknown field(s) (password1, password2) specified for User
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/contrib/admin/options.py", line 686, in wrapper
+    return self.admin_site.admin_view(view)(*args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/utils/decorators.py", line 133, in _wrapped_view
+    response = view_func(request, *args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/views/decorators/cache.py", line 62, in _wrapped_view_func
+    response = view_func(request, *args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/contrib/admin/sites.py", line 242, in inner
+    return view(request, *args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/utils/decorators.py", line 46, in _wrapper
+    return bound_method(*args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/views/decorators/debug.py", line 92, in sensitive_post_parameters_wrapper
+    return view(request, *args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/utils/decorators.py", line 46, in _wrapper
+    return bound_method(*args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/utils/decorators.py", line 133, in _wrapped_view
+    response = view_func(request, *args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/contrib/auth/admin.py", line 119, in add_view
+    return self._add_view(request, form_url, extra_context)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/contrib/auth/admin.py", line 147, in _add_view
+    return super().add_view(request, form_url, extra_context)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/contrib/admin/options.py", line 1890, in add_view
+    return self.changeform_view(request, None, form_url, extra_context)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/utils/decorators.py", line 46, in _wrapper
+    return bound_method(*args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/utils/decorators.py", line 133, in _wrapped_view
+    response = view_func(request, *args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/contrib/admin/options.py", line 1750, in changeform_view
+    return self._changeform_view(request, object_id, form_url, extra_context)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/contrib/admin/options.py", line 1786, in _changeform_view
+    ModelForm = self.get_form(
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/contrib/auth/admin.py", line 98, in get_form
+    return super().get_form(request, obj, **defaults)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/contrib/admin/options.py", line 809, in get_form
+    raise FieldError(
+django.core.exceptions.FieldError: Unknown field(s) (password1, password2) specified for User. Check fields/fieldsets/exclude attributes of class CustomUserAdmin.
+[2023/01/30 07:32:59] ERROR "GET /admin/authentication/user/add/ HTTP/1.1" 500 145
+[2023/01/30 07:41:45] ERROR Internal Server Error: /admin/authentication/user/71/change/
+Traceback (most recent call last):
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/contrib/admin/options.py", line 807, in get_form
+    return modelform_factory(self.model, **defaults)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/forms/models.py", line 648, in modelform_factory
+    return type(form)(class_name, (form,), form_class_attrs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/forms/models.py", line 327, in __new__
+    raise FieldError(message)
+django.core.exceptions.FieldError: Unknown field(s) (password1, password2) specified for User
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/contrib/admin/options.py", line 686, in wrapper
+    return self.admin_site.admin_view(view)(*args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/utils/decorators.py", line 133, in _wrapped_view
+    response = view_func(request, *args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/views/decorators/cache.py", line 62, in _wrapped_view_func
+    response = view_func(request, *args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/contrib/admin/sites.py", line 242, in inner
+    return view(request, *args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/contrib/admin/options.py", line 1893, in change_view
+    return self.changeform_view(request, object_id, form_url, extra_context)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/utils/decorators.py", line 46, in _wrapper
+    return bound_method(*args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/utils/decorators.py", line 133, in _wrapped_view
+    response = view_func(request, *args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/contrib/admin/options.py", line 1750, in changeform_view
+    return self._changeform_view(request, object_id, form_url, extra_context)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/contrib/admin/options.py", line 1786, in _changeform_view
+    ModelForm = self.get_form(
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/contrib/auth/admin.py", line 98, in get_form
+    return super().get_form(request, obj, **defaults)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/contrib/admin/options.py", line 809, in get_form
+    raise FieldError(
+django.core.exceptions.FieldError: Unknown field(s) (password1, password2) specified for User. Check fields/fieldsets/exclude attributes of class CustomUserAdmin.
+[2023/01/30 07:41:45] ERROR "GET /admin/authentication/user/71/change/ HTTP/1.1" 500 145
+[2023/01/30 07:41:50] ERROR Internal Server Error: /admin/authentication/user/71/change/
+Traceback (most recent call last):
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/contrib/admin/options.py", line 807, in get_form
+    return modelform_factory(self.model, **defaults)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/forms/models.py", line 648, in modelform_factory
+    return type(form)(class_name, (form,), form_class_attrs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/forms/models.py", line 327, in __new__
+    raise FieldError(message)
+django.core.exceptions.FieldError: Unknown field(s) (password1, password2) specified for User
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/contrib/admin/options.py", line 686, in wrapper
+    return self.admin_site.admin_view(view)(*args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/utils/decorators.py", line 133, in _wrapped_view
+    response = view_func(request, *args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/views/decorators/cache.py", line 62, in _wrapped_view_func
+    response = view_func(request, *args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/contrib/admin/sites.py", line 242, in inner
+    return view(request, *args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/contrib/admin/options.py", line 1893, in change_view
+    return self.changeform_view(request, object_id, form_url, extra_context)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/utils/decorators.py", line 46, in _wrapper
+    return bound_method(*args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/utils/decorators.py", line 133, in _wrapped_view
+    response = view_func(request, *args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/contrib/admin/options.py", line 1750, in changeform_view
+    return self._changeform_view(request, object_id, form_url, extra_context)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/contrib/admin/options.py", line 1786, in _changeform_view
+    ModelForm = self.get_form(
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/contrib/auth/admin.py", line 98, in get_form
+    return super().get_form(request, obj, **defaults)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/contrib/admin/options.py", line 809, in get_form
+    raise FieldError(
+django.core.exceptions.FieldError: Unknown field(s) (password1, password2) specified for User. Check fields/fieldsets/exclude attributes of class CustomUserAdmin.
+[2023/01/30 07:41:50] ERROR "GET /admin/authentication/user/71/change/ HTTP/1.1" 500 145
+[2023/01/30 07:47:23] ERROR Internal Server Error: /admin/authentication/user/71/change/
+Traceback (most recent call last):
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/contrib/admin/options.py", line 686, in wrapper
+    return self.admin_site.admin_view(view)(*args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/utils/decorators.py", line 133, in _wrapped_view
+    response = view_func(request, *args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/views/decorators/cache.py", line 62, in _wrapped_view_func
+    response = view_func(request, *args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/contrib/admin/sites.py", line 242, in inner
+    return view(request, *args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/contrib/admin/options.py", line 1893, in change_view
+    return self.changeform_view(request, object_id, form_url, extra_context)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/utils/decorators.py", line 46, in _wrapper
+    return bound_method(*args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/utils/decorators.py", line 133, in _wrapped_view
+    response = view_func(request, *args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/contrib/admin/options.py", line 1750, in changeform_view
+    return self._changeform_view(request, object_id, form_url, extra_context)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/contrib/admin/options.py", line 1823, in _changeform_view
+    form = ModelForm(instance=obj)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/EpicEvent/authentication/admin.py", line 114, in __init__
+    super(UserCreationForm, self).__init__(*args, **kwargs)
+TypeError: super(type, obj): obj must be an instance or subtype of type
+[2023/01/30 07:47:23] ERROR "GET /admin/authentication/user/71/change/ HTTP/1.1" 500 145
+[2023/01/30 08:37:52] ERROR Internal Server Error: /admin/authentication/user/add/
+Traceback (most recent call last):
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/db/backends/utils.py", line 89, in _execute
+    return self.cursor.execute(sql, params)
+psycopg2.errors.UniqueViolation: ERREUR:  la valeur d'une clé dupliquée rompt la contrainte unique « authentication_user_username_a09a089e_uniq »
+DETAIL:  La clé « (username)=() » existe déjà.
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/contrib/admin/options.py", line 686, in wrapper
+    return self.admin_site.admin_view(view)(*args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/utils/decorators.py", line 133, in _wrapped_view
+    response = view_func(request, *args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/views/decorators/cache.py", line 62, in _wrapped_view_func
+    response = view_func(request, *args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/contrib/admin/sites.py", line 242, in inner
+    return view(request, *args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/utils/decorators.py", line 46, in _wrapper
+    return bound_method(*args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/views/decorators/debug.py", line 92, in sensitive_post_parameters_wrapper
+    return view(request, *args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/utils/decorators.py", line 46, in _wrapper
+    return bound_method(*args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/utils/decorators.py", line 133, in _wrapped_view
+    response = view_func(request, *args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/contrib/auth/admin.py", line 119, in add_view
+    return self._add_view(request, form_url, extra_context)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/contrib/auth/admin.py", line 147, in _add_view
+    return super().add_view(request, form_url, extra_context)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/contrib/admin/options.py", line 1890, in add_view
+    return self.changeform_view(request, None, form_url, extra_context)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/utils/decorators.py", line 46, in _wrapper
+    return bound_method(*args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/utils/decorators.py", line 133, in _wrapped_view
+    response = view_func(request, *args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/contrib/admin/options.py", line 1750, in changeform_view
+    return self._changeform_view(request, object_id, form_url, extra_context)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/contrib/admin/options.py", line 1798, in _changeform_view
+    new_object = self.save_form(request, form, change=not add)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/contrib/admin/options.py", line 1219, in save_form
+    return form.save(commit=False)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/EpicEvent/authentication/admin.py", line 86, in save
+    user.save()
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/contrib/auth/base_user.py", line 68, in save
+    super().save(*args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/db/models/base.py", line 812, in save
+    self.save_base(
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/db/models/base.py", line 863, in save_base
+    updated = self._save_table(
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/db/models/base.py", line 1006, in _save_table
+    results = self._do_insert(
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/db/models/base.py", line 1047, in _do_insert
+    return manager._insert(
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/db/models/manager.py", line 85, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/db/models/query.py", line 1790, in _insert
+    return query.get_compiler(using=using).execute_sql(returning_fields)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/db/models/sql/compiler.py", line 1660, in execute_sql
+    cursor.execute(sql, params)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/db/backends/utils.py", line 67, in execute
+    return self._execute_with_wrappers(
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/db/backends/utils.py", line 80, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/db/backends/utils.py", line 84, in _execute
+    with self.db.wrap_database_errors:
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/db/utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/db/backends/utils.py", line 89, in _execute
+    return self.cursor.execute(sql, params)
+django.db.utils.IntegrityError: ERREUR:  la valeur d'une clé dupliquée rompt la contrainte unique « authentication_user_username_a09a089e_uniq »
+DETAIL:  La clé « (username)=() » existe déjà.
+
+[2023/01/30 08:37:52] ERROR "POST /admin/authentication/user/add/ HTTP/1.1" 500 145
