@@ -13,13 +13,16 @@ class Validators:
             if not char.isnumeric():
                 raise ValidationError(f"<{field}>: A phone number can contain only numbers !")
 
+
     @staticmethod
     def check_is_float(data, field):
         if type(data) is not float:
             raise ValidationError(f"<{field}>: This field must be a float number !")
 
+
     @staticmethod
-    def contains_letters_and_numbers(data):
+    def is_valid_password(data):
+        errors = list()
         alpha = False
         numeric = False
         for char in data:
@@ -28,15 +31,19 @@ class Validators:
             if char.isnumeric():
                 numeric = True
         if not alpha or not numeric:
-            raise ValidationError("Password error : your password must contain letters and numbers")
-
-    @staticmethod
-    def has_8_length(data):
+            errors.append("Password error : your password must contain letters and numbers")
         if len(data) < 8:
-            raise ValidationError("Password error : Your password must be at least 8 characters long!")
+            errors.append("Password error : Your password must be at least 8 characters long!")
+        if errors:
+            raise ValidationError(errors)
 
     @staticmethod
     def two_entries_differ(data1, data2):
         if data1 and data2 and data1 != data2:
             raise ValidationError("Password error : Your two entries for password differ !")
+
+    @staticmethod
+    def is_valid_team(data):
+        if data not in ['Management', 'Sales', 'Support']:
+            raise ValidationError("<Team>: Team must be one of these : Management, Sales or Support")
 

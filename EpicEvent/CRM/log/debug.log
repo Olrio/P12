@@ -637,3 +637,737 @@ django.db.utils.IntegrityError: ERREUR:  la valeur d'une clé dupliquée rompt l
 DETAIL:  La clé « (username)=() » existe déjà.
 
 [2023/01/30 08:37:52] ERROR "POST /admin/authentication/user/add/ HTTP/1.1" 500 145
+[2023/01/31 13:43:41] ERROR Internal Server Error: /admin/CRM/client/add/
+Traceback (most recent call last):
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/contrib/admin/options.py", line 686, in wrapper
+    return self.admin_site.admin_view(view)(*args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/utils/decorators.py", line 133, in _wrapped_view
+    response = view_func(request, *args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/views/decorators/cache.py", line 62, in _wrapped_view_func
+    response = view_func(request, *args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/contrib/admin/sites.py", line 242, in inner
+    return view(request, *args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/contrib/admin/options.py", line 1890, in add_view
+    return self.changeform_view(request, None, form_url, extra_context)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/utils/decorators.py", line 46, in _wrapper
+    return bound_method(*args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/utils/decorators.py", line 133, in _wrapped_view
+    response = view_func(request, *args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/contrib/admin/options.py", line 1750, in changeform_view
+    return self._changeform_view(request, object_id, form_url, extra_context)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/contrib/admin/options.py", line 1796, in _changeform_view
+    form_validated = form.is_valid()
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/forms/forms.py", line 205, in is_valid
+    return self.is_bound and not self.errors
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/forms/forms.py", line 200, in errors
+    self.full_clean()
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/forms/forms.py", line 438, in full_clean
+    self._clean_form()
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/forms/forms.py", line 459, in _clean_form
+    cleaned_data = self.clean()
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/EpicEvent/authentication/admin.py", line 162, in clean
+    Validators.check_is_phone_number(self.cleaned_data.get('phone'), "phone")
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/EpicEvent/authentication/validators.py", line 13, in check_is_phone_number
+    for char in data:
+TypeError: 'NoneType' object is not iterable
+[2023/01/31 13:43:41] ERROR "POST /admin/CRM/client/add/ HTTP/1.1" 500 145
+[2023/01/31 13:45:17] ERROR Internal Server Error: /admin/CRM/client/add/
+Traceback (most recent call last):
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/contrib/admin/options.py", line 686, in wrapper
+    return self.admin_site.admin_view(view)(*args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/utils/decorators.py", line 133, in _wrapped_view
+    response = view_func(request, *args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/views/decorators/cache.py", line 62, in _wrapped_view_func
+    response = view_func(request, *args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/contrib/admin/sites.py", line 242, in inner
+    return view(request, *args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/contrib/admin/options.py", line 1890, in add_view
+    return self.changeform_view(request, None, form_url, extra_context)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/utils/decorators.py", line 46, in _wrapper
+    return bound_method(*args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/utils/decorators.py", line 133, in _wrapped_view
+    response = view_func(request, *args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/contrib/admin/options.py", line 1750, in changeform_view
+    return self._changeform_view(request, object_id, form_url, extra_context)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/contrib/admin/options.py", line 1796, in _changeform_view
+    form_validated = form.is_valid()
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/forms/forms.py", line 205, in is_valid
+    return self.is_bound and not self.errors
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/forms/forms.py", line 200, in errors
+    self.full_clean()
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/forms/forms.py", line 438, in full_clean
+    self._clean_form()
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/forms/forms.py", line 459, in _clean_form
+    cleaned_data = self.clean()
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/EpicEvent/authentication/admin.py", line 162, in clean
+    Validators.check_is_phone_number(self.cleaned_data.get('phone'), "phone")
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/EpicEvent/authentication/validators.py", line 13, in check_is_phone_number
+    for char in data:
+TypeError: 'NoneType' object is not iterable
+[2023/01/31 13:45:17] ERROR "POST /admin/CRM/client/add/ HTTP/1.1" 500 145
+[2023/01/31 13:45:27] ERROR Internal Server Error: /admin/CRM/client/add/
+Traceback (most recent call last):
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/contrib/admin/options.py", line 686, in wrapper
+    return self.admin_site.admin_view(view)(*args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/utils/decorators.py", line 133, in _wrapped_view
+    response = view_func(request, *args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/views/decorators/cache.py", line 62, in _wrapped_view_func
+    response = view_func(request, *args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/contrib/admin/sites.py", line 242, in inner
+    return view(request, *args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/contrib/admin/options.py", line 1890, in add_view
+    return self.changeform_view(request, None, form_url, extra_context)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/utils/decorators.py", line 46, in _wrapper
+    return bound_method(*args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/utils/decorators.py", line 133, in _wrapped_view
+    response = view_func(request, *args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/contrib/admin/options.py", line 1750, in changeform_view
+    return self._changeform_view(request, object_id, form_url, extra_context)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/contrib/admin/options.py", line 1796, in _changeform_view
+    form_validated = form.is_valid()
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/forms/forms.py", line 205, in is_valid
+    return self.is_bound and not self.errors
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/forms/forms.py", line 200, in errors
+    self.full_clean()
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/forms/forms.py", line 438, in full_clean
+    self._clean_form()
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/forms/forms.py", line 459, in _clean_form
+    cleaned_data = self.clean()
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/EpicEvent/authentication/admin.py", line 162, in clean
+    Validators.check_is_phone_number(self.cleaned_data.get('phone'), "phone")
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/EpicEvent/authentication/validators.py", line 13, in check_is_phone_number
+    for char in data:
+TypeError: 'NoneType' object is not iterable
+[2023/01/31 13:45:27] ERROR "POST /admin/CRM/client/add/ HTTP/1.1" 500 145
+[2023/01/31 13:45:34] ERROR Internal Server Error: /admin/CRM/client/add/
+Traceback (most recent call last):
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/contrib/admin/options.py", line 686, in wrapper
+    return self.admin_site.admin_view(view)(*args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/utils/decorators.py", line 133, in _wrapped_view
+    response = view_func(request, *args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/views/decorators/cache.py", line 62, in _wrapped_view_func
+    response = view_func(request, *args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/contrib/admin/sites.py", line 242, in inner
+    return view(request, *args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/contrib/admin/options.py", line 1890, in add_view
+    return self.changeform_view(request, None, form_url, extra_context)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/utils/decorators.py", line 46, in _wrapper
+    return bound_method(*args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/utils/decorators.py", line 133, in _wrapped_view
+    response = view_func(request, *args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/contrib/admin/options.py", line 1750, in changeform_view
+    return self._changeform_view(request, object_id, form_url, extra_context)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/contrib/admin/options.py", line 1796, in _changeform_view
+    form_validated = form.is_valid()
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/forms/forms.py", line 205, in is_valid
+    return self.is_bound and not self.errors
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/forms/forms.py", line 200, in errors
+    self.full_clean()
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/forms/forms.py", line 438, in full_clean
+    self._clean_form()
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/forms/forms.py", line 459, in _clean_form
+    cleaned_data = self.clean()
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/EpicEvent/authentication/admin.py", line 160, in clean
+    errors['first_name'] = Validators.check_letters_hyphen(self.cleaned_data.get('first_name'), "first_name")
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/EpicEvent/authentication/validators.py", line 6, in check_letters_hyphen
+    for char in data:
+TypeError: 'NoneType' object is not iterable
+[2023/01/31 13:45:34] ERROR "POST /admin/CRM/client/add/ HTTP/1.1" 500 145
+[2023/01/31 13:46:15] ERROR Internal Server Error: /admin/CRM/client/add/
+Traceback (most recent call last):
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/contrib/admin/options.py", line 686, in wrapper
+    return self.admin_site.admin_view(view)(*args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/utils/decorators.py", line 133, in _wrapped_view
+    response = view_func(request, *args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/views/decorators/cache.py", line 62, in _wrapped_view_func
+    response = view_func(request, *args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/contrib/admin/sites.py", line 242, in inner
+    return view(request, *args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/contrib/admin/options.py", line 1890, in add_view
+    return self.changeform_view(request, None, form_url, extra_context)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/utils/decorators.py", line 46, in _wrapper
+    return bound_method(*args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/utils/decorators.py", line 133, in _wrapped_view
+    response = view_func(request, *args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/contrib/admin/options.py", line 1750, in changeform_view
+    return self._changeform_view(request, object_id, form_url, extra_context)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/contrib/admin/options.py", line 1796, in _changeform_view
+    form_validated = form.is_valid()
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/forms/forms.py", line 205, in is_valid
+    return self.is_bound and not self.errors
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/forms/forms.py", line 200, in errors
+    self.full_clean()
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/forms/forms.py", line 438, in full_clean
+    self._clean_form()
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/forms/forms.py", line 459, in _clean_form
+    cleaned_data = self.clean()
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/EpicEvent/authentication/admin.py", line 162, in clean
+    Validators.check_is_phone_number(self.cleaned_data.get('phone'), "phone")
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/EpicEvent/authentication/validators.py", line 14, in check_is_phone_number
+    for char in data:
+TypeError: 'NoneType' object is not iterable
+[2023/01/31 13:46:15] ERROR "POST /admin/CRM/client/add/ HTTP/1.1" 500 145
+[2023/01/31 13:51:43] ERROR Internal Server Error: /admin/authentication/user/add/
+Traceback (most recent call last):
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/forms/forms.py", line 452, in _clean_fields
+    value = getattr(self, "clean_%s" % name)()
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/EpicEvent/authentication/admin.py", line 36, in clean_first_name
+    raise ValidationError(errors)
+django.core.exceptions.ValidationError: {'first_name': ['<first_name>: Only letters and hyphen are authorized']}
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/contrib/admin/options.py", line 686, in wrapper
+    return self.admin_site.admin_view(view)(*args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/utils/decorators.py", line 133, in _wrapped_view
+    response = view_func(request, *args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/views/decorators/cache.py", line 62, in _wrapped_view_func
+    response = view_func(request, *args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/contrib/admin/sites.py", line 242, in inner
+    return view(request, *args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/utils/decorators.py", line 46, in _wrapper
+    return bound_method(*args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/views/decorators/debug.py", line 92, in sensitive_post_parameters_wrapper
+    return view(request, *args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/utils/decorators.py", line 46, in _wrapper
+    return bound_method(*args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/utils/decorators.py", line 133, in _wrapped_view
+    response = view_func(request, *args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/contrib/auth/admin.py", line 119, in add_view
+    return self._add_view(request, form_url, extra_context)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/contrib/auth/admin.py", line 147, in _add_view
+    return super().add_view(request, form_url, extra_context)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/contrib/admin/options.py", line 1890, in add_view
+    return self.changeform_view(request, None, form_url, extra_context)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/utils/decorators.py", line 46, in _wrapper
+    return bound_method(*args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/utils/decorators.py", line 133, in _wrapped_view
+    response = view_func(request, *args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/contrib/admin/options.py", line 1750, in changeform_view
+    return self._changeform_view(request, object_id, form_url, extra_context)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/contrib/admin/options.py", line 1796, in _changeform_view
+    form_validated = form.is_valid()
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/forms/forms.py", line 205, in is_valid
+    return self.is_bound and not self.errors
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/forms/forms.py", line 200, in errors
+    self.full_clean()
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/forms/forms.py", line 437, in full_clean
+    self._clean_fields()
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/forms/forms.py", line 455, in _clean_fields
+    self.add_error(name, e)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/forms/forms.py", line 392, in add_error
+    raise TypeError(
+TypeError: The argument `field` must be `None` when the `error` argument contains errors for multiple fields.
+[2023/01/31 13:51:43] ERROR "POST /admin/authentication/user/add/ HTTP/1.1" 500 145
+[2023/01/31 14:00:40] ERROR Internal Server Error: /admin/CRM/client/7/change/
+Traceback (most recent call last):
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/contrib/admin/options.py", line 686, in wrapper
+    return self.admin_site.admin_view(view)(*args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/utils/decorators.py", line 133, in _wrapped_view
+    response = view_func(request, *args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/views/decorators/cache.py", line 62, in _wrapped_view_func
+    response = view_func(request, *args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/contrib/admin/sites.py", line 242, in inner
+    return view(request, *args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/contrib/admin/options.py", line 1893, in change_view
+    return self.changeform_view(request, object_id, form_url, extra_context)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/utils/decorators.py", line 46, in _wrapper
+    return bound_method(*args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/utils/decorators.py", line 133, in _wrapped_view
+    response = view_func(request, *args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/contrib/admin/options.py", line 1750, in changeform_view
+    return self._changeform_view(request, object_id, form_url, extra_context)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/contrib/admin/options.py", line 1796, in _changeform_view
+    form_validated = form.is_valid()
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/forms/forms.py", line 205, in is_valid
+    return self.is_bound and not self.errors
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/forms/forms.py", line 200, in errors
+    self.full_clean()
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/forms/forms.py", line 438, in full_clean
+    self._clean_form()
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/forms/forms.py", line 459, in _clean_form
+    cleaned_data = self.clean()
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/EpicEvent/authentication/admin.py", line 145, in clean
+    Validators.check_letters_hyphen(self.cleaned_data.get('first_name'), "first_name", "first_name", raise_direct=False)
+TypeError: Validators.check_letters_hyphen() got multiple values for argument 'raise_direct'
+[2023/01/31 14:00:40] ERROR "POST /admin/CRM/client/7/change/ HTTP/1.1" 500 145
+[2023/01/31 14:00:48] ERROR Internal Server Error: /admin/CRM/client/7/change/
+Traceback (most recent call last):
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/contrib/admin/options.py", line 686, in wrapper
+    return self.admin_site.admin_view(view)(*args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/utils/decorators.py", line 133, in _wrapped_view
+    response = view_func(request, *args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/views/decorators/cache.py", line 62, in _wrapped_view_func
+    response = view_func(request, *args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/contrib/admin/sites.py", line 242, in inner
+    return view(request, *args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/contrib/admin/options.py", line 1893, in change_view
+    return self.changeform_view(request, object_id, form_url, extra_context)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/utils/decorators.py", line 46, in _wrapper
+    return bound_method(*args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/utils/decorators.py", line 133, in _wrapped_view
+    response = view_func(request, *args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/contrib/admin/options.py", line 1750, in changeform_view
+    return self._changeform_view(request, object_id, form_url, extra_context)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/contrib/admin/options.py", line 1796, in _changeform_view
+    form_validated = form.is_valid()
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/forms/forms.py", line 205, in is_valid
+    return self.is_bound and not self.errors
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/forms/forms.py", line 200, in errors
+    self.full_clean()
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/forms/forms.py", line 438, in full_clean
+    self._clean_form()
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/forms/forms.py", line 459, in _clean_form
+    cleaned_data = self.clean()
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/EpicEvent/authentication/admin.py", line 145, in clean
+    Validators.check_letters_hyphen(self.cleaned_data.get('first_name'), "first_name", "first_name", raise_direct=False)
+TypeError: Validators.check_letters_hyphen() got multiple values for argument 'raise_direct'
+[2023/01/31 14:00:48] ERROR "POST /admin/CRM/client/7/change/ HTTP/1.1" 500 145
+[2023/01/31 14:01:22] ERROR Internal Server Error: /admin/CRM/client/7/change/
+Traceback (most recent call last):
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/contrib/admin/options.py", line 686, in wrapper
+    return self.admin_site.admin_view(view)(*args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/utils/decorators.py", line 133, in _wrapped_view
+    response = view_func(request, *args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/views/decorators/cache.py", line 62, in _wrapped_view_func
+    response = view_func(request, *args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/contrib/admin/sites.py", line 242, in inner
+    return view(request, *args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/contrib/admin/options.py", line 1893, in change_view
+    return self.changeform_view(request, object_id, form_url, extra_context)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/utils/decorators.py", line 46, in _wrapper
+    return bound_method(*args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/utils/decorators.py", line 133, in _wrapped_view
+    response = view_func(request, *args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/contrib/admin/options.py", line 1750, in changeform_view
+    return self._changeform_view(request, object_id, form_url, extra_context)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/contrib/admin/options.py", line 1796, in _changeform_view
+    form_validated = form.is_valid()
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/forms/forms.py", line 205, in is_valid
+    return self.is_bound and not self.errors
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/forms/forms.py", line 200, in errors
+    self.full_clean()
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/forms/forms.py", line 438, in full_clean
+    self._clean_form()
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/forms/forms.py", line 459, in _clean_form
+    cleaned_data = self.clean()
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/EpicEvent/authentication/admin.py", line 146, in clean
+    Validators.check_letters_hyphen(self.cleaned_data.get('first_name'), "first_name", "first_name", raise_direct=False)
+TypeError: Validators.check_letters_hyphen() got multiple values for argument 'raise_direct'
+[2023/01/31 14:01:22] ERROR "POST /admin/CRM/client/7/change/ HTTP/1.1" 500 145
+[2023/01/31 14:02:12] ERROR Internal Server Error: /admin/CRM/client/7/change/
+Traceback (most recent call last):
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/contrib/admin/options.py", line 686, in wrapper
+    return self.admin_site.admin_view(view)(*args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/utils/decorators.py", line 133, in _wrapped_view
+    response = view_func(request, *args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/views/decorators/cache.py", line 62, in _wrapped_view_func
+    response = view_func(request, *args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/contrib/admin/sites.py", line 242, in inner
+    return view(request, *args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/contrib/admin/options.py", line 1893, in change_view
+    return self.changeform_view(request, object_id, form_url, extra_context)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/utils/decorators.py", line 46, in _wrapper
+    return bound_method(*args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/utils/decorators.py", line 133, in _wrapped_view
+    response = view_func(request, *args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/contrib/admin/options.py", line 1750, in changeform_view
+    return self._changeform_view(request, object_id, form_url, extra_context)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/contrib/admin/options.py", line 1796, in _changeform_view
+    form_validated = form.is_valid()
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/forms/forms.py", line 205, in is_valid
+    return self.is_bound and not self.errors
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/forms/forms.py", line 200, in errors
+    self.full_clean()
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/forms/forms.py", line 438, in full_clean
+    self._clean_form()
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/forms/forms.py", line 459, in _clean_form
+    cleaned_data = self.clean()
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/EpicEvent/authentication/admin.py", line 146, in clean
+    errors['first_name'] = Validators.check_letters_hyphen(self.cleaned_data.get('first_name'), "first_name", "first_name", raise_direct=False)
+TypeError: Validators.check_letters_hyphen() got multiple values for argument 'raise_direct'
+[2023/01/31 14:02:12] ERROR "POST /admin/CRM/client/7/change/ HTTP/1.1" 500 145
+[2023/01/31 14:02:15] ERROR Internal Server Error: /admin/CRM/client/7/change/
+Traceback (most recent call last):
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/contrib/admin/options.py", line 686, in wrapper
+    return self.admin_site.admin_view(view)(*args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/utils/decorators.py", line 133, in _wrapped_view
+    response = view_func(request, *args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/views/decorators/cache.py", line 62, in _wrapped_view_func
+    response = view_func(request, *args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/contrib/admin/sites.py", line 242, in inner
+    return view(request, *args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/contrib/admin/options.py", line 1893, in change_view
+    return self.changeform_view(request, object_id, form_url, extra_context)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/utils/decorators.py", line 46, in _wrapper
+    return bound_method(*args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/utils/decorators.py", line 133, in _wrapped_view
+    response = view_func(request, *args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/contrib/admin/options.py", line 1750, in changeform_view
+    return self._changeform_view(request, object_id, form_url, extra_context)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/contrib/admin/options.py", line 1796, in _changeform_view
+    form_validated = form.is_valid()
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/forms/forms.py", line 205, in is_valid
+    return self.is_bound and not self.errors
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/forms/forms.py", line 200, in errors
+    self.full_clean()
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/forms/forms.py", line 438, in full_clean
+    self._clean_form()
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/forms/forms.py", line 459, in _clean_form
+    cleaned_data = self.clean()
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/EpicEvent/authentication/admin.py", line 146, in clean
+    errors['first_name'] = Validators.check_letters_hyphen(self.cleaned_data.get('first_name'), "first_name", "first_name", raise_direct=False)
+TypeError: Validators.check_letters_hyphen() got multiple values for argument 'raise_direct'
+[2023/01/31 14:02:15] ERROR "POST /admin/CRM/client/7/change/ HTTP/1.1" 500 145
+[2023/01/31 14:02:31] ERROR Internal Server Error: /admin/CRM/client/7/change/
+Traceback (most recent call last):
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/contrib/admin/options.py", line 686, in wrapper
+    return self.admin_site.admin_view(view)(*args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/utils/decorators.py", line 133, in _wrapped_view
+    response = view_func(request, *args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/views/decorators/cache.py", line 62, in _wrapped_view_func
+    response = view_func(request, *args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/contrib/admin/sites.py", line 242, in inner
+    return view(request, *args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/contrib/admin/options.py", line 1893, in change_view
+    return self.changeform_view(request, object_id, form_url, extra_context)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/utils/decorators.py", line 46, in _wrapper
+    return bound_method(*args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/utils/decorators.py", line 133, in _wrapped_view
+    response = view_func(request, *args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/contrib/admin/options.py", line 1750, in changeform_view
+    return self._changeform_view(request, object_id, form_url, extra_context)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/contrib/admin/options.py", line 1796, in _changeform_view
+    form_validated = form.is_valid()
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/forms/forms.py", line 205, in is_valid
+    return self.is_bound and not self.errors
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/forms/forms.py", line 200, in errors
+    self.full_clean()
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/forms/forms.py", line 438, in full_clean
+    self._clean_form()
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/forms/forms.py", line 459, in _clean_form
+    cleaned_data = self.clean()
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/EpicEvent/authentication/admin.py", line 146, in clean
+    errors['first_name'] = Validators.check_letters_hyphen(self.cleaned_data.get('first_name'), "first_name", "first_name", raise_direct=False)
+TypeError: Validators.check_letters_hyphen() got multiple values for argument 'raise_direct'
+[2023/01/31 14:02:31] ERROR "POST /admin/CRM/client/7/change/ HTTP/1.1" 500 145
+[2023/01/31 14:33:45] ERROR Internal Server Error: /crm/users/63/
+Traceback (most recent call last):
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/views/decorators/csrf.py", line 54, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/rest_framework/viewsets.py", line 125, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/rest_framework/views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/rest_framework/views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/rest_framework/views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/rest_framework/views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/rest_framework/mixins.py", line 67, in update
+    serializer.is_valid(raise_exception=True)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/rest_framework/serializers.py", line 227, in is_valid
+    self._validated_data = self.run_validation(self.initial_data)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/rest_framework/serializers.py", line 429, in run_validation
+    value = self.validate(value)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/EpicEvent/authentication/serializers.py", line 135, in validate
+    checks[0] = Validators.check_letters_hyphen(data['first_name'], "first_name", raise_direct=False)
+IndexError: list assignment index out of range
+[2023/01/31 14:33:45] ERROR "PUT /crm/users/63/ HTTP/1.1" 500 145
+[2023/01/31 14:34:51] ERROR Internal Server Error: /crm/users/63/
+Traceback (most recent call last):
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/views/decorators/csrf.py", line 54, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/rest_framework/viewsets.py", line 125, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/rest_framework/views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/rest_framework/views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/rest_framework/views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/rest_framework/views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/rest_framework/mixins.py", line 67, in update
+    serializer.is_valid(raise_exception=True)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/rest_framework/serializers.py", line 227, in is_valid
+    self._validated_data = self.run_validation(self.initial_data)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/rest_framework/serializers.py", line 429, in run_validation
+    value = self.validate(value)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/EpicEvent/authentication/serializers.py", line 135, in validate
+    checks['first_name'] = Validators.check_letters_hyphen(data['first_name'], "first_name", raise_direct=False)
+TypeError: list indices must be integers or slices, not str
+[2023/01/31 14:34:51] ERROR "PUT /crm/users/63/ HTTP/1.1" 500 145
+[2023/01/31 14:34:52] ERROR Internal Server Error: /crm/users/63/
+Traceback (most recent call last):
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/views/decorators/csrf.py", line 54, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/rest_framework/viewsets.py", line 125, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/rest_framework/views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/rest_framework/views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/rest_framework/views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/rest_framework/views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/rest_framework/mixins.py", line 67, in update
+    serializer.is_valid(raise_exception=True)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/rest_framework/serializers.py", line 227, in is_valid
+    self._validated_data = self.run_validation(self.initial_data)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/rest_framework/serializers.py", line 429, in run_validation
+    value = self.validate(value)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/EpicEvent/authentication/serializers.py", line 135, in validate
+    checks['first_name'] = Validators.check_letters_hyphen(data['first_name'], "first_name", raise_direct=False)
+TypeError: list indices must be integers or slices, not str
+[2023/01/31 14:34:52] ERROR "PUT /crm/users/63/ HTTP/1.1" 500 145
+[2023/02/01 07:11:32] ERROR Internal Server Error: /crm/users/
+Traceback (most recent call last):
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/views/decorators/csrf.py", line 54, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/rest_framework/viewsets.py", line 125, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/rest_framework/views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/rest_framework/views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/rest_framework/views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/rest_framework/views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/rest_framework/mixins.py", line 18, in create
+    serializer.is_valid(raise_exception=True)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/rest_framework/serializers.py", line 227, in is_valid
+    self._validated_data = self.run_validation(self.initial_data)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/rest_framework/serializers.py", line 426, in run_validation
+    value = self.to_internal_value(data)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/rest_framework/serializers.py", line 485, in to_internal_value
+    validated_value = validate_method(validated_value)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/EpicEvent/authentication/serializers.py", line 80, in validate_password2
+    if self.password1 and value:
+AttributeError: 'RegisterUserSerializer' object has no attribute 'password1'
+[2023/02/01 07:11:32] ERROR "POST /crm/users/ HTTP/1.1" 500 145
+[2023/02/01 07:13:02] ERROR Internal Server Error: /crm/users/
+Traceback (most recent call last):
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/views/decorators/csrf.py", line 54, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/rest_framework/viewsets.py", line 125, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/rest_framework/views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/rest_framework/views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/rest_framework/views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/rest_framework/views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/rest_framework/mixins.py", line 18, in create
+    serializer.is_valid(raise_exception=True)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/rest_framework/serializers.py", line 227, in is_valid
+    self._validated_data = self.run_validation(self.initial_data)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/rest_framework/serializers.py", line 426, in run_validation
+    value = self.to_internal_value(data)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/rest_framework/serializers.py", line 485, in to_internal_value
+    validated_value = validate_method(validated_value)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/EpicEvent/authentication/serializers.py", line 80, in validate_password2
+    if self.validated_data['password1'] and value:
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/rest_framework/serializers.py", line 271, in validated_data
+    raise AssertionError(msg)
+AssertionError: You must call `.is_valid()` before accessing `.validated_data`.
+[2023/02/01 07:13:02] ERROR "POST /crm/users/ HTTP/1.1" 500 145
+[2023/02/01 07:13:04] ERROR Internal Server Error: /crm/users/
+Traceback (most recent call last):
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/views/decorators/csrf.py", line 54, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/rest_framework/viewsets.py", line 125, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/rest_framework/views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/rest_framework/views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/rest_framework/views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/rest_framework/views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/rest_framework/mixins.py", line 18, in create
+    serializer.is_valid(raise_exception=True)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/rest_framework/serializers.py", line 227, in is_valid
+    self._validated_data = self.run_validation(self.initial_data)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/rest_framework/serializers.py", line 426, in run_validation
+    value = self.to_internal_value(data)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/rest_framework/serializers.py", line 485, in to_internal_value
+    validated_value = validate_method(validated_value)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/EpicEvent/authentication/serializers.py", line 80, in validate_password2
+    if self.validated_data['password1'] and value:
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/rest_framework/serializers.py", line 271, in validated_data
+    raise AssertionError(msg)
+AssertionError: You must call `.is_valid()` before accessing `.validated_data`.
+[2023/02/01 07:13:04] ERROR "POST /crm/users/ HTTP/1.1" 500 145
+[2023/02/01 07:14:12] ERROR Internal Server Error: /crm/users/
+Traceback (most recent call last):
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/views/decorators/csrf.py", line 54, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/rest_framework/viewsets.py", line 125, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/rest_framework/views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/rest_framework/views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/rest_framework/views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/rest_framework/views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/rest_framework/mixins.py", line 18, in create
+    serializer.is_valid(raise_exception=True)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/rest_framework/serializers.py", line 227, in is_valid
+    self._validated_data = self.run_validation(self.initial_data)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/rest_framework/serializers.py", line 426, in run_validation
+    value = self.to_internal_value(data)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/rest_framework/serializers.py", line 485, in to_internal_value
+    validated_value = validate_method(validated_value)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/EpicEvent/authentication/serializers.py", line 80, in validate_password2
+    if self.data['password1'] and value:
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/rest_framework/serializers.py", line 555, in data
+    ret = super().data
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/rest_framework/serializers.py", line 249, in data
+    raise AssertionError(msg)
+AssertionError: When a serializer is passed a `data` keyword argument you must call `.is_valid()` before attempting to access the serialized `.data` representation.
+You should either call `.is_valid()` first, or access `.initial_data` instead.
+[2023/02/01 07:14:12] ERROR "POST /crm/users/ HTTP/1.1" 500 145
+[2023/02/01 07:15:20] ERROR Internal Server Error: /crm/users/
+Traceback (most recent call last):
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/views/decorators/csrf.py", line 54, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/rest_framework/viewsets.py", line 125, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/rest_framework/views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/rest_framework/views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/rest_framework/views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/rest_framework/views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/rest_framework/mixins.py", line 18, in create
+    serializer.is_valid(raise_exception=True)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/rest_framework/serializers.py", line 227, in is_valid
+    self._validated_data = self.run_validation(self.initial_data)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/rest_framework/serializers.py", line 426, in run_validation
+    value = self.to_internal_value(data)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/rest_framework/serializers.py", line 485, in to_internal_value
+    validated_value = validate_method(validated_value)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/EpicEvent/authentication/serializers.py", line 80, in validate_password2
+    if self.initial['password1'] and value:
+TypeError: 'NoneType' object is not subscriptable
+[2023/02/01 07:15:20] ERROR "POST /crm/users/ HTTP/1.1" 500 145
+[2023/02/01 07:28:02] ERROR Internal Server Error: /crm/users/88/
+Traceback (most recent call last):
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/views/decorators/csrf.py", line 54, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/rest_framework/viewsets.py", line 125, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/rest_framework/views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/rest_framework/views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/rest_framework/views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/rest_framework/views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/rest_framework/mixins.py", line 67, in update
+    serializer.is_valid(raise_exception=True)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/rest_framework/serializers.py", line 227, in is_valid
+    self._validated_data = self.run_validation(self.initial_data)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/rest_framework/serializers.py", line 429, in run_validation
+    value = self.validate(value)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/EpicEvent/authentication/serializers.py", line 140, in validate
+    Validators.has_8_length(data['password1'])
+AttributeError: type object 'Validators' has no attribute 'has_8_length'
+[2023/02/01 07:28:02] ERROR "PUT /crm/users/88/ HTTP/1.1" 500 145

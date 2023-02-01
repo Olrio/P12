@@ -30,7 +30,7 @@ class UserForm(forms.ModelForm):
         fields = ('username',)
 
     def clean_first_name(self):
-        Validators.check_letters_hyphen(self.cleaned_data['first_name'], "first_name")
+        Validators.check_letters_hyphen(self.cleaned_data.get('first_name'), "first_name")
         return self.cleaned_data['first_name']
 
     def clean_last_name(self):
@@ -47,8 +47,7 @@ class UserForm(forms.ModelForm):
     def clean_password1(self):
         password1 = self.cleaned_data.get("password1")
         if password1:
-            Validators.has_8_length(password1)
-            Validators.contains_letters_and_numbers(password1)
+            Validators.is_valid_password(password1)
         return password1
 
     def clean_password2(self):
@@ -140,43 +139,42 @@ class CustomUserAdmin(BaseUserAdmin):
         return form
 
 
-class ClientChangeForm(forms.ModelForm):
-    def clean(self):
+class ClientForm(forms.ModelForm):
+    def clean_first_name(self):
         Validators.check_letters_hyphen(self.cleaned_data.get('first_name'), "first_name")
+        return self.cleaned_data['first_name']
+
+    def clean_last_name(self):
         Validators.check_letters_hyphen(self.cleaned_data.get('last_name'), "last_name")
+        return self.cleaned_data['last_name']
+
+    def clean_phone(self):
         Validators.check_is_phone_number(self.cleaned_data.get('phone'), "phone")
+        return self.cleaned_data['phone']
+
+    def clean_mobile(self):
         Validators.check_is_phone_number(self.cleaned_data.get('mobile'), "mobile")
+        return self.cleaned_data['mobile']
 
     def save(self, commit=True):
         client = super().save(commit=False)
         client.date_updated = datetime.datetime.now()
+        if client.pk is None:
+            client.date_created = datetime.datetime.now()
         client.save()
         return client
 
-class ClientCreationForm(forms.ModelForm):
-    def clean(self):
-        Validators.check_letters_hyphen(self.cleaned_data.get('first_name'), "first_name")
-        Validators.check_letters_hyphen(self.cleaned_data.get('last_name'), "last_name")
-        Validators.check_is_phone_number(self.cleaned_data.get('phone'), "phone")
-        Validators.check_is_phone_number(self.cleaned_data.get('mobile'), "mobile")
-
-    def save(self, commit=True):
-        client = super().save(commit=False)
-        client.date_created = datetime.datetime.now()
-        client.date_updated = datetime.datetime.now()
-        client.save()
-        return client
 
 class ClientAdmin(admin.ModelAdmin):
-    change_form = ClientChangeForm
-    add_form = ClientCreationForm
+    change_form = ClientForm
+    add_form = ClientForm
 
     def get_form(self, request, obj=None, change=False, **kwargs):
         if not obj:
             self.form = self.add_form
         else:
             self.form = self.change_form
-        return super(ClientAdmin, self).get_form(request, **kwargs)
+        return super().get_form(request, **kwargs)
 
     list_display = ['last_name', 'first_name', 'company_name', 'status', 'sales_contact']
     readonly_fields = ['date_created', 'date_updated']
