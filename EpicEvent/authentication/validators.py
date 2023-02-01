@@ -47,3 +47,8 @@ class Validators:
         if data not in ['Management', 'Sales', 'Support']:
             raise ValidationError("<Team>: Team must be one of these : Management, Sales or Support")
 
+    @staticmethod
+    def is_prior_to_created_date(due, created):
+        if due < created:
+            raise ValidationError("Payment due date can't be prior to creation date")
+

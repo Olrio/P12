@@ -87,11 +87,9 @@ class ContractSerializer(serializers.ModelSerializer):
 
     def validate_payment_due(self, value):
         if self.context['request'].method == "POST":
-            if value < datetime.datetime.now():
-                raise ValidationError("Payment_due date can't be prior to current date")
+            Validators.is_prior_to_created_date(value, datetime.datetime.now())
         elif self.context['request'].method == "PUT":
-            if value < self.instance.date_created:
-                raise ValidationError("Payment_due date can't be prior to creation date")
+            Validators.is_prior_to_created_date(value, self.instance.date_created)
         return value
 
 

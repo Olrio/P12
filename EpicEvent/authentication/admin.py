@@ -190,49 +190,29 @@ class ClientAdmin(admin.ModelAdmin):
 
 class ContractForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
-        """
-        If form is change form, an instance of contract exists and has a date created
-        If form is an add form, there's no instance yet, so no created date. Created date is current datetime
-        """
         try:
+            # change form
             self.date_created = kwargs['instance'].date_created
         except (AttributeError, KeyError):
+            # add form
             self.date_created = datetime.datetime.now()
-        super(ContractForm, self).__init__(*args, **kwargs)
-        self.fields['client'].error_messages = {'required': ''}
-        self.fields['amount'].error_messages = {'required': ''}
-        self.fields['payment_due'].error_messages = {'required': ''}
+        super().__init__(*args, **kwargs)
+        self.fields['amount'].error_messages = {'required': 'Amount field is required and must be a float or  an integer !'}
+
+    def clean_payment_due(self):
+        Validators.is_prior_to_created_date(self.cleaned_data['payment_due'], self.date_created)
+        return self.cleaned_data['payment_due']
+
 
     def clean(self):
-        errors = dict()
-        """
-        Validation of payment_due date
-        This field is required so if it is empty, a keyerror is catched and an error is raised
-        If payment_due date exists, it is compared with created date which is current date or existing created date
-        """
-        try:
-            if self.cleaned_data['payment_due'] < self.date_created:
-                errors['payment_due'] = "Payment due date can't be prior to creation date"
-        except KeyError:
-            errors['payment_due'] = "You must specify a date and a time for the payment due !"
-        try:
-            self.cleaned_data['client']
-        except KeyError:
-            errors['client'] = "Any contract needs to be related to a client !"
-        try:
-            self.cleaned_data['amount']
-        except KeyError:
-            errors['amount'] = "Amount field is required and must be filled with a float or integer !"
         try:
             if self.cleaned_data['status'] == False\
                     and  self.initial['status'] == True \
                     and Event.objects.filter(contract=self.instance).exists():
-                errors['status'] = "There's already an event associated with this signed contract. You can't cancel signature !"
+                raise  ValidationError("There's already an event associated with this signed contract. You can't cancel signature !")
         except KeyError:
-            # it's a create form, without status field
+            # it's a create form, with no status field
             pass
-        if errors:
-                raise ValidationError(errors)
 
     def save(self, commit=True):
         contract = super().save(commit=False)
@@ -263,44 +243,26 @@ class ContractAdmin(admin.ModelAdmin):
             return self.fields
 
 
-
     @admin.display
     def sales_contact(self, obj):
         return format_html("{}", obj.client.sales_contact)
 
-
-class EventCreationForm(forms.ModelForm):
-    @staticmethod
-    def check_event_status(status, date_event):
-        if date_event and date_event > datetime.datetime.now() and status in ["2", "3"]:
-            raise ValidationError(
-                f"Error in field <Event status>: This event can't be in progress or closed since its date is later than the current date")
-        elif date_event and date_event < datetime.datetime.now() and status == "1":
-            raise ValidationError(
-                f"Error in field <Event status>: This event can't be incoming since its date is earlier than the current date")
+    @admin.display
+    def pk(self, obj):
+        return format_html("Contract N°{}", obj.pk)
+    pk.short_description = "Contract"
 
 
-    def clean(self):
-        self.check_event_status(self.cleaned_data.get('event_status'), self.cleaned_data.get('event_date'))
-
-
-    def save(self, commit=True):
-        event = super().save(commit=False)
-        event.date_created = datetime.datetime.now()
-        event.date_updated = datetime.datetime.now()
-        event.save()
-        return event
-
-class EventChangeForm(forms.ModelForm):
-    class Meta:
-        model = Event
-        fields = "__all__"
+class EventForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['attendees'].error_messages = {'required': 'Attendees field is required and must be an integer !'}
 
     @staticmethod
     def check_event_status(status, date_event):
-        if date_event > datetime.datetime.now() and status in ["2", "3"] :
+        if date_event and date_event > datetime.datetime.now() and status in ["2", "3"] :
             raise ValidationError(f"Error in field <Event status>: This event can't be in progress or closed since its date is later than the current date")
-        elif date_event < datetime.datetime.now() and status == "1":
+        elif date_event and date_event < datetime.datetime.now() and status == "1":
             raise ValidationError(f"Error in field <Event status>: This event can't be incoming since its date is earlier than the current date")
 
     def clean(self):
@@ -308,13 +270,15 @@ class EventChangeForm(forms.ModelForm):
 
     def save(self, commit=True):
         event = super().save(commit=False)
+        if event.pk is None:
+            event.date_created = datetime.datetime.now()
         event.date_updated = datetime.datetime.now()
         event.save()
         return event
 
 class EventAdmin(admin.ModelAdmin):
-    change_form = EventChangeForm
-    add_form = EventCreationForm
+    change_form = EventForm
+    add_form = EventForm
 
     list_display = ['name', 'contract', 'support_contact', 'event_status', 'event_date']
     readonly_fields = ['my_notes', 'date_created', 'date_updated']
@@ -341,18 +305,9 @@ class EventAdmin(admin.ModelAdmin):
             return super(EventAdmin, self).formfield_for_foreignkey(db_field, request, **kwargs)
 
 
-    @admin.display(empty_value='***Nothing***')
+    @admin.display
     def my_notes(self, obj):
         return obj.notes
-
-    def get_fields(self, request, obj=None):
-        if obj:
-            self.fields = ['nam', 'contract', 'support_contact', 'event_status', 'event_date',
-                        'attendees', 'date_created', 'date_updated',  'notes']
-        else:
-            self.fields =  ['name', 'contract', 'support_contact', 'event_status', 'event_date',
-                        'attendees', 'date_created', 'date_updated', 'notes']
-        return self.fields
 
 
 admin.site.register(User, CustomUserAdmin)
