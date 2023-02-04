@@ -50,7 +50,7 @@ class Validators:
 
     @staticmethod
     def is_prior_to_created_date(due, created):
-        if due < created:
+        if due.date() < created.date():
             raise ValidationError("Payment due date can't be prior to creation date")
 
     @staticmethod

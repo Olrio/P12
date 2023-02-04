@@ -165,9 +165,21 @@ LOGGING = {
     },
     'handlers': {
         'file': {
-            'level': 'INFO',
+            'level': 'ERROR',
             'class': 'logging.FileHandler',
             'filename': 'CRM/log/debug.log',
+            'formatter': 'verbose',
+        },
+        'login_file': {
+            'level': 'INFO',
+            'class': 'logging.FileHandler',
+            'filename': 'CRM/log/login.log',
+            'formatter': 'verbose',
+        },
+        'form_file': {
+            'level': 'INFO',
+            'class': 'logging.FileHandler',
+            'filename': 'CRM/log/form.log',
             'formatter': 'verbose',
         },
     },
@@ -177,11 +189,16 @@ LOGGING = {
                 'level': 'ERROR',
                 'propagate': False,
             },
-            'security':{
-                'handlers': ['file'],
+            'login_security':{
+                'handlers': ['login_file'],
                 'level': 'INFO',
                 'propagate': False,
-            }
+            },
+            'form_security':{
+                'handlers': ['form_file'],
+                'level': 'INFO',
+                'propagate': False,
+            },
     },
 
 }
