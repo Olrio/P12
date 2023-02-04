@@ -165,7 +165,7 @@ LOGGING = {
     },
     'handlers': {
         'file': {
-            'level': 'ERROR',
+            'level': 'INFO',
             'class': 'logging.FileHandler',
             'filename': 'CRM/log/debug.log',
             'formatter': 'verbose',
@@ -177,6 +177,11 @@ LOGGING = {
                 'level': 'ERROR',
                 'propagate': False,
             },
+            'security':{
+                'handlers': ['file'],
+                'level': 'INFO',
+                'propagate': False,
+            }
     },
 
 }

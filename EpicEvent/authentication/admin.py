@@ -10,13 +10,17 @@ from .validators import Validators
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.views import LoginView
 from django.utils.html import format_html
-import datetime
+import datetime, logging
+
+security_logger = logging.getLogger('security')
 
 
 class MyAuthForm(AuthenticationForm):
     def confirm_login_allowed(self, user):
         if not user.is_staff:
+            security_logger.warning('user %s tried to connect to admin site', user)
             raise ValidationError("Only members of management team are allowed to use this site.")
+        security_logger.info('user %s connected to admin site', user)
 
 class MyLoginView(LoginView):
     authentication_form = MyAuthForm
@@ -63,20 +67,7 @@ class UserForm(forms.ModelForm):
         user.last_name = user.last_name.title()
         # in add form, username is set automatically
         if self.base_fields['password1'].required:
-            initials = ''.join([name[0] for name in user.first_name.split("-")])
-            # let's set the username from first_name and last_name
-            # it's the lower first(s) letter(s) of first_name completed with the lower last_name
-            # if this username already exists, a number is added, starting from 2
-            counter = 2
-            if User.objects.filter(username=initials.lower()+user.last_name.lower()).exists():
-                while True:
-                    if User.objects.filter(username=initials.lower()+user.last_name.lower() + str(counter)).exists():
-                        counter +=1
-                    else:
-                        break
-                user.username = initials.lower()+user.last_name.lower() + str(counter)
-            else:
-                user.username = initials.lower()+user.last_name.lower()
+            user.username = Validators.is_valid_username(user.first_name, user.last_name)
         if self.cleaned_data['password1']:
             user.set_password(self.cleaned_data["password1"])
         if self.cleaned_data['groups'].first().name=="Management team":

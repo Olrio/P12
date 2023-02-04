@@ -1,4 +1,5 @@
 from django.core.exceptions import ValidationError
+from authentication.models import User
 
 class Validators:
     @staticmethod
@@ -51,4 +52,23 @@ class Validators:
     def is_prior_to_created_date(due, created):
         if due < created:
             raise ValidationError("Payment due date can't be prior to creation date")
+
+    @staticmethod
+    def is_valid_username(first_name, last_name):
+        # let's set the username from first_name and last_name
+        # it's the lower first(s) letter(s) of first_name completed with the lower last_name
+        # if this username already exists, a number is added, starting from 2
+        initials = ''.join([name[0] for name in first_name.split("-")])
+        counter = 2
+        if User.objects.filter(username=initials.lower() + last_name.lower()).exists():
+            while True:
+                if User.objects.filter(
+                        username=initials.lower() + last_name.lower() + str(counter)).exists():
+                    counter += 1
+                else:
+                    break
+            username = initials.lower() + last_name.lower() + str(counter)
+        else:
+            username = initials.lower() + last_name.lower()
+        return username
 

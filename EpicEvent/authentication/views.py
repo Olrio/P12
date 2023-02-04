@@ -1,13 +1,28 @@
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.exceptions import NotFound
+from rest_framework.response import Response
 from django.core.exceptions import ObjectDoesNotExist
-from rest_framework import generics
 from .models import User
 from .serializers import UserSerializer, RegisterUserSerializer, UpdateUserSerializer
 from CRM.permissions import IsAuthenticated, IsManagementTeam
 
+import ipdb
+
 class UserViewset(ModelViewSet):
     permission_classes = [IsAuthenticated, IsManagementTeam]
+
+    def create(self, request):
+        """override create function to custom response so that
+            user can check fields not in the request body such as 'id' and 'username'
+            """
+        serializer = RegisterUserSerializer(data=request.data)
+        if serializer.is_valid():
+            user = serializer.save()
+            data = serializer.data
+            data.update({'id': user.id, 'username': user.username})
+            return Response(data)
+        else:
+            return Response(serializer.errors)
 
     def get_serializer(self, *args, **kwargs):
         if self.request.method == "POST":

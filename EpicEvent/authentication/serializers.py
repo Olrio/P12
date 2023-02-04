@@ -4,11 +4,19 @@ from django.contrib.auth.models import Group
 
 from .validators import Validators
 
+import ipdb, logging
+
 
 class UserSerializer(serializers.ModelSerializer):
+    groups = serializers.SlugRelatedField(many=True, read_only=True, slug_field="name")
+
+    @staticmethod
+    def get_groups(self, obj):
+        return obj.groups.values_list('name', flat=True)
+
     class Meta:
         model = User
-        fields = ["id", "last_name", "first_name"]
+        fields = ["id", "last_name", "first_name", "username", "groups"]
 
 
 class RegisterUserSerializer(serializers.ModelSerializer):
@@ -18,7 +26,8 @@ class RegisterUserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ["id", "last_name", "first_name", "password1", "password2", "team"]
+        fields = ["id", "last_name", "first_name", "username", "password1", "password2", "team"]
+        read_only_fields = ["username"]
 
     @staticmethod
     def validate_first_name(value):
@@ -41,25 +50,12 @@ class RegisterUserSerializer(serializers.ModelSerializer):
         return value
 
     def validate(self, data):
-        if data['password1'] and data['password2'] and data['password1'] != data['password2']:
-            raise serializers.ValidationError("Password error : your two entries differ !")
+        if data['password1'] and data['password2']:
+            Validators.two_entries_differ(data['password1'], data['password2'])
         return data
 
     def save(self, **kwargs):
-        initials = ''.join([name[0] for name in self.validated_data['first_name'].split("-")])
-        # let's set the username from first_name and last_name
-        # it's the lower first(s) letter(s) of first_name completed with the lower last_name
-        # if this username already exists, a number is added, starting from 2
-        counter = 2
-        if User.objects.filter(username=initials.lower() + self.validated_data['last_name'].lower()).exists():
-            while True:
-                if User.objects.filter(username=initials.lower() + self.validated_data['last_name'].lower() + str(counter)).exists():
-                    counter += 1
-                else:
-                    break
-            username = initials.lower() + self.validated_data['last_name'].lower() + str(counter)
-        else:
-            username = initials.lower() + self.validated_data['last_name'].lower()
+        username = Validators.is_valid_username(self.validated_data['first_name'], self.validated_data['last_name'])
         user = User(
             first_name=self.validated_data['first_name'],
             last_name=self.validated_data['last_name'],
@@ -98,7 +94,7 @@ class UpdateUserSerializer(serializers.ModelSerializer):
         try:
             Validators.is_valid_password(data['password1'])
             Validators.two_entries_differ(data['password1'], data['password2'])
-        except KeyError:
+        except KeyError as k:
             pass
         try:
             if data['team'] not in ['Management', 'Sales', 'Support']:
