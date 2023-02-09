@@ -54,7 +54,7 @@ class DataTest(TestCase):
         )
         return self.client
 
-    def create_contract(self, client, sales_contact, status, amount, payment_due,
+    def create_contract(self, client, status, amount, payment_due,
                         date_created=datetime.datetime.now(), date_updated=datetime.datetime.now()):
         self.contract = Contract.objects.create(
             client=client,
@@ -126,7 +126,6 @@ class DataTest(TestCase):
 
     def get_contracts(self):
         self.contract1 = self.create_contract(self.client1,
-                                              self.user_sales1,
                                               False,
                                               10000,
                                               self.date_due_contract_30,
@@ -134,7 +133,6 @@ class DataTest(TestCase):
                                               date_updated=self.date_update_contract_25,
         )
         self.contract2 = self.create_contract(self.client2,
-                                              self.user_sales2,
                                               True,
                                               12345.67,
                                               self.date_due_contract_20,
@@ -142,7 +140,6 @@ class DataTest(TestCase):
                                               date_updated=self.date_update_contract_10,
                                               )
         self.contract3 = self.create_contract(self.client3,
-                                              self.user_sales2,
                                               True,
                                               5432.66,
                                               self.date_past,

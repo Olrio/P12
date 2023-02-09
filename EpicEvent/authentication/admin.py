@@ -91,7 +91,7 @@ class UserForm(forms.ModelForm):
         user.first_name = user.first_name.title()
         user.last_name = user.last_name.title()
         # in add form, username is set automatically
-        if self.base_fields["password1"].required:
+        if "username" not in self.fields:
             user.username = Validators.is_valid_username(
                 user.first_name, user.last_name
             )

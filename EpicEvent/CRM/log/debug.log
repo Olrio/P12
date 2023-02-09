@@ -5149,3 +5149,91 @@ Traceback (most recent call last):
     print(due[0], created)
 TypeError: 'datetime.datetime' object is not subscriptable
 [2023/02/04 15:52:10] ERROR "POST /admin/CRM/contract/add/ HTTP/1.1" 500 145
+[2023/02/09 13:34:23] ERROR Internal Server Error: /admin/CRM/contract/5/change/
+Traceback (most recent call last):
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/forms/fields.py", line 361, in to_python
+    value = float(value)
+ValueError: could not convert string to float: '20000u'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/contrib/admin/options.py", line 686, in wrapper
+    return self.admin_site.admin_view(view)(*args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/utils/decorators.py", line 133, in _wrapped_view
+    response = view_func(request, *args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/views/decorators/cache.py", line 62, in _wrapped_view_func
+    response = view_func(request, *args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/contrib/admin/sites.py", line 242, in inner
+    return view(request, *args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/contrib/admin/options.py", line 1893, in change_view
+    return self.changeform_view(request, object_id, form_url, extra_context)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/utils/decorators.py", line 46, in _wrapper
+    return bound_method(*args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/utils/decorators.py", line 133, in _wrapped_view
+    response = view_func(request, *args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/contrib/admin/options.py", line 1750, in changeform_view
+    return self._changeform_view(request, object_id, form_url, extra_context)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/contrib/admin/options.py", line 1796, in _changeform_view
+    form_validated = form.is_valid()
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/forms/forms.py", line 205, in is_valid
+    return self.is_bound and not self.errors
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/forms/forms.py", line 200, in errors
+    self.full_clean()
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/forms/forms.py", line 437, in full_clean
+    self._clean_fields()
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/forms/forms.py", line 449, in _clean_fields
+    value = field.clean(value)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/forms/fields.py", line 198, in clean
+    value = self.to_python(value)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/forms/fields.py", line 363, in to_python
+    raise ValidationError(self.error_messages["invalid"], code="invalid")
+KeyError: 'invalid'
+[2023/02/09 18:15:56] ERROR Internal Server Error: /admin/CRM/event/add/
+Traceback (most recent call last):
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/forms/fields.py", line 328, in to_python
+    value = int(self.re_decimal.sub("", str(value)))
+ValueError: invalid literal for int() with base 10: '200 people'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/contrib/admin/options.py", line 686, in wrapper
+    return self.admin_site.admin_view(view)(*args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/utils/decorators.py", line 133, in _wrapped_view
+    response = view_func(request, *args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/views/decorators/cache.py", line 62, in _wrapped_view_func
+    response = view_func(request, *args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/contrib/admin/sites.py", line 242, in inner
+    return view(request, *args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/contrib/admin/options.py", line 1890, in add_view
+    return self.changeform_view(request, None, form_url, extra_context)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/utils/decorators.py", line 46, in _wrapper
+    return bound_method(*args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/utils/decorators.py", line 133, in _wrapped_view
+    response = view_func(request, *args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/contrib/admin/options.py", line 1750, in changeform_view
+    return self._changeform_view(request, object_id, form_url, extra_context)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/contrib/admin/options.py", line 1796, in _changeform_view
+    form_validated = form.is_valid()
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/forms/forms.py", line 205, in is_valid
+    return self.is_bound and not self.errors
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/forms/forms.py", line 200, in errors
+    self.full_clean()
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/forms/forms.py", line 437, in full_clean
+    self._clean_fields()
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/forms/forms.py", line 449, in _clean_fields
+    value = field.clean(value)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/forms/fields.py", line 198, in clean
+    value = self.to_python(value)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/forms/fields.py", line 330, in to_python
+    raise ValidationError(self.error_messages["invalid"], code="invalid")
+KeyError: 'invalid'
