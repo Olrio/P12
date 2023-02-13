@@ -71,4 +71,3 @@ class Validators:
         else:
             username = initials.lower() + last_name.lower()
         return username
-

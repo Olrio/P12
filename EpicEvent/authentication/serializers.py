@@ -101,18 +101,6 @@ class UpdateUserSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError({"Team error": "Team must be one of these : Management, Sales or Support"})
         except KeyError:
             raise serializers.ValidationError({"Team error": "A user must be affected to a team : Management, Sales or Support"})
-        initials = ''.join([name[0] for name in data['first_name'].split("-")])
-        counter = 2
-        # check if this username already exists in users, excluding current user
-        if User.objects.filter(username=initials.lower() + data['last_name'].lower()).exclude(id=getattr(self, 'instance').pk).exists():
-            while True:
-                if User.objects.filter(username=initials.lower() + data['last_name'].lower() + str(counter)).exists():
-                    counter += 1
-                else:
-                    break
-            data['username'] = initials.lower() + data['last_name'].lower() + str(counter)
-        else:
-            data['username'] = initials.lower() + data['last_name'].lower()
         return data
 
     def update(self, instance, validated_data):

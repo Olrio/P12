@@ -4,7 +4,7 @@ from CRM.models import Client, Contract, Event
 from authentication.models import User
 from authentication.admin import CustomUserAdmin, ClientAdmin, ContractAdmin, EventAdmin
 from django.contrib import admin
-from django.contrib.auth.models import Group, Permission
+from django.contrib.auth.models import Group
 import datetime
 
 import ipdb

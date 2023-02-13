@@ -7,14 +7,20 @@ from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django import forms
 from django.core.exceptions import ValidationError
 from .validators import Validators
+from django.contrib.auth.signals import user_logged_out
+from django.dispatch import receiver
 from django.contrib.auth.forms import AuthenticationForm
-from django.contrib.auth.views import LoginView
+from django.contrib.auth.views import LoginView, LogoutView
 from django.utils.html import format_html
 import datetime
 import logging
 
 login_logger = logging.getLogger("login_security")
 form_logger = logging.getLogger("form_security")
+
+@receiver(user_logged_out)
+def post_logout(sender, request, user, **kwargs):
+    login_logger.info("user %s logged out admin site", user)
 
 
 class MyAuthForm(AuthenticationForm):
