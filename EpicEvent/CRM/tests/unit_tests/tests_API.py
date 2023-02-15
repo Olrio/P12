@@ -3,42 +3,19 @@ from django.urls import reverse
 from authentication.models import User
 from django.contrib.auth.models import Group
 from CRM.models import Client, Contract, Event
+from .data_for_tests import Data
+
+import datetime
+import time
+
+import ipdb
 
 
-class DataTest(APITestCase):
-    @classmethod
-    def setUpTestData(cls):
-        cls.management_group = Group.objects.create(name="Management team")
-        cls.sales_group = Group.objects.create(name="Sales team")
-        cls.support_group = Group.objects.create(name="Support team")
-        cls.management_user = User.objects.create(username='egeret',
-                                                  first_name='Eva',
-                                                  last_name='Geret',
-                                                  is_staff=True,
-                                                  is_superuser=True)
-        cls.management_user.set_password("toto1234")
-        cls.management_user.groups.add(cls.management_group)
-        cls.management_user.save()
-        cls.sales_user = User.objects.create(username='yantou',
-                                                  first_name='Yves',
-                                                  last_name='Antou',
-                                                  is_staff=False,
-                                                  is_superuser=False)
-        cls.sales_user.set_password("toto1234")
-        cls.sales_user.groups.add(cls.sales_group)
-        cls.sales_user.save()
-        cls.support_user = User.objects.create(username='ecompagne',
-                                             first_name='Ella',
-                                             last_name='Compagne',
-                                             is_staff=False,
-                                             is_superuser=False)
-        cls.support_user.set_password("toto1234")
-        cls.support_user.groups.add(cls.support_group)
-        cls.support_user.save()
 
+class DataTest(Data):
     def login(self, user):
         url = reverse("login")
-        resp = self.client.post(
+        response = self.client.post(
             url,
             {
                 "username": user.username,
@@ -46,12 +23,12 @@ class DataTest(APITestCase):
             },
             format="json",
         )
-        return resp.json()
+        return response.json()
 
 class LoginTest(DataTest):
     def test_login_succes(self):
         url = reverse("login")
-        resp = self.client.post(
+        response = self.client.post(
             url,
             {
                 "username": self.management_user.username,
@@ -61,9 +38,9 @@ class LoginTest(DataTest):
         )
         # verify that given a valid username and
         # password of a user, request returns two tokens
-        self.assertTrue(resp.json()["refresh"] is not None)
-        self.assertTrue(resp.json()["access"] is not None)
-        return resp.json()
+        self.assertTrue(response.json()["refresh"] is not None)
+        self.assertTrue(response.json()["access"] is not None)
+        return response.json()
 
     def test_login_fail(self):
         url = reverse("login")
@@ -237,7 +214,7 @@ class UserTest(DataTest):
                          "Sorry, user 0 doesn't exist")
 
     def test_delete_a_user(self):
-        url = f"/crm/users/{self.support_user.id}/"
+        url = f"/crm/users/{self.user_lambda.id}/"
         token = self.login(self.management_user)
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + token["access"])
         users_count = User.objects.count()
@@ -262,3 +239,155 @@ class UserTest(DataTest):
         self.assertEqual(response.status_code, 404)
         self.assertEqual(response.json()['detail'],
                          "Sorry, user 0 doesn't exist")
+
+class ClientTest(DataTest):
+    def test_get_client_list_management_user(self):
+        url = "/crm/clients/"
+        token = self.login(self.management_user)
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + token["access"])
+        response = self.client.get(url, format="json")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data), Client.objects.count())
+        list_last_names = [data['last_name'] for data in response.data]
+        list_companies = [data['company_name'] for data in response.data]
+        self.assertTrue(self.client1.last_name in list_last_names)
+        self.assertTrue(self.client2.company_name in list_companies)
+
+    def test_get_client_detail(self):
+        url = f"/crm/clients/{self.client1.id}/"
+        token = self.login(self.sales_user)
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + token["access"])
+        response = self.client.get(url, format="json")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data['first_name'], self.client1.first_name)
+
+    def test_get_client_detail_non_existent(self):
+        url = "/crm/clients/0/"
+        token = self.login(self.sales_user)
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + token["access"])
+        response = self.client.get(url, format="json")
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.json()['detail'],
+                         "Sorry, client 0 doesn't exist")
+
+    def test_get_client_detail_unauthorized(self):
+        url = f"/crm/clients/{self.client1.id}/"
+        token = self.login(self.sales_user2)
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + token["access"])
+        response = self.client.get(url, format="json")
+        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.json()['detail'],
+                         "You do not have permission to perform this action.")
+
+    def test_create_a_client(self):
+        url = "/crm/clients/"
+        token = self.login(self.sales_user2)
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + token["access"])
+        clients_count = Client.objects.count()
+        response = self.client.post(url, {
+            'first_name': 'john',
+            'last_name': 'smith',
+            'email': 'menin@black.com',
+            'phone': '1111111111',
+            'mobile': '222222',
+            'company_name': 'la septième',
+        }, format="json")
+        self.assertEqual(Client.objects.count(), clients_count + 1)
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(Client.objects.last().sales_contact, self.sales_user2)
+
+    def test_create_a_client_unauthorized(self):
+        url = "/crm/clients/"
+        token = self.login(self.support_user)
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + token["access"])
+        response = self.client.post(url, {
+            'first_name': 'john',
+            'last_name': 'smith',
+            'email': 'menin@black.com',
+            'phone': '1111111111',
+            'mobile': '222222',
+            'company_name': 'la septième',
+        }, format="json")
+        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.json()['detail'],
+                         "You do not have permission to perform this action.")
+
+    def test_update_a_client(self):
+        url = f"/crm/clients/{self.client1.id}/"
+        token = self.login(self.sales_user)
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + token["access"])
+        self.assertEqual(self.client1.first_name, "Dark")
+        response = self.client.put(url, {
+            "first_name": "Darth",
+            "last_name": "Vador",
+            "email": "star@wars.com",
+            "phone": "12345678",
+            "mobile": "888888",
+            "company_name": "L'Empire",
+            "sales_contact": self.sales_user.id,
+        })
+        self.assertEqual(response.status_code, 200)
+        updated_client = Client.objects.get(id=self.client1.id)
+        self.assertEqual(updated_client.first_name, "Darth")
+        self.assertNotEqual(updated_client.date_created, updated_client.date_updated)
+
+    def test_update_a_client_non_existent(self):
+        url = "/crm/clients/0/"
+        token = self.login(self.sales_user)
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + token["access"])
+        response = self.client.put(url, {
+            "first_name": "Darth",
+            "last_name": "Vador",
+            "email": "star@wars.com",
+            "phone": "12345678",
+            "mobile": "888888",
+            "company_name": "L'Empire",
+            "sales_contact": self.sales_user.id,
+        })
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.json()['detail'],
+                         "Sorry, client 0 doesn't exist")
+
+    def test_update_a_client_unauthorized(self):
+        url = f"/crm/clients/{self.client1.id}/"
+        token = self.login(self.support_user)
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + token["access"])
+        response = self.client.put(url, {
+            "first_name": "Darth",
+            "last_name": "Vador",
+            "email": "star@wars.com",
+            "phone": "12345678",
+            "mobile": "888888",
+            "company_name": "L'Empire",
+            "sales_contact": self.sales_user.id,
+        })
+        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.json()['detail'],
+                         "You do not have permission to perform this action.")
+
+    def test_delete_a_client(self):
+        url = f"/crm/clients/{self.client2.id}/"
+        token = self.login(self.sales_user)
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + token["access"])
+        clients_count = Client.objects.count()
+        response = self.client.delete(url, format="json")
+        self.assertEqual(Client.objects.count(), clients_count - 1)
+        self.assertEqual(response.status_code, 204)
+
+    def test_delete_a_client_non_existent(self):
+        url = "/crm/clients/0/"
+        token = self.login(self.sales_user)
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + token["access"])
+        response = self.client.delete(url, format="json")
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.json()['detail'],
+                         "Sorry, client 0 doesn't exist")
+
+    def test_delete_a_client_unauthorized(self):
+        url = f"/crm/clients/{self.client1.id}/"
+        token = self.login(self.sales_user2)
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + token["access"])
+        response = self.client.delete(url, format="json")
+        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.json()['detail'],
+                         "You do not have permission to perform this action.")

@@ -5,6 +5,8 @@ from authentication.models import User
 from authentication.validators import Validators
 import datetime
 
+import ipdb
+
 
 class ClientSerializer(serializers.ModelSerializer):
     class Meta:
@@ -34,6 +36,7 @@ class ClientSerializer(serializers.ModelSerializer):
             sales_contact = validated_data["sales_contact"]
         else:
             sales_contact = self.context['request'].user
+        # ipdb.set_trace()
         client = Client.objects.create(
             first_name=validated_data["first_name"].title(),
             last_name=validated_data["last_name"].title(),
@@ -43,7 +46,7 @@ class ClientSerializer(serializers.ModelSerializer):
             company_name=validated_data["company_name"],
             sales_contact=sales_contact,
             date_created=datetime.datetime.now(),
-            date_updated = datetime.datetime.now()
+            date_updated=datetime.datetime.now()
         )
         client.save()
         return client
@@ -51,6 +54,7 @@ class ClientSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         instance = super().update(instance, validated_data)
         instance.date_updated = datetime.datetime.now()
+        instance.save()
         return instance
 
 
