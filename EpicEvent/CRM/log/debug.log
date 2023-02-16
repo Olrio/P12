@@ -5643,3 +5643,84 @@ Traceback (most recent call last):
   File "/usr/lib/python3.10/bdb.py", line 115, in dispatch_line
     if self.quitting: raise BdbQuit
 bdb.BdbQuit
+[2023/02/16 07:42:37] ERROR Internal Server Error: /crm/contracts/
+Traceback (most recent call last):
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/views/decorators/csrf.py", line 54, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/rest_framework/viewsets.py", line 125, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/rest_framework/views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/rest_framework/views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/rest_framework/views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/rest_framework/views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/rest_framework/mixins.py", line 19, in create
+    self.perform_create(serializer)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/rest_framework/mixins.py", line 24, in perform_create
+    serializer.save()
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/rest_framework/serializers.py", line 212, in save
+    self.instance = self.create(validated_data)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/EpicEvent/CRM/serializers.py", line 104, in create
+    status=validated_data["status"],
+KeyError: 'status'
+[2023/02/16 07:49:22] ERROR Internal Server Error: /crm/contracts/
+Traceback (most recent call last):
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/views/decorators/csrf.py", line 54, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/rest_framework/viewsets.py", line 125, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/rest_framework/views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/rest_framework/views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/rest_framework/views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/rest_framework/views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/rest_framework/mixins.py", line 19, in create
+    self.perform_create(serializer)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/rest_framework/mixins.py", line 24, in perform_create
+    serializer.save()
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/rest_framework/serializers.py", line 212, in save
+    self.instance = self.create(validated_data)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/EpicEvent/CRM/serializers.py", line 104, in create
+    status=validated_data["status"],
+KeyError: 'status'
+[2023/02/16 08:20:55] ERROR Internal Server Error: /crm/contracts/
+Traceback (most recent call last):
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/django/views/decorators/csrf.py", line 54, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/rest_framework/viewsets.py", line 125, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/rest_framework/views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/rest_framework/views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/rest_framework/views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/rest_framework/views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/rest_framework/mixins.py", line 19, in create
+    self.perform_create(serializer)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/rest_framework/mixins.py", line 24, in perform_create
+    serializer.save()
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/env/lib/python3.10/site-packages/rest_framework/serializers.py", line 212, in save
+    self.instance = self.create(validated_data)
+  File "/home/olrio/Open Classrooms/Projets_DAP/P12_RIO_Olivier/P12/EpicEvent/CRM/serializers.py", line 101, in create
+    if validated_data["status"]:
+KeyError: 'status'

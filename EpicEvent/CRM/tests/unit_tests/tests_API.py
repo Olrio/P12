@@ -241,7 +241,7 @@ class UserTest(DataTest):
                          "Sorry, user 0 doesn't exist")
 
 class ClientTest(DataTest):
-    def test_get_client_list_management_user(self):
+    def test_get_client_list(self):
         url = "/crm/clients/"
         token = self.login(self.management_user)
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + token["access"])
@@ -391,3 +391,149 @@ class ClientTest(DataTest):
         self.assertEqual(response.status_code, 403)
         self.assertEqual(response.json()['detail'],
                          "You do not have permission to perform this action.")
+
+
+class ContractTest(DataTest):
+    def test_get_contract_list(self):
+        url = "/crm/contracts/"
+        token = self.login(self.support_user)
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + token["access"])
+        response = self.client.get(url, format="json")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data), Contract.objects.count())
+
+    def test_get_contract_detail(self):
+        url = f"/crm/contracts/{self.contract1.id}/"
+        token = self.login(self.sales_user)
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + token["access"])
+        response = self.client.get(url, format="json")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data['amount'], self.contract1.amount)
+        self.assertEqual(response.data['payment_due'], self.contract1.payment_due.strftime("%Y/%m/%d %H:%M"))
+
+    def test_get_contract_detail_non_existent(self):
+        url = "/crm/contracts/0/"
+        token = self.login(self.sales_user)
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + token["access"])
+        response = self.client.get(url, format="json")
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.json()['detail'],
+                         "Sorry, contract 0 doesn't exist")
+
+    def test_get_contract_detail_unauthorized(self):
+        url = f"/crm/contracts/{self.contract1.id}/"
+        token = self.login(self.sales_user2)
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + token["access"])
+        response = self.client.get(url, format="json")
+        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.json()['detail'],
+                         "You do not have permission to perform this action.")
+
+    def test_create_a_contract(self):
+        url = "/crm/contracts/"
+        token = self.login(self.management_user)
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + token["access"])
+        contracts_count = Contract.objects.count()
+        response = self.client.post(url, {
+            'client': self.client2.id,
+            'payment_due': self.date_p50d.strftime("%Y/%m/%d %H:%M"),
+            'amount': 2500,
+        }, format="json")
+        self.assertEqual(Contract.objects.count(), contracts_count + 1)
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(Contract.objects.last().client.sales_contact, self.sales_user)
+
+    def test_create_a_contract_unauthorized(self):
+        url = "/crm/contracts/"
+        token = self.login(self.support_user)
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + token["access"])
+        response = self.client.post(url, {
+            'client': self.client2.id,
+            'payment_due': self.date_p50d.strftime("%Y/%m/%d %H:%M"),
+            'amount': 2500,
+        }, format="json")
+        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.json()['detail'],
+                         "You do not have permission to perform this action.")
+
+    def test_create_a_contract_client_non_existent(self):
+        url = "/crm/contracts/"
+        token = self.login(self.sales_user2)
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + token["access"])
+        response = self.client.post(url, {
+            'client': 0,
+            'payment_due': self.date_p50d.strftime("%Y/%m/%d %H:%M"),
+            'amount': 2500,
+        }, format="json")
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json()['client'][0],
+                         "Sorry, client 0 doesn't exist")
+
+    def test_update_a_contract(self):
+        url = f"/crm/contracts/{self.contract1.id}/"
+        token = self.login(self.sales_user)
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + token["access"])
+        self.assertEqual(self.contract1.amount, 10000)
+        response = self.client.put(url, {
+            "client": self.client1.id,
+            "payment_due": self.date_p20d.strftime("%Y/%m/%d %H:%M"),
+            "amount": 15000,
+        })
+        self.assertEqual(response.status_code, 200)
+        updated_contract = Contract.objects.get(id=self.contract1.id)
+        self.assertEqual(updated_contract.amount, 15000)
+        self.assertNotEqual(updated_contract.date_created, updated_contract.date_updated)
+
+    def test_update_a_contract_client_non_existent(self):
+        url = f"/crm/contracts/{self.contract1.id}/"
+        token = self.login(self.sales_user)
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + token["access"])
+        response = self.client.put(url, {
+            "client": 0,
+            "payment_due": self.date_p20d.strftime("%Y/%m/%d %H:%M"),
+            "amount": 15000,
+        })
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json()['client'][0],
+                         "Sorry, client 0 doesn't exist")
+
+    def test_update_a_contract_unauthorized(self):
+        url = f"/crm/contracts/{self.contract1.id}/"
+        token = self.login(self.sales_user2)
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + token["access"])
+        response = self.client.put(url, {
+            "client": 0,
+            "payment_due": self.date_p20d.strftime("%Y/%m/%d %H:%M"),
+            "amount": 15000,
+        })
+        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.json()['detail'],
+                         "You do not have permission to perform this action.")
+
+    def test_delete_a_contract(self):
+        url = f"/crm/contracts/{self.contract2.id}/"
+        token = self.login(self.sales_user)
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + token["access"])
+        contracts_count = Contract.objects.count()
+        response = self.client.delete(url, format="json")
+        self.assertEqual(Contract.objects.count(), contracts_count - 1)
+        self.assertEqual(response.status_code, 204)
+
+    def test_delete_a_contract_non_existent(self):
+        url = "/crm/contracts/0/"
+        token = self.login(self.sales_user)
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + token["access"])
+        response = self.client.delete(url, format="json")
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.json()['detail'],
+                         "Sorry, contract 0 doesn't exist")
+
+    def test_delete_a_contract_unauthorized(self):
+        url = f"/crm/contracts/{self.contract2.id}/"
+        token = self.login(self.sales_user2)
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + token["access"])
+        response = self.client.delete(url, format="json")
+        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.json()['detail'],
+                         "You do not have permission to perform this action.")
+

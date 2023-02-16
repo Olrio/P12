@@ -98,10 +98,14 @@ class ContractSerializer(serializers.ModelSerializer):
 
 
     def create(self, validated_data):
+        if "status" in validated_data:
+            status = validated_data["status"]
+        else:
+            status = False
         contract = Contract.objects.create(
             client=validated_data["client"],
             amount=validated_data["amount"],
-            status=validated_data["status"],
+            status=status,
             payment_due=validated_data["payment_due"],
             date_created=datetime.datetime.now(),
             date_updated = datetime.datetime.now()
@@ -112,6 +116,7 @@ class ContractSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         instance = super().update(instance, validated_data)
         instance.date_updated = datetime.datetime.now()
+        instance.save()
         return instance
 
 
