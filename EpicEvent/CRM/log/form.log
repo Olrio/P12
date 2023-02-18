@@ -194,3 +194,9 @@
 [2023/02/16 18:00:03] INFO use of a Contract add form with no status field according to <class 'KeyError'> error
 [2023/02/16 18:02:00] INFO use of a Contract add form according to <class 'AttributeError'> error
 [2023/02/16 18:02:00] INFO use of a Contract add form with no status field according to <class 'KeyError'> error
+[2023/02/16 19:53:21] INFO use of a Contract add form according to <class 'AttributeError'> error
+[2023/02/16 19:53:21] INFO use of a Contract add form with no status field according to <class 'KeyError'> error
+[2023/02/17 07:02:57] INFO use of a Contract add form according to <class 'AttributeError'> error
+[2023/02/17 07:02:57] INFO use of a Contract add form with no status field according to <class 'KeyError'> error
+[2023/02/17 16:42:19] INFO use of a Contract add form according to <class 'AttributeError'> error
+[2023/02/17 16:42:19] INFO use of a Contract add form with no status field according to <class 'KeyError'> error

@@ -5,8 +5,6 @@ from authentication.models import User
 from authentication.validators import Validators
 import datetime
 
-import ipdb
-
 
 class ClientSerializer(serializers.ModelSerializer):
     class Meta:
@@ -36,7 +34,6 @@ class ClientSerializer(serializers.ModelSerializer):
             sales_contact = validated_data["sales_contact"]
         else:
             sales_contact = self.context['request'].user
-        # ipdb.set_trace()
         client = Client.objects.create(
             first_name=validated_data["first_name"].title(),
             last_name=validated_data["last_name"].title(),
@@ -137,8 +134,12 @@ class EventSerializer(serializers.ModelSerializer):
         request_user = self.context['request'].user
         if not contract:
             raise ValidationError(f"Sorry, contract {value} doesn't exist")
-        if Contract.objects.filter(id=value, event__isnull=False).exists():
-            raise ValidationError("Sorry, there's already an event associated with this contract")
+        if self.context['request'].method  == "POST":
+            if Contract.objects.filter(id=value, event__isnull=False).exists():
+                raise ValidationError("Sorry, there's already an event associated with this contract")
+        if self.context['request'].method  == "PUT":
+            if Contract.objects.filter(id=value, event__isnull=False).exclude(event__id=self.instance.id).exists():
+                raise ValidationError("Sorry, there's already an event associated with this contract")
         if request_user.groups.filter(name="Sales team").exists() and contract.client.sales_contact != request_user:
             raise ValidationError(f"Sorry, you are not the sales contact of this client")
         if not contract.status:
@@ -197,5 +198,6 @@ class EventSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         instance = super().update(instance, validated_data)
         instance.date_updated = datetime.datetime.now()
+        instance.save()
         return instance
 

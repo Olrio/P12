@@ -25,9 +25,17 @@ class ClientViewset(MultipleSerializerMixin, ModelViewSet):
             permission_classes =  [IsManagementTeam|IsSalesTeam]
         return [permission() for permission in permission_classes]
 
+
     def get_queryset(self):
         if "pk" not in self.request.parser_context["kwargs"]:
-            return Client.objects.all()
+            queryset = Client.objects.all()
+            name = self.request.query_params.get('name')
+            email = self.request.query_params.get('email')
+            if name is not None:
+                queryset = queryset.filter(last_name__icontains=name)
+            if email is not None:
+                queryset = queryset.filter(email__icontains=email)
+            return queryset
         else:
             client_pk = self.request.parser_context["kwargs"]["pk"]
             try:
@@ -60,7 +68,32 @@ class ContractViewset(MultipleSerializerMixin, ModelViewSet):
 
     def get_queryset(self):
         if "pk" not in self.request.parser_context["kwargs"]:
-            return Contract.objects.all()
+            queryset = Contract.objects.all()
+            client = self.request.query_params.get('client')
+            email = self.request.query_params.get('email')
+            date = self.request.query_params.get('date')
+            after_date = self.request.query_params.get('after_date')
+            before_date = self.request.query_params.get('before_date')
+            amount = self.request.query_params.get('amount')
+            greater_amount = self.request.query_params.get('greater_amount')
+            lower_amount = self.request.query_params.get('lower_amount')
+            if client is not None:
+                queryset = queryset.filter(client__last_name__icontains=client)
+            if email is not None:
+                queryset = queryset.filter(client__email__icontains=email)
+            if date is not None:
+                queryset = queryset.filter(payment_due__date=date)
+            if after_date is not None:
+                queryset = queryset.filter(payment_due__date__gte=after_date)
+            if before_date is not None:
+                queryset = queryset.filter(payment_due__date__lte=before_date)
+            if amount is not None:
+                queryset = queryset.filter(amount=amount)
+            if greater_amount is not None:
+                queryset = queryset.filter(amount__gte=greater_amount)
+            if lower_amount is not None:
+                queryset = queryset.filter(amount__lte=lower_amount)
+            return queryset
         else:
             contract_pk = self.request.parser_context["kwargs"]["pk"]
             try:
@@ -83,7 +116,7 @@ class EventViewset(MultipleSerializerMixin, ModelViewSet):
         elif self.request.method == 'GET' and "pk" in self.request.parser_context["kwargs"]:
             permission_classes =  [IsManagementTeam|(IsSalesTeam & IsEventContractSalesContact)|(IsSupportTeam & IsEventSupportContact)]
         elif self.request.method == 'DELETE' and "pk" in self.request.parser_context["kwargs"]:
-            permission_classes =  [IsManagementTeam|(IsSalesTeam & IsEventContractSalesContact)|(IsSupportTeam & IsEventSupportContact)]
+            permission_classes =  [IsManagementTeam|(IsSalesTeam & IsEventContractSalesContact)]
         elif self.request.method == 'PUT' and "pk" in self.request.parser_context["kwargs"]:
             permission_classes =  [IsManagementTeam|(IsSalesTeam & IsEventContractSalesContact)|(IsSupportTeam & IsEventSupportContact)]
         elif self.request.method == 'POST':
@@ -92,7 +125,23 @@ class EventViewset(MultipleSerializerMixin, ModelViewSet):
 
     def get_queryset(self):
         if "pk" not in self.request.parser_context["kwargs"]:
-            return Event.objects.all()
+            queryset = Event.objects.all()
+            client = self.request.query_params.get('client')
+            email = self.request.query_params.get('email')
+            date = self.request.query_params.get('date')
+            after_date = self.request.query_params.get('after_date')
+            before_date = self.request.query_params.get('before_date')
+            if client is not None:
+                queryset = queryset.filter(contract__client__last_name__icontains=client)
+            if email is not None:
+                queryset = queryset.filter(contract__client__email__icontains=email)
+            if date is not None:
+                queryset = queryset.filter(event_date__date=date)
+            if after_date is not None:
+                queryset = queryset.filter(event_date__date__gte=after_date)
+            if before_date is not None:
+                queryset = queryset.filter(event_date__date__lte=before_date)
+            return queryset
         else:
             event_pk = self.request.parser_context["kwargs"]["pk"]
             try:

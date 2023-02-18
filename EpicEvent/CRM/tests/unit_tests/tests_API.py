@@ -537,3 +537,177 @@ class ContractTest(DataTest):
         self.assertEqual(response.json()['detail'],
                          "You do not have permission to perform this action.")
 
+
+class EventTest(DataTest):
+    def test_get_event_list(self):
+        url = "/crm/events/"
+        token = self.login(self.support_user)
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + token["access"])
+        response = self.client.get(url, format="json")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data), Event.objects.count())
+
+    def test_get_event_detail(self):
+        url = f"/crm/events/{self.event1.id}/"
+        token = self.login(self.support_user)
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + token["access"])
+        response = self.client.get(url, format="json")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data['name'], self.event1.name)
+        self.assertEqual(response.data['attendees'], self.event1.attendees)
+
+    def test_get_event_detail_unauthorized(self):
+        url = f"/crm/events/{self.event1.id}/"
+        token = self.login(self.sales_user2)
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + token["access"])
+        response = self.client.get(url, format="json")
+        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.json()['detail'],
+                         "You do not have permission to perform this action.")
+
+    def test_get_event_detail_non_existent(self):
+        url = "/crm/events/0/"
+        token = self.login(self.sales_user)
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + token["access"])
+        response = self.client.get(url, format="json")
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.json()['detail'],
+                         "Sorry, event 0 doesn't exist")
+
+    def test_create_an_event(self):
+        url = "/crm/events/"
+        token = self.login(self.sales_user)
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + token["access"])
+        events_count = Event.objects.count()
+        response = self.client.post(url, {
+            "name": "Event zero",
+            "contract": self.contract3.id,
+            "event_status": 'Incoming',
+            "attendees": 50,
+            "event_date": self.date_p20d.strftime("%Y/%m/%d %H:%M"),
+        }, format="json")
+        self.assertEqual(Event.objects.count(), events_count + 1)
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(Event.objects.last().contract.client.sales_contact, self.sales_user)
+
+    def test_create_an_event_unauthorized(self):
+        url = "/crm/events/"
+        token = self.login(self.support_user)
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + token["access"])
+        response = self.client.post(url, {
+            "name": "Event zero",
+            "contract": self.contract3.id,
+            "event_status": 'Incoming',
+            "attendees": 50,
+            "event_date": self.date_p20d.strftime("%Y/%m/%d %H:%M"),
+        }, format="json")
+        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.json()['detail'],
+                         "You do not have permission to perform this action.")
+
+    def test_create_an_event_user_is_not_sales_contact(self):
+        url = "/crm/events/"
+        token = self.login(self.sales_user2)
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + token["access"])
+        response = self.client.post(url, {
+            "name": "Event zero",
+            "contract": self.contract3.id,
+            "event_status": 'Incoming',
+            "attendees": 50,
+            "event_date": self.date_p20d.strftime("%Y/%m/%d %H:%M"),
+        }, format="json")
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json()['contract'][0],
+                         "Sorry, you are not the sales contact of this client")
+
+    def test_create_an_event_contract_non_existent(self):
+        url = "/crm/events/"
+        token = self.login(self.sales_user2)
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + token["access"])
+        response = self.client.post(url, {
+            "name": "Event zero",
+            "contract": 0,
+            "event_status": 'Incoming',
+            "attendees": 50,
+            "event_date": self.date_p20d.strftime("%Y/%m/%d %H:%M"),
+        }, format="json")
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json()['contract'][0],
+                         "Sorry, contract 0 doesn't exist")
+
+    def test_update_an_event(self):
+        url = f"/crm/events/{self.event1.id}/"
+        token = self.login(self.support_user)
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + token["access"])
+        self.assertEqual(self.event1.attendees, 1000)
+        response = self.client.put(url, {
+            "name": "Death Star",
+            "contract": self.contract1.id,
+            "support_contact": self.support_user.id,
+            "event_status": 'Incoming',
+            "attendees": 2000,
+            "event_date": self.date_p20d.strftime("%Y/%m/%d %H:%M"),
+        })
+        self.assertEqual(response.status_code, 200)
+        updated_event = Event.objects.get(id=self.event1.id)
+        self.assertEqual(updated_event.attendees, 2000)
+        self.assertNotEqual(updated_event.date_created, updated_event.date_updated)
+
+    def test_update_an_event_unauthorized(self):
+        url = f"/crm/events/{self.event1.id}/"
+        token = self.login(self.sales_user2)
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + token["access"])
+        response = self.client.put(url, {
+            "name": "Death Star",
+            "contract": self.contract1.id,
+            "event_status": 'Incoming',
+            "attendees": 2000,
+            "event_date": self.date_p20d.strftime("%Y/%m/%d %H:%M"),
+        })
+        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.json()['detail'],
+                         "You do not have permission to perform this action.")
+
+    def test_update_an_event_non_existent(self):
+        url = "/crm/events/0/"
+        token = self.login(self.support_user)
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + token["access"])
+        response = self.client.put(url, {
+            "name": "Death Star",
+            "contract": self.contract1.id,
+            "event_status": 'Incoming',
+            "attendees": 2000,
+            "event_date": self.date_p20d.strftime("%Y/%m/%d %H:%M"),
+        })
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.json()['detail'],
+                         "Sorry, event 0 doesn't exist")
+
+    def test_delete_an_event(self):
+        url = f"/crm/events/{self.event2.id}/"
+        token = self.login(self.sales_user)
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + token["access"])
+        events_count = Event.objects.count()
+        response = self.client.delete(url, format="json")
+        self.assertEqual(response.status_code, 204)
+        self.assertEqual(Event.objects.count(), events_count - 1)
+
+    def test_delete_an_event_non_existent(self):
+        url = "/crm/events/0/"
+        token = self.login(self.sales_user)
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + token["access"])
+        response = self.client.delete(url, format="json")
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.json()['detail'],
+                         "Sorry, event 0 doesn't exist")
+
+    def test_delete_an_event_unauthorized(self):
+        url = f"/crm/events/{self.event2.id}/"
+        token = self.login(self.support_user)
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + token["access"])
+        response = self.client.delete(url, format="json")
+        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.json()['detail'],
+                         "You do not have permission to perform this action.")
+
+

@@ -216,10 +216,13 @@ class ClientForm(forms.ModelForm):
 
 class ClientAdmin(admin.ModelAdmin):
     form = ClientForm
+    search_fields = ("last_name", "email")
+    list_filter = ("last_name", "email")
 
     list_display = [
         "last_name",
         "first_name",
+        "email",
         "company_name",
         "status",
         "sales_contact",
