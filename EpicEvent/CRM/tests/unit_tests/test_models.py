@@ -10,10 +10,14 @@ class DataTest(TestCase):
     def create_dates(self):
         self.date_now = datetime.datetime.now()
         self.date_past = self.date_now - datetime.timedelta(days=30)
-        self.date_update_client_100 = self.date_now + datetime.timedelta(days=100)
-        self.date_update_client_200 = self.date_now + datetime.timedelta(days=200)
-        self.date_update_contract_25 = self.date_now + datetime.timedelta(days=25)
-        self.date_update_contract_10 = self.date_now + datetime.timedelta(days=10)
+        self.date_update_client_100 = \
+            self.date_now + datetime.timedelta(days=100)
+        self.date_update_client_200 = \
+            self.date_now + datetime.timedelta(days=200)
+        self.date_update_contract_25 = \
+            self.date_now + datetime.timedelta(days=25)
+        self.date_update_contract_10 = \
+            self.date_now + datetime.timedelta(days=10)
         self.date_due_contract_20 = self.date_now + datetime.timedelta(days=20)
         self.date_due_contract_30 = self.date_now + datetime.timedelta(days=30)
         self.date_event_10 = self.date_now + datetime.timedelta(days=10)
@@ -27,7 +31,6 @@ class DataTest(TestCase):
         )
         return self.group
 
-
     def create_user(self, pk, username, first_name, last_name, group):
         self.user = User.objects.create(
             pk=pk,
@@ -38,8 +41,10 @@ class DataTest(TestCase):
         Group.objects.get(name=group.name).user_set.add(self.user)
         return self.user
 
-    def create_client(self, first_name, last_name, email, phone, mobile, company_name,
-                      sales_contact, date_created=datetime.datetime.now(),
+    def create_client(self, first_name, last_name,
+                      email, phone, mobile, company_name,
+                      sales_contact,
+                      date_created=datetime.datetime.now(),
                       date_updated=datetime.datetime.now()):
         self.client = Client.objects.create(
             first_name=first_name,
@@ -55,7 +60,8 @@ class DataTest(TestCase):
         return self.client
 
     def create_contract(self, client, status, amount, payment_due,
-                        date_created=datetime.datetime.now(), date_updated=datetime.datetime.now()):
+                        date_created=datetime.datetime.now(),
+                        date_updated=datetime.datetime.now()):
         self.contract = Contract.objects.create(
             client=client,
             status=status,
@@ -66,13 +72,15 @@ class DataTest(TestCase):
         )
         return self.contract
 
-    def create_event(self, contract, support_contact, event_status, attendees, event_date,
-                     date_created=datetime.datetime.now(), date_updated=datetime.datetime.now()):
+    def create_event(self, contract, support_contact,
+                     event_status, attendees, event_date,
+                     date_created=datetime.datetime.now(),
+                     date_updated=datetime.datetime.now()):
         self.event = Event.objects.create(
             contract=contract,
             support_contact=support_contact,
             event_status=event_status,
-            attendees= attendees,
+            attendees=attendees,
             event_date=event_date,
             date_created=date_created,
             date_updated=date_updated
@@ -85,59 +93,66 @@ class DataTest(TestCase):
         self.support = self.create_groups(3, "Support")
 
     def get_users(self):
-        self.user_sales1 = self.create_user(21, "supersaler", "Yves", "Antou", self.sales)
-        self.user_sales2 = self.create_user(22, "ellach", "Ella", "Chette", self.sales)
-        self.user_manager1 = self.create_user(11, "pacomik", "Pacome", "Hercial", self.management)
-        self.user_support1 = self.create_user(31, "technico", "Alex", "Perience", self.support)
-
+        self.user_sales1 = self.create_user(
+            21, "supersaler", "Yves", "Antou", self.sales)
+        self.user_sales2 = self.create_user(
+            22, "ellach", "Ella", "Chette", self.sales)
+        self.user_manager1 = self.create_user(
+            11, "pacomik", "Pacome", "Hercial", self.management)
+        self.user_support1 = self.create_user(
+            31, "technico", "Alex", "Perience", self.support)
 
     def get_clients(self):
-        self.client1 = self.create_client("Michel",
-                                          "Bidon",
-                                          "pipo@null.com",
-                                          "123456789",
-                                          "111111111",
-                                          "PipoBidon",
-                                          self.user_sales1,
-                                          date_created=self.date_now,
-                                          date_updated=self.date_update_client_100
+        self.client1 = self.create_client(
+            "Michel",
+            "Bidon",
+            "pipo@null.com",
+            "123456789",
+            "111111111",
+            "PipoBidon",
+            self.user_sales1,
+            date_created=self.date_now,
+            date_updated=self.date_update_client_100
                                           )
-        self.client2 = self.create_client("Marie",
-                                          "Golade",
-                                          "gag@calembour.com",
-                                          "987654321",
-                                          "222222222",
-                                          "MG inc",
-                                          self.user_sales2,
-                                          date_created=self.date_now,
-                                          date_updated=self.date_update_client_200,
+        self.client2 = self.create_client(
+            "Marie",
+            "Golade",
+            "gag@calembour.com",
+            "987654321",
+            "222222222",
+            "MG inc",
+            self.user_sales2,
+            date_created=self.date_now,
+            date_updated=self.date_update_client_200,
                                           )
-        self.client3 = self.create_client("Ray",
-                                          "Tro",
-                                          "retro@jurassic.com",
-                                          "112233445",
-                                          "333333333",
-                                          "Jurassic Prod",
-                                          self.user_sales2,
-                                          date_created=self.date_past,
-                                          date_updated=self.date_past,
-
-        )
+        self.client3 = self.create_client(
+            "Ray",
+            "Tro",
+            "retro@jurassic.com",
+            "112233445",
+            "333333333",
+            "Jurassic Prod",
+            self.user_sales2,
+            date_created=self.date_past,
+            date_updated=self.date_past,
+                                        )
 
     def get_contracts(self):
-        self.contract1 = self.create_contract(self.client1,
-                                              False,
-                                              10000,
-                                              self.date_due_contract_30,
-                                              date_created=self.date_now,
-                                              date_updated=self.date_update_contract_25,
-        )
-        self.contract2 = self.create_contract(self.client2,
-                                              True,
-                                              12345.67,
-                                              self.date_due_contract_20,
-                                              date_created=self.date_now,
-                                              date_updated=self.date_update_contract_10,
+        self.contract1 = self.create_contract(
+            self.client1,
+            False,
+            10000,
+            self.date_due_contract_30,
+            date_created=self.date_now,
+            date_updated=self.date_update_contract_25,
+                                            )
+        self.contract2 = self.create_contract(
+            self.client2,
+            True,
+            12345.67,
+            self.date_due_contract_20,
+            date_created=self.date_now,
+            date_updated=self.date_update_contract_10,
                                               )
         self.contract3 = self.create_contract(self.client3,
                                               True,
@@ -193,7 +208,8 @@ class UserTest(DataTest):
         self.assertEqual(self.user_sales2.last_name, "Chette")
 
     def test_user_role(self):
-        self.assertTrue(self.user_manager1.groups.filter(name="Management").exists())
+        self.assertTrue(
+            self.user_manager1.groups.filter(name="Management").exists())
 
 
 class ClientTest(DataTest):
@@ -234,8 +250,12 @@ class ClientTest(DataTest):
         self.assertEqual(self.client2.date_created, self.date_now)
 
     def test_client_date_updated(self):
-        self.assertEqual(self.client1.date_updated, self.date_update_client_100)
-        self.assertEqual(self.client2.date_updated, self.date_update_client_200)
+        self.assertEqual(
+            self.client1.date_updated,
+            self.date_update_client_100)
+        self.assertEqual(
+            self.client2.date_updated,
+            self.date_update_client_200)
 
     def test_client_sales_contact(self):
         self.assertEqual(self.client1.sales_contact.last_name, "Antou")
@@ -261,8 +281,12 @@ class ContractTest(DataTest):
         self.assertEqual(self.contract2.date_created, self.date_now)
 
     def test_contract_date_updated(self):
-        self.assertEqual(self.contract1.date_updated, self.date_update_contract_25)
-        self.assertEqual(self.contract2.date_updated, self.date_update_contract_10)
+        self.assertEqual(
+            self.contract1.date_updated,
+            self.date_update_contract_25)
+        self.assertEqual(
+            self.contract2.date_updated,
+            self.date_update_contract_10)
 
     def test_contract_status(self):
         self.assertEqual(self.contract1.status, False)
@@ -301,7 +325,9 @@ class EventTest(DataTest):
     def test_event_status(self):
         self.assertEqual(self.event1.event_status, 1)
         self.assertEqual(self.event2.event_status, 2)
-        status_name = next(status[1] for status in self.event3.STATUS if status[0] == str(self.event3.event_status))
+        status_name = next(
+            status[1] for status in self.event3.STATUS
+            if status[0] == str(self.event3.event_status))
         self.assertEqual(status_name, 'Closed')
 
     def test_event_attendees(self):

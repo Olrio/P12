@@ -9,14 +9,18 @@ import datetime
 class ClientSerializer(serializers.ModelSerializer):
     class Meta:
         model = Client
-        fields = ['pk', 'first_name', 'last_name', 'email', 'phone', 'mobile',
-                  'company_name', 'sales_contact', 'date_created', 'date_updated']
+        fields = ['pk', 'first_name', 'last_name', 'email',
+                  'phone', 'mobile',
+                  'company_name', 'sales_contact',
+                  'date_created', 'date_updated']
         read_only_fields = ['date_created', 'date_updated']
 
     def get_fields(self):
-        # field 'sales_contact' only used if user is not a sales team group member
+        # field 'sales_contact' only used
+        # if user is not a sales team group member
         fields = super().get_fields()
-        if self.context['request'].user.groups.filter(name="Sales team").exists() \
+        if self.context['request'].user.groups.filter(
+                name="Sales team").exists() \
                 and self.context['request'].method == "POST" \
                 and not self.context['request'].user.is_superuser:
             del fields['sales_contact']
@@ -30,7 +34,8 @@ class ClientSerializer(serializers.ModelSerializer):
         return data
 
     def create(self, validated_data):
-        if self.context['request'].user.groups.filter(name="Management team").exists():
+        if self.context['request'].user.groups.filter(
+                name="Management team").exists():
             sales_contact = validated_data["sales_contact"]
         else:
             sales_contact = self.context['request'].user
@@ -66,12 +71,9 @@ class ContractSerializer(serializers.ModelSerializer):
                   'sales_contact', 'date_created', 'date_updated']
         read_only_fields = ['date_created', 'date_updated']
 
-
-
     @staticmethod
     def get_sales_contact(obj):
         return obj.client.sales_contact.id
-
 
     def validate_client(self, value):
         try:
@@ -82,17 +84,20 @@ class ContractSerializer(serializers.ModelSerializer):
         request_user = self.context['request'].user
         if not client:
             raise ValidationError(f"Sorry, client {value} doesn't exist")
-        if request_user.groups.filter(name="Sales team").exists() and client.sales_contact != request_user:
-            raise ValidationError(f"Sorry, you are not the sales contact of this client")
+        if request_user.groups.filter(
+                name="Sales team").exists() \
+                and client.sales_contact != request_user:
+            raise ValidationError(
+                "Sorry, you are not the sales contact of this client")
         return client
 
     def validate_payment_due(self, value):
         if self.context['request'].method == "POST":
             Validators.is_prior_to_created_date(value, datetime.datetime.now())
         elif self.context['request'].method == "PUT":
-            Validators.is_prior_to_created_date(value, self.instance.date_created)
+            Validators.is_prior_to_created_date(
+                value, self.instance.date_created)
         return value
-
 
     def create(self, validated_data):
         if "status" in validated_data:
@@ -105,7 +110,7 @@ class ContractSerializer(serializers.ModelSerializer):
             status=status,
             payment_due=validated_data["payment_due"],
             date_created=datetime.datetime.now(),
-            date_updated = datetime.datetime.now()
+            date_updated=datetime.datetime.now()
         )
         contract.save()
         return contract
@@ -134,21 +139,31 @@ class EventSerializer(serializers.ModelSerializer):
         request_user = self.context['request'].user
         if not contract:
             raise ValidationError(f"Sorry, contract {value} doesn't exist")
-        if self.context['request'].method  == "POST":
+        if self.context['request'].method == "POST":
             if Contract.objects.filter(id=value, event__isnull=False).exists():
-                raise ValidationError("Sorry, there's already an event associated with this contract")
-        if self.context['request'].method  == "PUT":
-            if Contract.objects.filter(id=value, event__isnull=False).exclude(event__id=self.instance.id).exists():
-                raise ValidationError("Sorry, there's already an event associated with this contract")
-        if request_user.groups.filter(name="Sales team").exists() and contract.client.sales_contact != request_user:
-            raise ValidationError(f"Sorry, you are not the sales contact of this client")
+                raise ValidationError(
+                    "Sorry, there's already an event "
+                    "associated with this contract")
+        if self.context['request'].method == "PUT":
+            if Contract.objects.filter(
+                    id=value, event__isnull=False).exclude(
+                    event__id=self.instance.id).exists():
+                raise ValidationError(
+                    "Sorry, there's already an event "
+                    "associated with this contract")
+        if request_user.groups.filter(name="Sales team").exists() \
+                and contract.client.sales_contact != request_user:
+            raise ValidationError(
+                "Sorry, you are not the sales contact of this client")
         if not contract.status:
-            raise ValidationError(f"Sorry, this contract isn't signed yet")
+            raise ValidationError("Sorry, this contract isn't signed yet")
         return contract
 
     def validate_event_status(self, value):
         if value not in ["Incoming", "In progress", "Closed"]:
-            raise ValidationError(f"Error in field <Event status>: Must be <Incoming>, <In progress> or <Closed>")
+            raise ValidationError(
+                "Error in field <Event status>: "
+                "Must be <Incoming>, <In progress> or <Closed>")
         if value == "Incoming":
             return 1
         elif value == "In progress":
@@ -157,30 +172,41 @@ class EventSerializer(serializers.ModelSerializer):
 
     def validate_event_date(self, value):
         if value < datetime.datetime.now():
-            raise ValidationError(f"Error in field <Event date>: The date you entered is prior to current date")
+            raise ValidationError(
+                "Error in field <Event date>: "
+                "The date you entered is prior to current date")
         return value
 
     def validate_support_contact(self, value):
         request_user = self.context['request'].user
         if request_user.groups.filter(name="Sales team").exists():
-            raise ValidationError("Only users of management team can change/add support_contact. Please dont't use this field.")
+            raise ValidationError(
+                "Only users of management team "
+                "can change/add support_contact. "
+                "Please dont't use this field.")
         try:
             support_contact = User.objects.get(id=value)
             if not support_contact.groups.filter(name="Support team").exists():
-                raise ValidationError(f"Sorry, user {value} isn't member of support team")
+                raise ValidationError(
+                    f"Sorry, user {value} isn't member of support team")
         except User.DoesNotExist:
             raise ValidationError(f"Sorry, user {value} doesn't exist")
         return support_contact
 
     def validate(self, data):
-        if data['event_date'] > datetime.datetime.now() and data['event_status'] in [2, 3] :
-            raise ValidationError({"Event status" : "This event can't be in progress"
-                                                    " or closed since its date is later than the current date"})
-        elif data['event_date'] < datetime.datetime.now() and data['event_status'] == 1:
-            raise ValidationError({"Event status" : "This event can't be incoming "
-                                                    "since its date is earlier than the current date"})
+        if data['event_date'] > datetime.datetime.now() \
+                and data['event_status'] in [2, 3]:
+            raise ValidationError(
+                {"Event status": "This event can't be in progress"
+                                 " or closed since its date "
+                                 "is later than the current date"})
+        elif data['event_date'] < datetime.datetime.now() \
+                and data['event_status'] == 1:
+            raise ValidationError(
+                {"Event status": "This event can't be incoming "
+                                 "since its date is earlier "
+                                 "than the current date"})
         return data
-
 
     def create(self, validated_data):
         event = Event.objects.create(
@@ -190,7 +216,7 @@ class EventSerializer(serializers.ModelSerializer):
             event_date=validated_data["event_date"],
             attendees=validated_data['attendees'],
             date_created=datetime.datetime.now(),
-            date_updated = datetime.datetime.now()
+            date_updated=datetime.datetime.now()
         )
         event.save()
         return event
@@ -200,4 +226,3 @@ class EventSerializer(serializers.ModelSerializer):
         instance.date_updated = datetime.datetime.now()
         instance.save()
         return instance
-

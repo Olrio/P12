@@ -10,13 +10,14 @@ from .validators import Validators
 from django.contrib.auth.signals import user_logged_out
 from django.dispatch import receiver
 from django.contrib.auth.forms import AuthenticationForm
-from django.contrib.auth.views import LoginView, LogoutView
+from django.contrib.auth.views import LoginView
 from django.utils.html import format_html
 import datetime
 import logging
 
 login_logger = logging.getLogger("login_security")
 form_logger = logging.getLogger("form_security")
+
 
 @receiver(user_logged_out)
 def post_logout(sender, request, user, **kwargs):

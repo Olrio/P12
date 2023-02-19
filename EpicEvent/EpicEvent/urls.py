@@ -15,7 +15,8 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from rest_framework_simplejwt.views import TokenRefreshView, TokenObtainPairView
+from rest_framework_simplejwt.views import TokenRefreshView, \
+    TokenObtainPairView
 from rest_framework_nested import routers
 from authentication.admin import MyLoginView
 from authentication.views import UserViewset
@@ -31,9 +32,11 @@ router.register("events", EventViewset, basename="events")
 router.register("users", UserViewset, basename="user")
 
 urlpatterns = [
-    path("admin/login/", MyLoginView.as_view(), {'template_name': 'admin/login.html'}, name="admin_login"),
+    path("admin/login/", MyLoginView.as_view(),
+         {'template_name': 'admin/login.html'}, name="admin_login"),
     path("admin/", admin.site.urls),
-    path("crm/token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
+    path("crm/token/refresh/", TokenRefreshView.as_view(),
+         name="token_refresh"),
     path("crm/", include(router.urls)),
     path("crm/login/", TokenObtainPairView.as_view(), name="login"),
 ]

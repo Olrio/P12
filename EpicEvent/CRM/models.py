@@ -1,12 +1,5 @@
 from django.db import models
 from authentication.models import User
-from .validators import validate_amount
-from django.contrib.contenttypes.models import ContentType
-from django.contrib.auth.models import Group, Permission
-
-import authentication.permissions
-
-
 
 
 class Client(models.Model):
@@ -43,7 +36,6 @@ class Contract(models.Model):
     payment_due = models.DateTimeField()
     date_created = models.DateTimeField()
     date_updated = models.DateTimeField()
-
 
     def __str__(self):
         return f"{self.client} - Contract N° {self.pk}"

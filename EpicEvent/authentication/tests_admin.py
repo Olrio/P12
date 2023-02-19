@@ -1,11 +1,10 @@
 from django.contrib.auth.hashers import make_password
 from CRM.models import Client, Contract, Event
 from authentication.models import User
-from authentication.admin import CustomUserAdmin, ClientAdmin, ContractAdmin, EventAdmin
+from authentication.admin import CustomUserAdmin, ClientAdmin
 from django.contrib import admin
 from CRM.tests.unit_tests.data_for_tests import Data
 
-import ipdb
 
 class TestLogin(Data):
     def test_valid_login(self):
@@ -17,13 +16,17 @@ class TestLogin(Data):
         self.assertFalse(response)
 
     def test_login_error_message_invalid_credentials(self):
-        response = self.browser.post("/admin/login/", {'username':'bidon', 'password':'bidon'})
+        response = self.browser.post(
+            "/admin/login/", {'username': 'bidon', 'password': 'bidon'})
         error = response.context['form'].errors.as_data()["__all__"][0]
-        self.assertEqual(error.message, "You must provide both valid username "
-                                        "and password of an active user to access this site")
+        self.assertEqual(error.message,
+                         "You must provide both valid username "
+                         "and password of an active user to access this site")
 
     def test_login_error_message_not_management_user(self):
-        response = self.browser.post("/admin/login/", {'username':'yantou', 'password':'toto1234'})
+        response = self.browser.post(
+            "/admin/login/",
+            {'username': 'yantou', 'password': 'toto1234'})
         error = response.context['form'].errors.as_data()["__all__"][0]
         self.assertEqual(error.message, "Only members of management team "
                                         "are allowed to use this site.")
@@ -33,16 +36,20 @@ class TestUsers(Data):
     def test_get_users(self):
         self.browser.login(username='egeret', password='toto1234')
         response = self.browser.get("/admin/authentication/user/")
-        self.assertEqual(response.context['cl'].result_count, User.objects.count())
+        self.assertEqual(
+            response.context['cl'].result_count, User.objects.count())
         results = list(response.context['cl'].result_list)
-        user_admin =CustomUserAdmin(User, admin.site)
-        user0 = next(user for user in results if user.username=='egeret')
-        user1 = next(user for user in results if user.username=='yantou')
+        user_admin = CustomUserAdmin(User, admin.site)
+        user0 = next(user for user in results if user.username == 'egeret')
+        user1 = next(user for user in results if user.username == 'yantou')
         self.assertEqual(user0.last_name, "Geret")
         self.assertTrue(user_admin.management(user0))
         self.assertFalse(user_admin.management(user1))
-        self.assertEqual(user_admin.number_of_clients(user1), f'<b><i>{Client.objects.filter(sales_contact=user1).count()}</i></b>')
-
+        self.assertEqual(
+            user_admin.number_of_clients(user1),
+            f'<b><i>'
+            f'{Client.objects.filter(sales_contact=user1).count()}'
+            f'</i></b>')
 
     def test_create_user(self):
         users_count = User.objects.count()
@@ -67,8 +74,11 @@ class TestUsers(Data):
             'password1': password_created,
             'password2': password_created,
         }, follow=True)
-        error_first_name = response.context['adminform'].errors.as_data()["groups"][0]
-        self.assertEqual(error_first_name.message, "Please affect this user to a group")
+        error_first_name =\
+            response.context['adminform'].errors.as_data()["groups"][0]
+        self.assertEqual(
+            error_first_name.message,
+            "Please affect this user to a group")
 
     def test_created_user_can_not_belong_to_several_groups(self):
         self.browser.login(username='egeret', password='toto1234')
@@ -80,8 +90,11 @@ class TestUsers(Data):
             'password2': password_created,
             'groups': [self.sales_group.id, self.management_group.id]
         }, follow=True)
-        error_first_name = response.context['adminform'].errors.as_data()["groups"][0]
-        self.assertEqual(error_first_name.message, "A user can belong to only one group")
+        error_first_name =\
+            response.context['adminform'].errors.as_data()["groups"][0]
+        self.assertEqual(
+            error_first_name.message,
+            "A user can belong to only one group")
 
     def test_is_not_staff_created_sales_team_user(self):
         self.browser.login(username='egeret', password='toto1234')
@@ -109,7 +122,6 @@ class TestUsers(Data):
         user = User.objects.get(username='lluke')
         self.assertTrue(user.is_staff)
 
-
     def test_check_created_user_firstname_and_lastname(self):
         self.browser.login(username='egeret', password='toto1234')
         password_created = make_password('toto1234')
@@ -120,21 +132,30 @@ class TestUsers(Data):
             'password2': password_created,
             'groups': self.sales_group.id
         }, follow=True)
-        error_first_name = response.context['adminform'].errors.as_data()["first_name"][0]
-        self.assertEqual(error_first_name.message, "<first_name>: Only letters and hyphen are authorized")
-        error_last_name = response.context['adminform'].errors.as_data()["last_name"][0]
-        self.assertEqual(error_last_name.message, "<last_name>: Only letters and hyphen are authorized")
+        error_first_name =\
+            response.context['adminform'].errors.as_data()["first_name"][0]
+        self.assertEqual(
+            error_first_name.message,
+            "<first_name>: Only letters and hyphen are authorized")
+        error_last_name = \
+            response.context['adminform'].errors.as_data()["last_name"][0]
+        self.assertEqual(
+            error_last_name.message,
+            "<last_name>: Only letters and hyphen are authorized")
 
 
 class TestClients(Data):
     def test_get_clients(self):
         self.browser.login(username='egeret', password='toto1234')
         response = self.browser.get("/admin/CRM/client/")
-        self.assertEqual(response.context['cl'].result_count, Client.objects.count())
+        self.assertEqual(
+            response.context['cl'].result_count, Client.objects.count())
         results = list(response.context['cl'].result_list)
         client_admin = ClientAdmin(Client, admin.site)
-        client1 = next(client for client in results if client.last_name=='Vador')
-        client2 = next(client for client in results if client.last_name == 'Skywalker')
+        client1 = next(
+            client for client in results if client.last_name == 'Vador')
+        client2 = next(
+            client for client in results if client.last_name == 'Skywalker')
         self.assertEqual(client2.company_name, "Les rebelles")
         self.assertEqual(client1.mobile, "888888")
         self.assertEqual(client_admin.status(client2), "prospect")
@@ -142,16 +163,18 @@ class TestClients(Data):
 
     def test_user_can_add_client(self):
         self.browser.login(username='egeret', password='toto1234')
-        response = self.browser.post("/admin/CRM/client/add/", {'user': self.management_user}, follow=True)
-        self.assertEqual(response.context['request'].path, '/admin/CRM/client/add/')
-
+        response = self.browser.post(
+            "/admin/CRM/client/add/",
+            {'user': self.management_user}, follow=True)
+        self.assertEqual(
+            response.context['request'].path, '/admin/CRM/client/add/')
 
     def test_user_can_not_add_client(self):
         # user is redirected to login page
         self.browser.login(username='ttournesol', password='toto1234')
-        response = self.browser.post("/admin/CRM/client/add/", {'user': self.sales_user}, follow=True)
+        response = self.browser.post(
+            "/admin/CRM/client/add/", {'user': self.sales_user}, follow=True)
         self.assertEqual(response.context['request'].path, '/admin/login/')
-
 
     def test_create_client(self):
         clients_count = Client.objects.count()
@@ -168,19 +191,21 @@ class TestClients(Data):
         self.assertEqual(Client.objects.count(), clients_count + 1)
         self.assertEqual(Client.objects.last().mobile, '222222')
 
+
 class TestContracts(Data):
     def test_get_contracts(self):
         self.browser.login(username='egeret', password='toto1234')
         response = self.browser.get("/admin/CRM/contract/")
-        self.assertEqual(response.context['cl'].result_count, Contract.objects.count())
+        self.assertEqual(
+            response.context['cl'].result_count, Contract.objects.count())
 
     def test_create_contract(self):
         contracts_count = Contract.objects.count()
         self.browser.login(username='egeret', password='toto1234')
         self.browser.post("/admin/CRM/contract/add/", data={
-            "client" : self.client1.id,
-            "amount" : 5000,
-            "payment_due_0" : self.date_p20d.date(),
+            "client": self.client1.id,
+            "amount": 5000,
+            "payment_due_0": self.date_p20d.date(),
             "payment_due_1": self.date_p20d.time(),
         }, follow=True)
         self.assertEqual(Contract.objects.count(), contracts_count + 1)
@@ -190,42 +215,52 @@ class TestContracts(Data):
         self.browser.login(username='egeret', password='toto1234')
         contract = Contract.objects.get(id=self.contract1.pk)
         self.assertEqual(contract.amount, 10000)
-        self.browser.post(f"/admin/CRM/contract/{self.contract1.id}/change/", data={
-            "client": self.client1.id,
-            "amount": "20000",
-            "status":True,
-            "payment_due_0": self.date_p20d.date(),
-            "payment_due_1": self.date_p20d.time(),
-        }, follow=True)
+        self.browser.post(
+            f"/admin/CRM/contract/"
+            f"{self.contract1.id}/change/",
+            data={
+                "client": self.client1.id,
+                "amount": "20000",
+                "status": True,
+                "payment_due_0": self.date_p20d.date(),
+                "payment_due_1": self.date_p20d.time(),
+                }, follow=True)
         contract = Contract.objects.get(id=self.contract1.pk)
         self.assertEqual(contract.amount, 20000)
 
     def test_cancel_signature_of_contract_with_associated_evenement(self):
         self.browser.login(username='egeret', password='toto1234')
-        response = self.browser.post(f"/admin/CRM/contract/{self.contract1.id}/change/", data={
-            "client": self.client1.id,
-            "amount": "20000",
-            "status": False,
-            "payment_due_0": self.date_p20d.date(),
-            "payment_due_1": self.date_p20d.time(),
-        }, follow=True)
+        response = self.browser.post(
+            f"/admin/CRM/contract/"
+            f"{self.contract1.id}/change/",
+            data={
+                "client": self.client1.id,
+                "amount": "20000",
+                "status": False,
+                "payment_due_0": self.date_p20d.date(),
+                "payment_due_1": self.date_p20d.time(),
+                }, follow=True)
         error = response.context['adminform'].errors.as_data()['__all__'][0]
-        self.assertEqual(error.message, "There's already an event associated with this signed contract. You can't cancel signature !")
+        self.assertEqual(error.message,
+                         "There's already an event associated"
+                         " with this signed contract. "
+                         "You can't cancel signature !")
 
 
 class TestEvents(Data):
     def test_get_events(self):
         self.browser.login(username='egeret', password='toto1234')
         response = self.browser.get("/admin/CRM/event/")
-        self.assertEqual(response.context['cl'].result_count, Event.objects.count())
+        self.assertEqual(
+            response.context['cl'].result_count, Event.objects.count())
 
     def test_create_event(self):
         events_count = Event.objects.count()
         self.browser.login(username='egeret', password='toto1234')
         self.browser.post("/admin/CRM/event/add/", data={
-            "name" : "My event",
-            "contract" : self.contract3.id,
-            "support_contact" : self.support_user.id,
+            "name": "My event",
+            "contract": self.contract3.id,
+            "support_contact": self.support_user.id,
             "event_status": "1",
             "attendees": "200",
             "event_date_0": self.date_p50d.date(),
@@ -246,8 +281,10 @@ class TestEvents(Data):
             "event_date_1": self.date_p50d.time(),
         }, follow=True)
         error = response.context['adminform'].errors.as_data()["__all__"][0]
-        self.assertEqual(error.message,"Error in field <Event status>: This event can't be "
-                                       "in progress or closed since its date is later than the current date" )
+        self.assertEqual(error.message, "Error in field <Event status>: "
+                                        "This event can't be "
+                                        "in progress or closed since its date"
+                                        " is later than the current date")
         response = self.browser.post("/admin/CRM/event/add/", data={
             "name": "My event",
             "contract": self.contract3.id,
@@ -260,4 +297,5 @@ class TestEvents(Data):
         error = response.context['adminform'].errors.as_data()["__all__"][0]
         self.assertEqual(error.message,
                          "Error in field <Event status>: "
-                         "This event can't be incoming since its date is earlier than the current date")
+                         "This event can't be incoming since its date "
+                         "is earlier than the current date")

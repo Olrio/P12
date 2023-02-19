@@ -1,15 +1,7 @@
-from rest_framework.test import APITestCase
 from django.urls import reverse
 from authentication.models import User
-from django.contrib.auth.models import Group
 from CRM.models import Client, Contract, Event
 from .data_for_tests import Data
-
-import datetime
-import time
-
-import ipdb
-
 
 
 class DataTest(Data):
@@ -24,6 +16,7 @@ class DataTest(Data):
             format="json",
         )
         return response.json()
+
 
 class LoginTest(DataTest):
     def test_login_succes(self):
@@ -52,7 +45,9 @@ class LoginTest(DataTest):
             },
             format="json",
         )
-        self.assertEqual(resp.json()["detail"], 'No active account found with the given credentials')
+        self.assertEqual(
+            resp.json()["detail"],
+            'No active account found with the given credentials')
         return resp.json()
 
     def test_token_refresh(self):
@@ -78,7 +73,9 @@ class LoginTest(DataTest):
             format="json",
         )
         self.assertEqual(response.status_code, 401)
-        self.assertEqual(response.json()['detail'], 'Token is invalid or expired')
+        self.assertEqual(
+            response.json()['detail'],
+            'Token is invalid or expired')
 
 
 class UserTest(DataTest):
@@ -100,7 +97,10 @@ class UserTest(DataTest):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + token["access"])
         response = self.client.get(url, format="json")
         self.assertEqual(response.status_code, 403)
-        self.assertEqual(response.json()['detail'], "Sorry, only members of the management team can perform this action")
+        self.assertEqual(
+            response.json()['detail'],
+            "Sorry, only members of the management team"
+            " can perform this action")
 
     def test_get_user_detail(self):
         url = f"/crm/users/{self.support_user.id}/"
@@ -108,7 +108,9 @@ class UserTest(DataTest):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + token["access"])
         response = self.client.get(url, format="json")
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.data['first_name'], self.support_user.first_name)
+        self.assertEqual(
+            response.data['first_name'],
+            self.support_user.first_name)
 
     def test_get_user_detail_unauthorized(self):
         url = f"/crm/users/{self.support_user.id}/"
@@ -117,10 +119,11 @@ class UserTest(DataTest):
         response = self.client.get(url, format="json")
         self.assertEqual(response.status_code, 403)
         self.assertEqual(response.json()['detail'],
-                         "Sorry, only members of the management team can perform this action")
+                         "Sorry, only members of the management team "
+                         "can perform this action")
 
     def test_get_user_detail_non_existent(self):
-        url = f"/crm/users/0/"
+        url = "/crm/users/0/"
         token = self.login(self.management_user)
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + token["access"])
         response = self.client.get(url, format="json")
@@ -154,9 +157,15 @@ class UserTest(DataTest):
             'password2': '1234',
             'team': 'support'
         }, format="json")
-        self.assertEqual(response.json()['last_name'][0], "<last_name>: Only letters and hyphen are authorized")
-        self.assertEqual(response.json()['first_name'][0], "<first_name>: Only letters and hyphen are authorized")
-        self.assertEqual(response.json()['password1'][0], "Password error : your password must contain letters and numbers")
+        self.assertEqual(
+            response.json()['last_name'][0],
+            "<last_name>: Only letters and hyphen are authorized")
+        self.assertEqual(
+            response.json()['first_name'][0],
+            "<first_name>: Only letters and hyphen are authorized")
+        self.assertEqual(
+            response.json()['password1'][0],
+            "Password error : your password must contain letters and numbers")
 
     def test_create_a_user_unauthorized(self):
         url = "/crm/users/"
@@ -170,7 +179,8 @@ class UserTest(DataTest):
             'team': 'Support'
         }, format="json")
         self.assertEqual(response.json()['detail'],
-                         "Sorry, only members of the management team can perform this action")
+                         "Sorry, only members of the management team"
+                         " can perform this action")
 
     def test_update_a_user(self):
         url = f"/crm/users/{self.support_user.id}/"
@@ -181,7 +191,7 @@ class UserTest(DataTest):
             "first_name": "Hella",
             "last_name": self.support_user.last_name,
             "team": "Support",
-            "username":"+grg+"
+            "username": "+grg+"
         })
         self.assertEqual(response.status_code, 200)
         updated_user = User.objects.get(id=self.support_user.id)
@@ -198,10 +208,11 @@ class UserTest(DataTest):
         })
         self.assertEqual(response.status_code, 403)
         self.assertEqual(response.json()['detail'],
-                         "Sorry, only members of the management team can perform this action")
+                         "Sorry, only members of the management team "
+                         "can perform this action")
 
     def test_update_a_user_non_existent(self):
-        url = f"/crm/users/0/"
+        url = "/crm/users/0/"
         token = self.login(self.management_user)
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + token["access"])
         response = self.client.put(url, {
@@ -229,16 +240,18 @@ class UserTest(DataTest):
         response = self.client.delete(url)
         self.assertEqual(response.status_code, 403)
         self.assertEqual(response.json()['detail'],
-                         "Sorry, only members of the management team can perform this action")
+                         "Sorry, only members of the management team"
+                         " can perform this action")
 
     def test_delete_a_user_non_existent(self):
-        url = f"/crm/users/0/"
+        url = "/crm/users/0/"
         token = self.login(self.management_user)
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + token["access"])
         response = self.client.delete(url)
         self.assertEqual(response.status_code, 404)
         self.assertEqual(response.json()['detail'],
                          "Sorry, user 0 doesn't exist")
+
 
 class ClientTest(DataTest):
     def test_get_client_list(self):
@@ -329,7 +342,9 @@ class ClientTest(DataTest):
         self.assertEqual(response.status_code, 200)
         updated_client = Client.objects.get(id=self.client1.id)
         self.assertEqual(updated_client.first_name, "Darth")
-        self.assertNotEqual(updated_client.date_created, updated_client.date_updated)
+        self.assertNotEqual(
+            updated_client.date_created,
+            updated_client.date_updated)
 
     def test_update_a_client_non_existent(self):
         url = "/crm/clients/0/"
@@ -409,7 +424,9 @@ class ContractTest(DataTest):
         response = self.client.get(url, format="json")
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data['amount'], self.contract1.amount)
-        self.assertEqual(response.data['payment_due'], self.contract1.payment_due.strftime("%Y/%m/%d %H:%M"))
+        self.assertEqual(
+            response.data['payment_due'],
+            self.contract1.payment_due.strftime("%Y/%m/%d %H:%M"))
 
     def test_get_contract_detail_non_existent(self):
         url = "/crm/contracts/0/"
@@ -441,7 +458,9 @@ class ContractTest(DataTest):
         }, format="json")
         self.assertEqual(Contract.objects.count(), contracts_count + 1)
         self.assertEqual(response.status_code, 201)
-        self.assertEqual(Contract.objects.last().client.sales_contact, self.sales_user)
+        self.assertEqual(
+            Contract.objects.last().client.sales_contact,
+            self.sales_user)
 
     def test_create_a_contract_unauthorized(self):
         url = "/crm/contracts/"
@@ -482,7 +501,9 @@ class ContractTest(DataTest):
         self.assertEqual(response.status_code, 200)
         updated_contract = Contract.objects.get(id=self.contract1.id)
         self.assertEqual(updated_contract.amount, 15000)
-        self.assertNotEqual(updated_contract.date_created, updated_contract.date_updated)
+        self.assertNotEqual(
+            updated_contract.date_created,
+            updated_contract.date_updated)
 
     def test_update_a_contract_client_non_existent(self):
         url = f"/crm/contracts/{self.contract1.id}/"
@@ -588,7 +609,9 @@ class EventTest(DataTest):
         }, format="json")
         self.assertEqual(Event.objects.count(), events_count + 1)
         self.assertEqual(response.status_code, 201)
-        self.assertEqual(Event.objects.last().contract.client.sales_contact, self.sales_user)
+        self.assertEqual(
+            Event.objects.last().contract.client.sales_contact,
+            self.sales_user)
 
     def test_create_an_event_unauthorized(self):
         url = "/crm/events/"
@@ -651,7 +674,9 @@ class EventTest(DataTest):
         self.assertEqual(response.status_code, 200)
         updated_event = Event.objects.get(id=self.event1.id)
         self.assertEqual(updated_event.attendees, 2000)
-        self.assertNotEqual(updated_event.date_created, updated_event.date_updated)
+        self.assertNotEqual(
+            updated_event.date_created,
+            updated_event.date_updated)
 
     def test_update_an_event_unauthorized(self):
         url = f"/crm/events/{self.event1.id}/"
@@ -709,5 +734,3 @@ class EventTest(DataTest):
         self.assertEqual(response.status_code, 403)
         self.assertEqual(response.json()['detail'],
                          "You do not have permission to perform this action.")
-
-

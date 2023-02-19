@@ -6,20 +6,29 @@ class IsAuthenticated(BasePermission):
     def has_permission(self, request, view):
         return bool(request.user and request.user.is_authenticated)
 
+
 class IsManagementTeam(BasePermission):
-    message = "Sorry, only members of the management team can perform this action"
+    message = "Sorry, only members of the management team" \
+              " can perform this action"
+
     def has_permission(self, request, view):
-        return bool(request.user.groups.filter(name="Management team").exists())
+        return bool(
+            request.user.groups.filter(name="Management team").exists())
+
 
 class IsSalesTeam(BasePermission):
     message = "Sorry, only members of the sales team can perform this action"
+
     def has_permission(self, request, view):
         return bool(request.user.groups.filter(name="Sales team").exists())
 
+
 class IsSupportTeam(BasePermission):
     message = "Sorry, only members of the support team can perform this action"
+
     def has_permission(self, request, view):
         return bool(request.user.groups.filter(name="Support team").exists())
+
 
 class IsClientSalesContact(BasePermission):
     message = (
@@ -35,6 +44,7 @@ class IsClientSalesContact(BasePermission):
                 sales_contact=request.user).exists()
         )
 
+
 class IsClientEventSupportContact(BasePermission):
     message = (
         "Sorry, you don't have permission to access "
@@ -48,6 +58,7 @@ class IsClientEventSupportContact(BasePermission):
                 pk=obj.pk,
                 contract__event__support_contact=request.user).exists()
         )
+
 
 class IsContractSalesContact(BasePermission):
     message = (
@@ -63,6 +74,7 @@ class IsContractSalesContact(BasePermission):
                 client__sales_contact=request.user).exists()
         )
 
+
 class IsEventSupportContact(BasePermission):
     message = (
         "Sorry, you don't have permission to access "
@@ -76,6 +88,7 @@ class IsEventSupportContact(BasePermission):
                 pk=obj.pk,
                 support_contact=request.user).exists()
         )
+
 
 class IsEventContractSalesContact(BasePermission):
     message = (

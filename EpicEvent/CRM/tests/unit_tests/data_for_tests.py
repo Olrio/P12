@@ -4,8 +4,8 @@ from CRM.models import Client, Contract, Event
 from authentication.models import User
 from django.contrib.auth.models import Group
 
-
 import datetime
+
 
 class Data(APITestCase):
     @classmethod
@@ -20,44 +20,49 @@ class Data(APITestCase):
         cls.sales_group = Group.objects.create(name="Sales team")
         cls.support_group = Group.objects.create(name="Support team")
 
-        cls.management_user = User.objects.create(username='egeret',
-                                                  first_name='Eva',
-                                                  last_name='Geret',
-                                                  is_staff=True,
-                                                  is_superuser=True)
+        cls.management_user = User.objects.create(
+            username='egeret',
+            first_name='Eva',
+            last_name='Geret',
+            is_staff=True,
+            is_superuser=True)
         cls.management_user.set_password("toto1234")
         cls.management_user.groups.add(cls.management_group)
         cls.management_user.save()
-        cls.sales_user = User.objects.create(username='yantou',
-                                             first_name='Yves',
-                                             last_name='Antou',
-                                             is_staff=False,
-                                             is_superuser=False)
+        cls.sales_user = User.objects.create(
+            username='yantou',
+            first_name='Yves',
+            last_name='Antou',
+            is_staff=False,
+            is_superuser=False)
         cls.sales_user.set_password("toto1234")
         cls.sales_user.groups.add(cls.sales_group)
         cls.sales_user.save()
-        cls.sales_user2 = User.objects.create(username='supersaler',
-                                             first_name='Max',
-                                             last_name='De Tchatche',
-                                             is_staff=False,
-                                             is_superuser=False)
+        cls.sales_user2 = User.objects.create(
+            username='supersaler',
+            first_name='Max',
+            last_name='De Tchatche',
+            is_staff=False,
+            is_superuser=False)
         cls.sales_user2.set_password("toto1234")
         cls.sales_user2.groups.add(cls.sales_group)
         cls.sales_user2.save()
 
-        cls.support_user = User.objects.create(username='ecompagne',
-                                               first_name='Ella',
-                                               last_name='Compagne',
-                                               is_staff=False,
-                                               is_superuser=False)
+        cls.support_user = User.objects.create(
+            username='ecompagne',
+            first_name='Ella',
+            last_name='Compagne',
+            is_staff=False,
+            is_superuser=False)
         cls.support_user.set_password("toto1234")
         cls.support_user.groups.add(cls.support_group)
         cls.support_user.save()
-        cls.user_lambda = User.objects.create(username='jbody',
-                                               first_name='Jeannot',
-                                               last_name='Body',
-                                               is_staff=False,
-                                               is_superuser=False)
+        cls.user_lambda = User.objects.create(
+            username='jbody',
+            first_name='Jeannot',
+            last_name='Body',
+            is_staff=False,
+            is_superuser=False)
         cls.user_lambda.set_password("toto1234")
         cls.user_lambda.groups.add(cls.support_group)
         cls.user_lambda.save()
@@ -84,7 +89,6 @@ class Data(APITestCase):
             date_created=cls.date_now,
             date_updated=cls.date_now,
         )
-
 
         cls.contract1 = Contract.objects.create(
             client=cls.client1,
@@ -134,4 +138,3 @@ class Data(APITestCase):
             date_created=cls.date_now,
             date_updated=cls.date_now,
         )
-
