@@ -43,6 +43,10 @@ class Contract(models.Model):
 
 class Event(models.Model):
     name = models.CharField(max_length=250)
+    # client = models.ForeignKey(
+    #     to=Client,
+    #     on_delete=models.CASCADE,
+    # )
     contract = models.OneToOneField(
         to=Contract,
         on_delete=models.CASCADE,

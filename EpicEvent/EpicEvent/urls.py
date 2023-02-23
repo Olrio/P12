@@ -15,11 +15,10 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from rest_framework_simplejwt.views import TokenRefreshView, \
-    TokenObtainPairView
+from rest_framework_simplejwt.views import TokenRefreshView
 from rest_framework_nested import routers
 from authentication.admin import MyLoginView
-from authentication.views import UserViewset
+from authentication.views import UserViewset, TokenObtainPairView
 from CRM.views import ClientViewset, ContractViewset, EventViewset
 
 admin.sites.AdminSite.site_header = 'Epic Events CRM'

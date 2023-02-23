@@ -1,11 +1,16 @@
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.exceptions import NotFound
 from rest_framework.response import Response
+from rest_framework_simplejwt.views import TokenViewBase
 from django.core.exceptions import ObjectDoesNotExist
 from .models import User
 from .serializers import UserSerializer, \
-    RegisterUserSerializer, UpdateUserSerializer
+    RegisterUserSerializer, UpdateUserSerializer, LoginUserSerializer
 from CRM.permissions import IsAuthenticated, IsManagementTeam
+
+
+class TokenObtainPairView(TokenViewBase):
+    serializer_class = LoginUserSerializer
 
 
 class UserViewset(ModelViewSet):

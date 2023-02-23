@@ -1,8 +1,24 @@
 from rest_framework import serializers
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from authentication.models import User
 from django.contrib.auth.models import Group
-
 from .validators import Validators
+
+import logging
+
+login_logger = logging.getLogger("login_security")
+
+
+class LoginUserSerializer(TokenObtainPairSerializer):
+    def validate(self, attrs):
+        if User.objects.filter(username=attrs['username']).exists():
+            user = User.objects.get(username=attrs['username'])
+            login_logger.info("user %s connected to API", user)
+        else:
+            login_logger.warning("someone with username %s "
+                                 "tried to connect to API", attrs['username'])
+        data = super().validate(attrs)
+        return data
 
 
 class UserSerializer(serializers.ModelSerializer):
