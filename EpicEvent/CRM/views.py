@@ -1,5 +1,8 @@
 from rest_framework.viewsets import ModelViewSet
-from django.core.exceptions import ObjectDoesNotExist
+from django.core.exceptions import (
+    ObjectDoesNotExist,
+    FieldError
+)
 from rest_framework.exceptions import NotFound
 from .models import (
     Client,
@@ -7,8 +10,10 @@ from .models import (
     Event
 )
 from .serializers import (
-    ClientSerializer,
-    ContractSerializer,
+    ClientDetailSerializer,
+    ClientListSerializer,
+    ContractDetailSerializer,
+    ContractListSerializer,
     EventSerializer
 )
 from .permissions import (
@@ -26,12 +31,24 @@ from .permissions import (
 
 class MultipleSerializerMixin:
     permission_classes = [IsAuthenticated]
+    detail_serializer_class = None
+
+    def get_serializer_class(self):
+        if self.action == "retrieve" and self.get_serializer_class is not None:
+            return self.detail_serializer_class
+        elif self.action == "update" and self.get_serializer_class is not None:
+            return self.detail_serializer_class
+        elif self.action == "create":
+            return self.detail_serializer_class
+        return super().get_serializer_class()
 
 
 class ClientViewset(MultipleSerializerMixin, ModelViewSet):
-    serializer_class = ClientSerializer
+    serializer_class = ClientListSerializer
+    detail_serializer_class = ClientDetailSerializer
 
     def get_permissions(self):
+        permission_classes = []
         if (self.request.method == 'GET'
                 and "pk" not in self.request.parser_context["kwargs"]):
             permission_classes = [
@@ -65,12 +82,18 @@ class ClientViewset(MultipleSerializerMixin, ModelViewSet):
     def get_queryset(self):
         if "pk" not in self.request.parser_context["kwargs"]:
             queryset = Client.objects.all()
-            name = self.request.query_params.get('name')
-            email = self.request.query_params.get('email')
-            if name is not None:
-                queryset = queryset.filter(last_name__icontains=name)
-            if email is not None:
-                queryset = queryset.filter(email__icontains=email)
+            try:
+                queryset = queryset.filter(
+                    **dict(self.request.query_params.items())
+                )
+                return queryset
+            except FieldError:
+                raise NotFound(
+                    detail=(
+                        "Sorry, looks like you search for inexistent fields. "
+                        "Please ensure you correctly entered searched fields."
+                    )
+                )
             return queryset
         else:
             client_pk = self.request.parser_context["kwargs"]["pk"]
@@ -87,7 +110,8 @@ class ClientViewset(MultipleSerializerMixin, ModelViewSet):
 
 
 class ContractViewset(MultipleSerializerMixin, ModelViewSet):
-    serializer_class = ContractSerializer
+    serializer_class = ContractListSerializer
+    detail_serializer_class = ContractDetailSerializer
 
     def get_permissions(self):
         if (self.request.method == 'GET'
@@ -125,31 +149,18 @@ class ContractViewset(MultipleSerializerMixin, ModelViewSet):
     def get_queryset(self):
         if "pk" not in self.request.parser_context["kwargs"]:
             queryset = Contract.objects.all()
-            client = self.request.query_params.get('client')
-            email = self.request.query_params.get('email')
-            date = self.request.query_params.get('date')
-            after_date = self.request.query_params.get('after_date')
-            before_date = self.request.query_params.get('before_date')
-            amount = self.request.query_params.get('amount')
-            greater_amount = self.request.query_params.get('greater_amount')
-            lower_amount = self.request.query_params.get('lower_amount')
-            if client is not None:
-                queryset = queryset.filter(client__last_name__icontains=client)
-            if email is not None:
-                queryset = queryset.filter(client__email__icontains=email)
-            if date is not None:
-                queryset = queryset.filter(payment_due__date=date)
-            if after_date is not None:
-                queryset = queryset.filter(payment_due__date__gte=after_date)
-            if before_date is not None:
-                queryset = queryset.filter(payment_due__date__lte=before_date)
-            if amount is not None:
-                queryset = queryset.filter(amount=amount)
-            if greater_amount is not None:
-                queryset = queryset.filter(amount__gte=greater_amount)
-            if lower_amount is not None:
-                queryset = queryset.filter(amount__lte=lower_amount)
-            return queryset
+            try:
+                queryset = queryset.filter(
+                    **dict(self.request.query_params.items())
+                )
+                return queryset
+            except FieldError:
+                raise NotFound(
+                    detail=(
+                        "Sorry, looks like you search for inexistent fields. "
+                        "Please ensure you correctly entered searched fields."
+                    )
+                )
         else:
             contract_pk = self.request.parser_context["kwargs"]["pk"]
             try:
@@ -205,23 +216,18 @@ class EventViewset(MultipleSerializerMixin, ModelViewSet):
     def get_queryset(self):
         if "pk" not in self.request.parser_context["kwargs"]:
             queryset = Event.objects.all()
-            client = self.request.query_params.get('client')
-            email = self.request.query_params.get('email')
-            date = self.request.query_params.get('date')
-            after_date = self.request.query_params.get('after_date')
-            before_date = self.request.query_params.get('before_date')
-            if client is not None:
+            try:
                 queryset = queryset.filter(
-                    contract__client__last_name__icontains=client)
-            if email is not None:
-                queryset = queryset.filter(
-                    contract__client__email__icontains=email)
-            if date is not None:
-                queryset = queryset.filter(event_date__date=date)
-            if after_date is not None:
-                queryset = queryset.filter(event_date__date__gte=after_date)
-            if before_date is not None:
-                queryset = queryset.filter(event_date__date__lte=before_date)
+                    **dict(self.request.query_params.items())
+                )
+                return queryset
+            except FieldError:
+                raise NotFound(
+                    detail=(
+                        "Sorry, looks like you search for inexistent fields. "
+                        "Please ensure you correctly entered searched fields."
+                    )
+                )
             return queryset
         else:
             event_pk = self.request.parser_context["kwargs"]["pk"]

@@ -6,11 +6,37 @@ from .models import (
     Event
 )
 from authentication.models import User
+from authentication.serializers import UserListSerializer
 from authentication.validators import Validators
 import datetime
 
 
-class ClientSerializer(serializers.ModelSerializer):
+class ClientListSerializer(serializers.ModelSerializer):
+    sales_contact = serializers.SerializerMethodField()
+
+    @staticmethod
+    def get_sales_contact(instance):
+        queryset = User.objects.filter(id=instance.sales_contact.id)
+        serializer = UserListSerializer(queryset, many=True)
+        # we only need sales_contact id, first_name and last_name
+        for saler in serializer.data:
+            del(saler['username'])
+            del (saler['groups'])
+        return serializer.data
+
+    class Meta:
+        model = Client
+        fields = [
+            'pk',
+            'first_name',
+            'last_name',
+            'email',
+            'company_name',
+            'sales_contact',
+        ]
+
+
+class ClientDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = Client
         fields = [
@@ -72,7 +98,34 @@ class ClientSerializer(serializers.ModelSerializer):
         return instance
 
 
-class ContractSerializer(serializers.ModelSerializer):
+class ContractListSerializer(serializers.ModelSerializer):
+    client = serializers.SerializerMethodField()
+
+    @staticmethod
+    def get_client(instance):
+        queryset = Client.objects.filter(id=instance.client.id)
+        serializer = ClientListSerializer(queryset, many=True)
+        # # we only need sales_contact id, first_name and last_name
+        # for saler in serializer.data:
+        #     del (saler['username'])
+        #     del (saler['groups'])
+        return serializer.data
+    class Meta:
+        model = Contract
+        fields = [
+            'pk',
+            'client',
+            'amount',
+            'status',
+            'payment_due',
+        ]
+
+    @staticmethod
+    def get_sales_contact(obj):
+        return obj.client.sales_contact.id
+
+
+class ContractDetailSerializer(serializers.ModelSerializer):
     sales_contact = serializers.SerializerMethodField()
     payment_due = serializers.DateTimeField(input_formats=['%Y/%m/%d %H:%M'])
     client = serializers.CharField()
