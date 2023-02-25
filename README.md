@@ -9,7 +9,7 @@ activer l'environnement virtuel : source env/bin/activate (Linux) ou env\\Script
 installer les modules requis à partir du fichier requirements.txt : pip install -r requirements
 
 Cette API utilise PostgreSQL pour la gestion de la base de données. 
-PostgreSQL doit donc être installé localement.
+PostgreSQL doit donc être installé.
 
 Sous Windows :  
 &emsp;- Télécharger l'installer via le site https://www.enterprisedb.com/downloads/postgres-postgresql-downloads  
@@ -29,17 +29,21 @@ Sous Linux :
 &emsp;- Dans le terminal, saisir `sudo apt-get install postgresql`  
 &emsp;- Lancer le Shell de PostgreSQL au moyen de la commande `sudo -u postgres psql`  
 
-Etape suivante :  
+Etape suivante - création de la base de données:  
 &emsp;- L'invite de commande `postgres=#` est affichée   
-&emsp;- Saisir `CREATE USER olrio WITH PASSWORD 'toto123';` pour créer 
+&emsp;- Saisir `CREATE USER <user> WITH PASSWORD <password>;` pour créer 
 l'utilisateur principal  
-&emsp;- Saisir `CREATE DATABASE epicdb OWNER olrio;` pour créer la base de données
+&emsp;- Saisir `CREATE DATABASE <database> OWNER <user>;` pour créer la base de données
 &emsp;- Quitter le Shell en tapant `exit`  
 
 
 Se placer dans le dossier EpicEvent/
 
 Y copier le fichier .env contenant la SECRET_KEY nécessaire au projet
+Ce fichier comporte également les informations nécessaires à l'association des applications avec la base de données:  
+- nom de la base de données PostgreSQL <database>
+- nom de l'utilisateur principal de la base de données <user>
+- mot de passe de cet utilisateur <password>
 
 Effectuer les migrations avec la commande `python manage.py migrate`
 
@@ -76,5 +80,7 @@ Exemples de requêtes pouvant être faites à l'API :
 &emsp; Le Body doit comprendre les champs nécessaires à la création du Client, à savoir `first_name`, `last_name`, `email`, `phone`, `mobile` et `company_name`  
 
 Noter que les erreurs et exceptions sont consignées dans le fichier CRM/log/debug.log
+L'historique des connexions au site administrateur et à l'API est conservé dans le fichier CRM/log/login.log
+
 
 

@@ -1,9 +1,12 @@
 from django.test import Client as Browser
 from rest_framework.test import APITestCase
-from CRM.models import Client, Contract, Event
+from CRM.models import (
+    Client,
+    Contract,
+    Event
+)
 from authentication.models import User
 from django.contrib.auth.models import Group
-
 import datetime
 
 

@@ -1,7 +1,14 @@
 from django.contrib.auth.hashers import make_password
-from CRM.models import Client, Contract, Event
+from CRM.models import (
+    Client,
+    Contract,
+    Event
+)
 from authentication.models import User
-from authentication.admin import CustomUserAdmin, ClientAdmin
+from authentication.admin import (
+    CustomUserAdmin,
+    ClientAdmin
+)
 from django.contrib import admin
 from CRM.tests.unit_tests.data_for_tests import Data
 
@@ -19,9 +26,11 @@ class TestLogin(Data):
         response = self.browser.post(
             "/admin/login/", {'username': 'bidon', 'password': 'bidon'})
         error = response.context['form'].errors.as_data()["__all__"][0]
-        self.assertEqual(error.message,
-                         "You must provide both valid username "
-                         "and password of an active user to access this site")
+        self.assertEqual(
+            error.message,
+            "You must provide both valid username "
+            "and password of an active user to access this site"
+        )
 
     def test_login_error_message_not_management_user(self):
         response = self.browser.post(
@@ -74,8 +83,9 @@ class TestUsers(Data):
             'password1': password_created,
             'password2': password_created,
         }, follow=True)
-        error_first_name =\
+        error_first_name = (
             response.context['adminform'].errors.as_data()["groups"][0]
+        )
         self.assertEqual(
             error_first_name.message,
             "Please affect this user to a group")
@@ -90,11 +100,13 @@ class TestUsers(Data):
             'password2': password_created,
             'groups': [self.sales_group.id, self.management_group.id]
         }, follow=True)
-        error_first_name =\
+        error_first_name = (
             response.context['adminform'].errors.as_data()["groups"][0]
+        )
         self.assertEqual(
             error_first_name.message,
-            "A user can belong to only one group")
+            "A user can belong to only one group"
+        )
 
     def test_is_not_staff_created_sales_team_user(self):
         self.browser.login(username='egeret', password='toto1234')
@@ -132,13 +144,15 @@ class TestUsers(Data):
             'password2': password_created,
             'groups': self.sales_group.id
         }, follow=True)
-        error_first_name =\
+        error_first_name = (
             response.context['adminform'].errors.as_data()["first_name"][0]
+        )
         self.assertEqual(
             error_first_name.message,
             "<first_name>: Only letters and hyphen are authorized")
-        error_last_name = \
+        error_last_name = (
             response.context['adminform'].errors.as_data()["last_name"][0]
+        )
         self.assertEqual(
             error_last_name.message,
             "<last_name>: Only letters and hyphen are authorized")
@@ -281,10 +295,13 @@ class TestEvents(Data):
             "event_date_1": self.date_p50d.time(),
         }, follow=True)
         error = response.context['adminform'].errors.as_data()["__all__"][0]
-        self.assertEqual(error.message, "Error in field <Event status>: "
-                                        "This event can't be "
-                                        "in progress or closed since its date"
-                                        " is later than the current date")
+        self.assertEqual(
+            error.message,
+            "Error in field <Event status>: "
+            "This event can't be "
+            "in progress or closed since its date"
+            " is later than the current date"
+        )
         response = self.browser.post("/admin/CRM/event/add/", data={
             "name": "My event",
             "contract": self.contract3.id,

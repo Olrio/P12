@@ -1,6 +1,10 @@
 from django.urls import reverse
 from authentication.models import User
-from CRM.models import Client, Contract, Event
+from CRM.models import (
+    Client,
+    Contract,
+    Event
+)
 from .data_for_tests import Data
 
 

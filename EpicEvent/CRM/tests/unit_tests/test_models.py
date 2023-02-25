@@ -1,8 +1,11 @@
 from django.test import TestCase
-from CRM.models import Client, Contract, Event
+from CRM.models import (
+    Client,
+    Contract,
+    Event
+)
 from authentication.models import User
 from django.contrib.auth.models import Group
-
 import datetime
 
 
@@ -10,14 +13,18 @@ class DataTest(TestCase):
     def create_dates(self):
         self.date_now = datetime.datetime.now()
         self.date_past = self.date_now - datetime.timedelta(days=30)
-        self.date_update_client_100 = \
-            self.date_now + datetime.timedelta(days=100)
-        self.date_update_client_200 = \
-            self.date_now + datetime.timedelta(days=200)
-        self.date_update_contract_25 = \
-            self.date_now + datetime.timedelta(days=25)
-        self.date_update_contract_10 = \
-            self.date_now + datetime.timedelta(days=10)
+        self.date_update_client_100 = (
+                self.date_now + datetime.timedelta(days=100)
+        )
+        self.date_update_client_200 = (
+                self.date_now + datetime.timedelta(days=200)
+        )
+        self.date_update_contract_25 = (
+                self.date_now + datetime.timedelta(days=25)
+        )
+        self.date_update_contract_10 = (
+                self.date_now + datetime.timedelta(days=10)
+        )
         self.date_due_contract_20 = self.date_now + datetime.timedelta(days=20)
         self.date_due_contract_30 = self.date_now + datetime.timedelta(days=30)
         self.date_event_10 = self.date_now + datetime.timedelta(days=10)
@@ -113,7 +120,7 @@ class DataTest(TestCase):
             self.user_sales1,
             date_created=self.date_now,
             date_updated=self.date_update_client_100
-                                          )
+            )
         self.client2 = self.create_client(
             "Marie",
             "Golade",
@@ -124,7 +131,7 @@ class DataTest(TestCase):
             self.user_sales2,
             date_created=self.date_now,
             date_updated=self.date_update_client_200,
-                                          )
+            )
         self.client3 = self.create_client(
             "Ray",
             "Tro",
@@ -135,7 +142,7 @@ class DataTest(TestCase):
             self.user_sales2,
             date_created=self.date_past,
             date_updated=self.date_past,
-                                        )
+            )
 
     def get_contracts(self):
         self.contract1 = self.create_contract(
@@ -145,7 +152,7 @@ class DataTest(TestCase):
             self.date_due_contract_30,
             date_created=self.date_now,
             date_updated=self.date_update_contract_25,
-                                            )
+            )
         self.contract2 = self.create_contract(
             self.client2,
             True,
@@ -153,40 +160,44 @@ class DataTest(TestCase):
             self.date_due_contract_20,
             date_created=self.date_now,
             date_updated=self.date_update_contract_10,
-                                              )
-        self.contract3 = self.create_contract(self.client3,
-                                              True,
-                                              5432.66,
-                                              self.date_past,
-                                              date_created=self.date_now,
-                                              date_updated=self.date_past,
-                                              )
+            )
+        self.contract3 = self.create_contract(
+            self.client3,
+            True,
+            5432.66,
+            self.date_past,
+            date_created=self.date_now,
+            date_updated=self.date_past,
+            )
 
     def get_events(self):
-        self.event1 = self.create_event(self.contract1,
-                                        self.user_support1,
-                                        1,
-                                        150,
-                                        self.date_event_10,
-                                        self.date_now,
-                                        self.date_update_event_5,
-                                        )
-        self.event2 = self.create_event(self.contract2,
-                                        self.user_support1,
-                                        2,
-                                        500,
-                                        self.date_event_0,
-                                        self.date_now,
-                                        self.date_now,
-                                        )
-        self.event3 = self.create_event(self.contract3,
-                                        self.user_support1,
-                                        3,
-                                        1000,
-                                        self.date_past,
-                                        self.date_past,
-                                        self.date_past,
-                                        )
+        self.event1 = self.create_event(
+            self.contract1,
+            self.user_support1,
+            1,
+            150,
+            self.date_event_10,
+            self.date_now,
+            self.date_update_event_5,
+            )
+        self.event2 = self.create_event(
+            self.contract2,
+            self.user_support1,
+            2,
+            500,
+            self.date_event_0,
+            self.date_now,
+            self.date_now,
+            )
+        self.event3 = self.create_event(
+            self.contract3,
+            self.user_support1,
+            3,
+            1000,
+            self.date_past,
+            self.date_past,
+            self.date_past,
+            )
 
 
 class UserTest(DataTest):

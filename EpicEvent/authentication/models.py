@@ -1,5 +1,8 @@
-from django.contrib.auth.models import AbstractBaseUser, \
-    PermissionsMixin, BaseUserManager
+from django.contrib.auth.models import (
+    AbstractBaseUser,
+    PermissionsMixin,
+    BaseUserManager
+)
 from django.db import models
 
 
@@ -22,7 +25,6 @@ class UserManager(BaseUserManager):
     def create_superuser(self, username, password, **extra_fields):
         extra_fields.setdefault('is_staff', True)
         extra_fields.setdefault('is_superuser', True)
-
         if extra_fields.get('is_staff') is not True:
             raise ValueError('Superuser must have is_staff=True.')
         if extra_fields.get('is_superuser') is not True:
@@ -39,18 +41,10 @@ class User(PermissionsMixin, AbstractBaseUser):
         unique=True,
     )
     USERNAME_FIELD = "username"
-    is_active = models.BooleanField(
-        default=True,
-        help_text=(
-            "Designates whether this user should be treated as active. "
-            "Unselect this instead of deleting accounts."
-        ),
-    )
     is_staff = models.BooleanField(
         default=False,
         help_text="Designates whether the user can log into this admin site.",
     )
-    is_admin = models.BooleanField(default=False)
     is_superuser = models.BooleanField(default=False)
 
     objects = UserManager()

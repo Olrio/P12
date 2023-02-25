@@ -3,13 +3,15 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from authentication.models import User
 from django.contrib.auth.models import Group
 from .validators import Validators
-
 import logging
 
 login_logger = logging.getLogger("login_security")
 
 
 class LoginUserSerializer(TokenObtainPairSerializer):
+    """
+    enable to follow connexions to API
+    """
     def validate(self, attrs):
         if User.objects.filter(username=attrs['username']).exists():
             user = User.objects.get(username=attrs['username'])
@@ -21,7 +23,7 @@ class LoginUserSerializer(TokenObtainPairSerializer):
         return data
 
 
-class UserSerializer(serializers.ModelSerializer):
+class UserListSerializer(serializers.ModelSerializer):
     groups = serializers.SlugRelatedField(
         many=True, read_only=True, slug_field="name")
 
@@ -31,7 +33,34 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ["id", "last_name", "first_name", "username", "groups"]
+        fields = [
+            "id",
+            "last_name",
+            "first_name",
+            "username",
+            "groups"
+        ]
+
+
+class UserDetailSerializer(serializers.ModelSerializer):
+    groups = serializers.SlugRelatedField(
+        many=True, read_only=True, slug_field="name")
+
+    @staticmethod
+    def get_groups(obj):
+        return obj.groups.values_list('name', flat=True)
+
+    class Meta:
+        model = User
+        fields = [
+            "id",
+            "last_name",
+            "first_name",
+            "username",
+            "groups",
+            "is_staff",
+            "is_superuser"
+        ]
 
 
 class RegisterUserSerializer(serializers.ModelSerializer):
@@ -41,8 +70,15 @@ class RegisterUserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ["id", "last_name", "first_name", "username",
-                  "password1", "password2", "team"]
+        fields = [
+            "id",
+            "last_name",
+            "first_name",
+            "username",
+            "password1",
+            "password2",
+            "team"
+        ]
         read_only_fields = ["username"]
 
     @staticmethod
@@ -99,11 +135,30 @@ class UpdateUserSerializer(serializers.ModelSerializer):
         max_length=20,
         required=False
     )
+    is_staff = serializers.BooleanField(
+        allow_null=True,
+        default=None,
+        required=None
+    )
+    is_superuser = serializers.BooleanField(
+        allow_null=True,
+        default=None,
+        required=None
+    )
 
     class Meta:
         model = User
-        fields = ["id", "last_name", "first_name",
-                  "username", "password1", "password2", "team"]
+        fields = [
+            "id",
+            "last_name",
+            "first_name",
+            "username",
+            "password1",
+            "password2",
+            "team",
+            "is_superuser",
+            "is_staff"
+        ]
 
     def validate(self, data):
         Validators.check_letters_hyphen(data['first_name'], "first_name")
@@ -115,6 +170,12 @@ class UpdateUserSerializer(serializers.ModelSerializer):
             Validators.two_entries_differ(data['password1'], data['password2'])
         if "team" in data:
             Validators.is_valid_team(data['team'])
+        # is_superuser and is_staff are optional fields
+        # so, if not provided, we keep instance values
+        if data['is_superuser'] is None:
+            data['is_superuser'] = self.instance.is_superuser
+        if data['is_staff'] is None:
+            data['is_staff'] = self.instance.is_staff
         return data
 
     def update(self, instance, validated_data):

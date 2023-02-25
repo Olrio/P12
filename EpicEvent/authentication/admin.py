@@ -2,7 +2,11 @@ from django.contrib import admin
 from django.urls import resolve
 from django.db.models import Q
 from .models import User
-from CRM.models import Client, Contract, Event
+from CRM.models import (
+    Client,
+    Contract,
+    Event
+)
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django import forms
 from django.core.exceptions import ValidationError
@@ -123,7 +127,7 @@ class CustomUserAdmin(BaseUserAdmin):
         "sales",
         "support",
     )
-    list_filter = ("is_admin",)
+    list_filter = []
     fieldsets = (
         (None, {"fields": ("first_name", "last_name", "username")}),
         (
@@ -133,7 +137,12 @@ class CustomUserAdmin(BaseUserAdmin):
                 "fields": ("password1", "password2"),
             },
         ),
-        ("Permissions", {"fields": ("groups",)}),
+        (
+            "Permissions",
+            {
+                "fields": ("groups", "is_staff", "is_superuser")
+            }
+        ),
     )
 
     add_fieldsets = (
@@ -274,9 +283,12 @@ class ContractForm(forms.ModelForm):
                 )
         except KeyError as e:
             # it's a create form, with no status field
-            form_logger.info("use of a Contract add form "
-                             "with no status field according "
-                             "to %s error", type(e))
+            form_logger.info(
+                "use of a Contract add form "
+                "with no status field according "
+                "to %s error",
+                type(e)
+            )
 
     def save(self, commit=True):
         contract = super().save(commit=False)
@@ -344,17 +356,21 @@ class EventForm(forms.ModelForm):
 
     @staticmethod
     def check_event_status(status, date_event):
-        if date_event \
-                and date_event > datetime.datetime.now() \
-                and status in ["2", "3"]:
+        if (
+                date_event
+                and date_event > datetime.datetime.now()
+                and status in ["2", "3"]
+        ):
             raise ValidationError(
                 "Error in field <Event status>: "
                 "This event can't be in progress or closed "
                 "since its date is later than the current date"
             )
-        elif date_event \
-                and date_event < datetime.datetime.now() \
-                and status == "1":
+        elif (
+                date_event
+                and date_event < datetime.datetime.now()
+                and status == "1"
+        ):
             raise ValidationError(
                 "Error in field <Event status>: "
                 "This event can't be incoming since its date "
@@ -387,24 +403,26 @@ class EventAdmin(admin.ModelAdmin):
         if db_field.name == "contract":
             if resolve(request.path)[2]:
                 event_id = resolve(request.path)[2]["object_id"]
-                kwargs["queryset"] = \
+                kwargs["queryset"] = (
                     Contract.objects.filter(status=True).filter(
-                    Q(event__contract__isnull=True) | Q(event__id=event_id)
+                        Q(event__contract__isnull=True) | Q(event__id=event_id)
+                        )
                 )
                 return super(EventAdmin, self).formfield_for_foreignkey(
                     db_field, request, **kwargs
                 )
             else:
-                kwargs["queryset"] = \
+                kwargs["queryset"] = (
                     Contract.objects.filter(status=True).exclude(
-                    event__contract__isnull=False
+                        event__contract__isnull=False
+                        )
                 )
                 return super(EventAdmin, self).formfield_for_foreignkey(
                     db_field, request, **kwargs
                 )
         if db_field.name == "support_contact":
-            kwargs["queryset"] = \
-                User.objects.filter(groups__name="Support team")
+            kwargs["queryset"] = (
+                User.objects.filter(groups__name="Support team"))
             return super(EventAdmin, self).formfield_for_foreignkey(
                 db_field, request, **kwargs
             )

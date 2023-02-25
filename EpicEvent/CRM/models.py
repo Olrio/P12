@@ -26,11 +26,6 @@ class Contract(models.Model):
         to=Client,
         on_delete=models.CASCADE,
     )
-    # sales_contact = models.ForeignKey(
-    #         to=User,
-    #         on_delete=models.PROTECT,
-    #         limit_choices_to={'groups__name': "Sales team"},
-    #     )
     status = models.BooleanField(default=False)
     amount = models.FloatField()
     payment_due = models.DateTimeField()
@@ -43,10 +38,6 @@ class Contract(models.Model):
 
 class Event(models.Model):
     name = models.CharField(max_length=250)
-    # client = models.ForeignKey(
-    #     to=Client,
-    #     on_delete=models.CASCADE,
-    # )
     contract = models.OneToOneField(
         to=Contract,
         on_delete=models.CASCADE,

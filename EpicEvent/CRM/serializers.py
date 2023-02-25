@@ -1,6 +1,10 @@
 from rest_framework import serializers
 from django.core.exceptions import ValidationError
-from .models import Client, Contract, Event
+from .models import (
+    Client,
+    Contract,
+    Event
+)
 from authentication.models import User
 from authentication.validators import Validators
 import datetime
@@ -9,10 +13,18 @@ import datetime
 class ClientSerializer(serializers.ModelSerializer):
     class Meta:
         model = Client
-        fields = ['pk', 'first_name', 'last_name', 'email',
-                  'phone', 'mobile',
-                  'company_name', 'sales_contact',
-                  'date_created', 'date_updated']
+        fields = [
+            'pk',
+            'first_name',
+            'last_name',
+            'email',
+            'phone',
+            'mobile',
+            'company_name',
+            'sales_contact',
+            'date_created',
+            'date_updated'
+        ]
         read_only_fields = ['date_created', 'date_updated']
 
     def get_fields(self):
@@ -151,8 +163,9 @@ class EventSerializer(serializers.ModelSerializer):
                 raise ValidationError(
                     "Sorry, there's already an event "
                     "associated with this contract")
-        if request_user.groups.filter(name="Sales team").exists() \
-                and contract.client.sales_contact != request_user:
+        if request_user.groups.filter(
+                name="Sales team"
+        ).exists() and contract.client.sales_contact != request_user:
             raise ValidationError(
                 "Sorry, you are not the sales contact of this client")
         if not contract.status:
@@ -183,7 +196,8 @@ class EventSerializer(serializers.ModelSerializer):
             raise ValidationError(
                 "Only users of management team "
                 "can change/add support_contact. "
-                "Please dont't use this field.")
+                "Please dont't use this field."
+            )
         try:
             support_contact = User.objects.get(id=value)
             if not support_contact.groups.filter(name="Support team").exists():
@@ -194,14 +208,14 @@ class EventSerializer(serializers.ModelSerializer):
         return support_contact
 
     def validate(self, data):
-        if data['event_date'] > datetime.datetime.now() \
-                and data['event_status'] in [2, 3]:
+        if (data['event_date'] > datetime.datetime.now()
+                and data['event_status'] in [2, 3]):
             raise ValidationError(
                 {"Event status": "This event can't be in progress"
                                  " or closed since its date "
                                  "is later than the current date"})
-        elif data['event_date'] < datetime.datetime.now() \
-                and data['event_status'] == 1:
+        elif (data['event_date'] < datetime.datetime.now()
+              and data['event_status'] == 1):
             raise ValidationError(
                 {"Event status": "This event can't be incoming "
                                  "since its date is earlier "

@@ -4,9 +4,17 @@ from rest_framework.response import Response
 from rest_framework_simplejwt.views import TokenViewBase
 from django.core.exceptions import ObjectDoesNotExist
 from .models import User
-from .serializers import UserSerializer, \
-    RegisterUserSerializer, UpdateUserSerializer, LoginUserSerializer
-from CRM.permissions import IsAuthenticated, IsManagementTeam
+from .serializers import (
+    UserListSerializer,
+    UserDetailSerializer,
+    RegisterUserSerializer,
+    UpdateUserSerializer,
+    LoginUserSerializer
+)
+from CRM.permissions import (
+    IsAuthenticated,
+    IsManagementTeam
+)
 
 
 class TokenObtainPairView(TokenViewBase):
@@ -29,7 +37,9 @@ class UserViewset(ModelViewSet):
                 'id': user.id,
                 'first_name': user.first_name,
                 'last_name': user.last_name,
-                'username': user.username
+                'username': user.username,
+                'is_staff': user.is_staff,
+                'is_superuser': user.is_superuser,
             })
             return Response(data)
         else:
@@ -40,8 +50,14 @@ class UserViewset(ModelViewSet):
             self.serializer_class = RegisterUserSerializer
         elif self.request.method == "PUT":
             self.serializer_class = UpdateUserSerializer
-        else:
-            self.serializer_class = UserSerializer
+        elif self.request.method == "GET" and (
+                "pk" in self.request.parser_context["kwargs"]
+        ):
+            self.serializer_class = UserDetailSerializer
+        elif self.request.method == "GET" and (
+                "pk" not in self.request.parser_context["kwargs"]
+        ):
+            self.serializer_class = UserListSerializer
         return self.serializer_class(*args, **kwargs)
 
     def get_queryset(self):

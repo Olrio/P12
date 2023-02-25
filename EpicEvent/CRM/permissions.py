@@ -1,5 +1,9 @@
 from rest_framework.permissions import BasePermission
-from CRM.models import Client, Contract, Event
+from CRM.models import (
+    Client,
+    Contract,
+    Event
+)
 
 
 class IsAuthenticated(BasePermission):
@@ -8,19 +12,24 @@ class IsAuthenticated(BasePermission):
 
 
 class IsManagementTeam(BasePermission):
-    message = "Sorry, only members of the management team" \
-              " can perform this action"
+    message = (
+        "Sorry, only members of the management team "
+        "can perform this action"
+    )
 
     def has_permission(self, request, view):
-        return bool(
-            request.user.groups.filter(name="Management team").exists())
+        return bool(request.user.groups.filter(
+            name="Management team"
+        ).exists())
 
 
 class IsSalesTeam(BasePermission):
     message = "Sorry, only members of the sales team can perform this action"
 
     def has_permission(self, request, view):
-        return bool(request.user.groups.filter(name="Sales team").exists())
+        return bool(request.user.groups.filter(
+            name="Sales team"
+        ).exists())
 
 
 class IsSupportTeam(BasePermission):
@@ -38,11 +47,10 @@ class IsClientSalesContact(BasePermission):
     )
 
     def has_object_permission(self, request, view, obj):
-        return (
-            Client.objects.filter(
-                pk=obj.pk,
-                sales_contact=request.user).exists()
-        )
+        return Client.objects.filter(
+            pk=obj.pk,
+            sales_contact=request.user
+        ).exists()
 
 
 class IsClientEventSupportContact(BasePermission):
@@ -53,11 +61,9 @@ class IsClientEventSupportContact(BasePermission):
     )
 
     def has_object_permission(self, request, view, obj):
-        return (
-            Client.objects.filter(
-                pk=obj.pk,
-                contract__event__support_contact=request.user).exists()
-        )
+        return Client.objects.filter(
+            pk=obj.pk, contract__event__support_contact=request.user
+        ).exists()
 
 
 class IsContractSalesContact(BasePermission):
@@ -68,11 +74,9 @@ class IsContractSalesContact(BasePermission):
     )
 
     def has_object_permission(self, request, view, obj):
-        return (
-            Contract.objects.filter(
-                pk=obj.pk,
-                client__sales_contact=request.user).exists()
-        )
+        return Contract.objects.filter(
+            pk=obj.pk, client__sales_contact=request.user
+        ).exists()
 
 
 class IsEventSupportContact(BasePermission):
@@ -83,11 +87,10 @@ class IsEventSupportContact(BasePermission):
     )
 
     def has_object_permission(self, request, view, obj):
-        return (
-            Event.objects.filter(
-                pk=obj.pk,
-                support_contact=request.user).exists()
-        )
+        return Event.objects.filter(
+            pk=obj.pk,
+            support_contact=request.user
+        ).exists()
 
 
 class IsEventContractSalesContact(BasePermission):
@@ -98,8 +101,6 @@ class IsEventContractSalesContact(BasePermission):
     )
 
     def has_object_permission(self, request, view, obj):
-        return (
-            Event.objects.filter(
-                pk=obj.pk,
-                contract__client__sales_contact=request.user).exists()
-        )
+        return Event.objects.filter(
+            pk=obj.pk, contract__client__sales_contact=request.user
+        ).exists()
