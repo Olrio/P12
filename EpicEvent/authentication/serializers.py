@@ -7,7 +7,6 @@ import logging
 
 login_logger = logging.getLogger("login_security")
 
-
 class LoginUserSerializer(TokenObtainPairSerializer):
     """
     enable to follow connexions to API
@@ -130,7 +129,7 @@ class RegisterUserSerializer(serializers.ModelSerializer):
 class UpdateUserSerializer(serializers.ModelSerializer):
     password1 = serializers.CharField(required=False)
     password2 = serializers.CharField(required=False)
-    team = serializers.CharField(required=False)
+    team = serializers.CharField(required=True)
     username = serializers.CharField(
         max_length=20,
         required=False
@@ -171,21 +170,20 @@ class UpdateUserSerializer(serializers.ModelSerializer):
         if "team" in data:
             Validators.is_valid_team(data['team'])
         # is_superuser and is_staff are optional fields
-        # so, if not provided, we keep instance values
+        # if is_superuser not provided, we keep instance values
+        # if is_staff not provided, is_staff is true only for management team
         if data['is_superuser'] is None:
             data['is_superuser'] = self.instance.is_superuser
-        if data['is_staff'] is None:
-            data['is_staff'] = self.instance.is_staff
+        if data['is_staff'] is None and data['team'] == 'Management':
+            data['is_staff'] = True
+        elif data['is_staff'] is None and data['team'] != 'Management':
+            data['is_staff'] = False
         return data
 
     def update(self, instance, validated_data):
         # remove user from all groups then add to the specified group
         instance.groups.clear()
         group = Group.objects.get(name=self.validated_data["team"] + " team")
-        if self.validated_data["team"] == "Management":
-            instance.is_staff = True
-        else:
-            instance.is_staff = False
         instance.groups.add(group)
         instance = super().update(instance, validated_data)
         return instance

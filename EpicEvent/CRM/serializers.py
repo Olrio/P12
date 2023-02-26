@@ -105,11 +105,8 @@ class ContractListSerializer(serializers.ModelSerializer):
     def get_client(instance):
         queryset = Client.objects.filter(id=instance.client.id)
         serializer = ClientListSerializer(queryset, many=True)
-        # # we only need sales_contact id, first_name and last_name
-        # for saler in serializer.data:
-        #     del (saler['username'])
-        #     del (saler['groups'])
         return serializer.data
+
     class Meta:
         model = Contract
         fields = [
