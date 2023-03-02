@@ -37,6 +37,19 @@ class ClientListSerializer(serializers.ModelSerializer):
 
 
 class ClientDetailSerializer(serializers.ModelSerializer):
+    sales_contact = serializers.SerializerMethodField()
+    contact = serializers.IntegerField(required=False)
+
+    @staticmethod
+    def get_sales_contact(instance):
+        queryset = User.objects.filter(id=instance.sales_contact.id)
+        serializer = UserListSerializer(queryset, many=True)
+        # we only need sales_contact id, first_name and last_name
+        for saler in serializer.data:
+            del (saler['username'])
+            del (saler['groups'])
+        return serializer.data
+
     class Meta:
         model = Client
         fields = [
@@ -47,22 +60,12 @@ class ClientDetailSerializer(serializers.ModelSerializer):
             'phone',
             'mobile',
             'company_name',
+            'contact',
             'sales_contact',
             'date_created',
             'date_updated'
         ]
         read_only_fields = ['date_created', 'date_updated']
-
-    def get_fields(self):
-        # field 'sales_contact' only used
-        # if user is not a sales team group member
-        fields = super().get_fields()
-        if self.context['request'].user.groups.filter(
-                name="Sales team").exists() \
-                and self.context['request'].method == "POST" \
-                and not self.context['request'].user.is_superuser:
-            del fields['sales_contact']
-        return fields
 
     def validate(self, data):
         Validators.check_letters_hyphen(data['first_name'], "first_name")
@@ -74,7 +77,26 @@ class ClientDetailSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         if self.context['request'].user.groups.filter(
                 name="Management team").exists():
-            sales_contact = validated_data["sales_contact"]
+            if "contact" not in validated_data:
+                raise serializers.ValidationError(
+                    {
+                        "sales_contact error": "Please fill 'contact' field"
+                    }
+                )
+            try:
+                sales_contact = User.objects.get(id=validated_data["contact"])
+            except User.DoesNotExist:
+                raise serializers.ValidationError(
+                    {
+                        "sales_contact error": "This user doesn't exist."
+                    }
+                )
+            if not sales_contact.groups.filter(name="Sales team").exists():
+                raise serializers.ValidationError(
+                    {
+                        "sales_contact error": "Please choose a user belonging to Sales team"
+                    }
+                )
         else:
             sales_contact = self.context['request'].user
         client = Client.objects.create(
@@ -93,6 +115,24 @@ class ClientDetailSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         instance = super().update(instance, validated_data)
+        if self.context['request'].user.groups.filter(
+                name="Management team").exists():
+            if "contact" in validated_data:
+                try:
+                    sales_contact = User.objects.get(id=validated_data["contact"])
+                except User.DoesNotExist:
+                    raise serializers.ValidationError(
+                        {
+                            "sales_contact error": "This user doesn't exist."
+                        }
+                    )
+                if not sales_contact.groups.filter(name="Sales team").exists():
+                    raise serializers.ValidationError(
+                        {
+                            "sales_contact error": "Please choose a user belonging to Sales team"
+                        }
+                    )
+                instance.sales_contact = sales_contact
         instance.date_updated = datetime.datetime.now()
         instance.save()
         return instance
@@ -117,31 +157,33 @@ class ContractListSerializer(serializers.ModelSerializer):
             'payment_due',
         ]
 
-    @staticmethod
-    def get_sales_contact(obj):
-        return obj.client.sales_contact.id
-
 
 class ContractDetailSerializer(serializers.ModelSerializer):
-    sales_contact = serializers.SerializerMethodField()
     payment_due = serializers.DateTimeField(input_formats=['%Y/%m/%d %H:%M'])
-    client = serializers.CharField()
+    client = serializers.SerializerMethodField()
+    id_client = serializers.IntegerField(required=False)
 
     class Meta:
         model = Contract
-        fields = ['pk', 'client', 'amount', 'status', 'payment_due',
-                  'sales_contact', 'date_created', 'date_updated']
+        fields = [
+            'pk',
+            'client',
+            'id_client',
+            'amount',
+            'status',
+            'payment_due',
+            'date_created',
+            'date_updated'
+        ]
         read_only_fields = ['date_created', 'date_updated']
 
     @staticmethod
-    def get_sales_contact(obj):
-        return obj.client.sales_contact.id
+    def get_client(instance):
+        queryset = Client.objects.filter(id=instance.client.id)
+        serializer = ClientListSerializer(queryset, many=True)
+        return serializer.data
 
-    def validate_client(self, value):
-        try:
-            int(value)
-        except ValueError:
-            raise ValidationError("Enter an integer for <client> field")
+    def validate_id_client(self, value):
         client = Client.objects.filter(id=value).first()
         request_user = self.context['request'].user
         if not client:
@@ -151,7 +193,10 @@ class ContractDetailSerializer(serializers.ModelSerializer):
                 and client.sales_contact != request_user:
             raise ValidationError(
                 "Sorry, you are not the sales contact of this client")
-        return client
+        if self.context['request'].method == "POST":
+            return client
+        elif self.context['request'].method == "PUT":
+            return client.id
 
     def validate_payment_due(self, value):
         if self.context['request'].method == "POST":
@@ -161,13 +206,22 @@ class ContractDetailSerializer(serializers.ModelSerializer):
                 value, self.instance.date_created)
         return value
 
+    def validate(self, data):
+        if "id_client" not in data:
+            raise serializers.ValidationError(
+                {
+                    "id_client": "Please enter id of client"
+                }
+            )
+        return data
+
     def create(self, validated_data):
         if "status" in validated_data:
             status = validated_data["status"]
         else:
             status = False
         contract = Contract.objects.create(
-            client=validated_data["client"],
+            client=validated_data["id_client"],
             amount=validated_data["amount"],
             status=status,
             payment_due=validated_data["payment_due"],
@@ -180,21 +234,37 @@ class ContractDetailSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         instance = super().update(instance, validated_data)
         instance.date_updated = datetime.datetime.now()
+        instance.client = Client.objects.get(id=validated_data['id_client'])
         instance.save()
         return instance
 
 
-class EventSerializer(serializers.ModelSerializer):
+class EventListSerializer(serializers.ModelSerializer):
     contract = serializers.CharField()
     support_contact = serializers.CharField(required=False)
+    status = serializers.CharField(source='get_event_status_display')
     event_status = serializers.CharField()
     event_date = serializers.DateTimeField(input_formats=['%Y/%m/%d %H:%M'])
 
     class Meta:
         model = Event
-        fields = ['pk', 'name', 'contract', 'support_contact', 'event_status',
-                  'event_date', 'attendees', 'date_created', 'date_updated']
-        read_only_fields = ['date_created', 'date_updated']
+        fields = ['pk', 'name', 'contract', 'support_contact', 'event_status', 'status',
+                  'event_date', 'attendees']
+        read_only_fields = ['date_created', 'date_updated', 'status']
+
+
+class EventDetailSerializer(serializers.ModelSerializer):
+    contract = serializers.CharField()
+    support_contact = serializers.CharField(required=False)
+    event_date = serializers.DateTimeField(input_formats=['%Y/%m/%d %H:%M'])
+    status = serializers.CharField(source='get_event_status_display', required=False)
+    event_status = serializers.CharField()
+
+    class Meta:
+        model = Event
+        fields = ['pk', 'name', 'contract', 'support_contact', 'event_status', 'status',
+                  'event_date', 'attendees', 'notes', 'date_created', 'date_updated']
+        read_only_fields = ['date_created', 'date_updated', 'status']
 
     def validate_contract(self, value):
         contract = Contract.objects.filter(id=value).first()
@@ -222,7 +292,8 @@ class EventSerializer(serializers.ModelSerializer):
             raise ValidationError("Sorry, this contract isn't signed yet")
         return contract
 
-    def validate_event_status(self, value):
+    @staticmethod
+    def validate_event_status(value):
         if value not in ["Incoming", "In progress", "Closed"]:
             raise ValidationError(
                 "Error in field <Event status>: "
@@ -232,13 +303,6 @@ class EventSerializer(serializers.ModelSerializer):
         elif value == "In progress":
             return 2
         return 3
-
-    def validate_event_date(self, value):
-        if value < datetime.datetime.now():
-            raise ValidationError(
-                "Error in field <Event date>: "
-                "The date you entered is prior to current date")
-        return value
 
     def validate_support_contact(self, value):
         request_user = self.context['request'].user
@@ -261,13 +325,13 @@ class EventSerializer(serializers.ModelSerializer):
         if (data['event_date'] > datetime.datetime.now()
                 and data['event_status'] in [2, 3]):
             raise ValidationError(
-                {"Event status": "This event can't be in progress"
+                {"event_status": "This event can't be in progress"
                                  " or closed since its date "
                                  "is later than the current date"})
         elif (data['event_date'] < datetime.datetime.now()
               and data['event_status'] == 1):
             raise ValidationError(
-                {"Event status": "This event can't be incoming "
+                {"event_status": "This event can't be incoming "
                                  "since its date is earlier "
                                  "than the current date"})
         return data
@@ -282,6 +346,10 @@ class EventSerializer(serializers.ModelSerializer):
             date_created=datetime.datetime.now(),
             date_updated=datetime.datetime.now()
         )
+        if "support_contact" in validated_data:
+            event.support_contact = validated_data['support_contact']
+        if "notes" in validated_data:
+            event.notes = validated_data['notes']
         event.save()
         return event
 

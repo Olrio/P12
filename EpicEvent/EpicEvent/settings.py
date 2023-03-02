@@ -180,12 +180,6 @@ LOGGING = {
             'filename': 'CRM/log/login.log',
             'formatter': 'verbose',
         },
-        'form_file': {
-            'level': 'INFO',
-            'class': 'logging.FileHandler',
-            'filename': 'CRM/log/form.log',
-            'formatter': 'verbose',
-        },
     },
     'loggers': {
             'django': {
@@ -195,11 +189,6 @@ LOGGING = {
             },
             'login_security': {
                 'handlers': ['login_file'],
-                'level': 'INFO',
-                'propagate': False,
-            },
-            'form_security': {
-                'handlers': ['form_file'],
                 'level': 'INFO',
                 'propagate': False,
             },

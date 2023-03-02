@@ -6,6 +6,11 @@ from CRM.models import (
     Event
 )
 from .data_for_tests import Data
+from authentication.serializers import (
+    UserListSerializer,
+    UserDetailSerializer,
+    RegisterUserSerializer
+)
 
 
 class DataTest(Data):
@@ -94,6 +99,8 @@ class UserTest(DataTest):
         list_last_names = [data['last_name'] for data in response.data]
         self.assertTrue(self.management_user.username in list_usernames)
         self.assertTrue(self.sales_user.last_name in list_last_names)
+        self.assertTrue("Sales team" in UserListSerializer().get_groups(self.sales_user))
+
 
     def test_get_users_list_unauthorized(self):
         url = "/crm/users/"
@@ -115,6 +122,7 @@ class UserTest(DataTest):
         self.assertEqual(
             response.data['first_name'],
             self.support_user.first_name)
+        self.assertTrue("Support team" in UserDetailSerializer().get_groups(self.support_user))
 
     def test_get_user_detail_unauthorized(self):
         url = f"/crm/users/{self.support_user.id}/"
@@ -135,7 +143,7 @@ class UserTest(DataTest):
         self.assertEqual(response.json()['detail'],
                          "Sorry, user 0 doesn't exist")
 
-    def test_create_a_user(self):
+    def test_create_a_support_user(self):
         url = "/crm/users/"
         token = self.login(self.management_user)
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + token["access"])
@@ -149,6 +157,50 @@ class UserTest(DataTest):
         }, format="json")
         self.assertEqual(User.objects.count(), users_count + 1)
         self.assertEqual(response.status_code, 200)
+        self.assertFalse(User.objects.last().is_staff)
+
+    def test_create_a_user_with_same_last_name_and_first_name_than_existent_user(self):
+        url = "/crm/users/"
+        token = self.login(self.management_user)
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + token["access"])
+        response = self.client.post(url, {
+            'last_name': self.sales_user.last_name,
+            'first_name': self.sales_user.first_name,
+            'password1': 'toto1234',
+            'password2': 'toto1234',
+            'team': 'Support'
+        }, format="json")
+        self.assertEqual(response.status_code, 200)
+        created_user1 = User.objects.last()
+        self.assertNotEqual(created_user1.username,
+                            self.sales_user.username)
+        response = self.client.post(url, {
+            'last_name': self.sales_user.last_name,
+            'first_name': self.sales_user.first_name,
+            'password1': 'toto1234',
+            'password2': 'toto1234',
+            'team': 'Support'
+        }, format="json")
+        self.assertEqual(response.status_code, 200)
+        created_user2 = User.objects.last()
+        self.assertNotEqual(created_user1.username,
+                            created_user2.username)
+
+    def test_create_a_management_user(self):
+        url = "/crm/users/"
+        token = self.login(self.management_user)
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + token["access"])
+        users_count = User.objects.count()
+        response = self.client.post(url, {
+            'last_name': 'bond',
+            'first_name': 'james',
+            'password1': 'toto1234',
+            'password2': 'toto1234',
+            'team': 'Management'
+        }, format="json")
+        self.assertEqual(User.objects.count(), users_count + 1)
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(User.objects.last().is_staff)
 
     def test_create_a_user_bad_data(self):
         url = "/crm/users/"
@@ -195,11 +247,64 @@ class UserTest(DataTest):
             "first_name": "Hella",
             "last_name": self.support_user.last_name,
             "team": "Support",
-            "username": "+grg+"
+            "username": "+grg+",
+            "password1": "",
+            "password2": "",
         })
         self.assertEqual(response.status_code, 200)
         updated_user = User.objects.get(id=self.support_user.id)
         self.assertEqual(updated_user.first_name, "Hella")
+
+    def test_update_a_user_change_password(self):
+        url = f"/crm/users/{self.support_user.id}/"
+        token = self.login(self.management_user)
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + token["access"])
+        self.assertEqual(self.support_user.first_name, "Ella")
+        response = self.client.put(url, {
+            "first_name": "Hella",
+            "last_name": self.support_user.last_name,
+            "team": "Management",
+            "username": "+grg+",
+            "password1": "newpassword99",
+            "password2": "newpassword99",
+        })
+        self.assertEqual(response.status_code, 200)
+        updated_user = User.objects.get(id=self.support_user.id)
+        self.assertEqual(updated_user.first_name, "Hella")
+        self.assertTrue(User.objects.get(username="+grg+").is_staff)
+
+    def test_update_a_user_missing_password(self):
+        url = f"/crm/users/{self.support_user.id}/"
+        token = self.login(self.management_user)
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + token["access"])
+        self.assertEqual(self.support_user.first_name, "Ella")
+        response = self.client.put(url, {
+            "first_name": "Hella",
+            "last_name": self.support_user.last_name,
+            "team": "Management",
+            "username": "+grg+",
+            "password2": "newpassword99",
+        })
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json()['non_field_errors'][0],
+                         "Password error : You must supply both password1 and password2 !")
+
+    def test_update_a_user_two_passwords_different(self):
+        url = f"/crm/users/{self.support_user.id}/"
+        token = self.login(self.management_user)
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + token["access"])
+        self.assertEqual(self.support_user.first_name, "Ella")
+        response = self.client.put(url, {
+            "first_name": "Hella",
+            "last_name": self.support_user.last_name,
+            "team": "Management",
+            "username": "+grg+",
+            "password1": "newpassword9",
+            "password2": "newpassword99",
+        })
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json()['non_field_errors'][0],
+                         "Password error : Your two entries for password differ !")
 
     def test_update_a_user_unauthorized(self):
         url = f"/crm/users/{self.support_user.id}/"
@@ -256,6 +361,30 @@ class UserTest(DataTest):
         self.assertEqual(response.json()['detail'],
                          "Sorry, user 0 doesn't exist")
 
+    def test_delete_a_user_client_sales_contact(self):
+        url = f"/crm/users/{self.sales_user.id}/"
+        token = self.login(self.management_user)
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + token["access"])
+        response = self.client.delete(url)
+        self.assertEqual(response.status_code, 400)
+        clients = Client.objects.filter(sales_contact = self.sales_user)
+        self.assertEqual(response.json()['Unauthorized delete'],
+                         "This user is sales contact for the following clients :"
+                         f" {[client for client in clients]}. "
+                         f"You must change these clients sales contact prior to delete this user.")
+
+    def test_delete_a_user_event_support_contact(self):
+        url = f"/crm/users/{self.support_user.id}/"
+        token = self.login(self.management_user)
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + token["access"])
+        response = self.client.delete(url)
+        self.assertEqual(response.status_code, 400)
+        events = Event.objects.filter(support_contact = self.support_user)
+        self.assertEqual(response.json()['Unauthorized delete'],
+                         "This user is support for the following events :"
+                         f" {[event for event in events]}. "
+                         f"You must change these events support contact prior to delete this user.")
+
 
 class ClientTest(DataTest):
     def test_get_client_list(self):
@@ -270,9 +399,26 @@ class ClientTest(DataTest):
         self.assertTrue(self.client1.last_name in list_last_names)
         self.assertTrue(self.client2.company_name in list_companies)
 
-    def test_get_client_detail(self):
+    def test_get_client_list_with_incorrect_filter(self):
+        url = "/crm/clients/?xzk=2"
+        token = self.login(self.management_user)
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + token["access"])
+        response = self.client.get(url, format="json")
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.json()['detail'],
+                         "Sorry, looks like you search for inexistent fields. Please ensure you correctly entered searched fields.")
+
+    def test_get_client_detail_sales_user(self):
         url = f"/crm/clients/{self.client1.id}/"
         token = self.login(self.sales_user)
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + token["access"])
+        response = self.client.get(url, format="json")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data['first_name'], self.client1.first_name)
+
+    def test_get_client_detail_support_user(self):
+        url = f"/crm/clients/{self.client1.id}/"
+        token = self.login(self.support_user)
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + token["access"])
         response = self.client.get(url, format="json")
         self.assertEqual(response.status_code, 200)
@@ -287,9 +433,18 @@ class ClientTest(DataTest):
         self.assertEqual(response.json()['detail'],
                          "Sorry, client 0 doesn't exist")
 
-    def test_get_client_detail_unauthorized(self):
+    def test_get_client_detail_unauthorized_sales_user(self):
         url = f"/crm/clients/{self.client1.id}/"
         token = self.login(self.sales_user2)
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + token["access"])
+        response = self.client.get(url, format="json")
+        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.json()['detail'],
+                         "You do not have permission to perform this action.")
+
+    def test_get_client_detail_unauthorized_support_user(self):
+        url = f"/crm/clients/{self.client1.id}/"
+        token = self.login(self.support_user2)
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + token["access"])
         response = self.client.get(url, format="json")
         self.assertEqual(response.status_code, 403)
@@ -312,6 +467,69 @@ class ClientTest(DataTest):
         self.assertEqual(Client.objects.count(), clients_count + 1)
         self.assertEqual(response.status_code, 201)
         self.assertEqual(Client.objects.last().sales_contact, self.sales_user2)
+
+    def test_create_a_client_invalid_phone(self):
+        url = "/crm/clients/"
+        token = self.login(self.sales_user2)
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + token["access"])
+        response = self.client.post(url, {
+            'first_name': 'john',
+            'last_name': 'smith',
+            'email': 'menin@black.com',
+            'phone': '11111bad',
+            'mobile': '222222',
+            'company_name': 'la septième',
+        }, format="json")
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json()['non_field_errors'][0],
+                         "<phone>: A phone number can contain only numbers !")
+
+    def test_create_a_client_management_user_not_providing_contact_user(self):
+        url = "/crm/clients/"
+        token = self.login(self.management_user)
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + token["access"])
+        response = self.client.post(url, {
+            'first_name': 'john',
+            'last_name': 'smith',
+            'email': 'menin@black.com',
+            'phone': '1111111111',
+            'mobile': '222222',
+            'company_name': 'la septième',
+        }, format="json")
+        self.assertEqual(response.json()['sales_contact error'],
+                         "Please fill 'contact' field")
+
+    def test_create_a_client_management_user_providing_inexistent_contact_user(self):
+        url = "/crm/clients/"
+        token = self.login(self.management_user)
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + token["access"])
+        response = self.client.post(url, {
+            'first_name': 'john',
+            'last_name': 'smith',
+            'contact': 0,
+            'email': 'menin@black.com',
+            'phone': '1111111111',
+            'mobile': '222222',
+            'company_name': 'la septième',
+        }, format="json")
+        self.assertEqual(response.json()['sales_contact error'],
+                         "This user doesn't exist.")
+
+    def test_create_a_client_management_user_providing_contact_user_not_sales_member(self):
+        url = "/crm/clients/"
+        token = self.login(self.management_user)
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + token["access"])
+        response = self.client.post(url, {
+            'first_name': 'john',
+            'last_name': 'smith',
+            'contact': self.support_user2.id,
+            'email': 'menin@black.com',
+            'phone': '1111111111',
+            'mobile': '222222',
+            'company_name': 'la septième',
+        }, format="json")
+        self.assertEqual(response.json()['sales_contact error'],
+                         "Please choose a user belonging to Sales team")
 
     def test_create_a_client_unauthorized(self):
         url = "/crm/clients/"
@@ -341,7 +559,6 @@ class ClientTest(DataTest):
             "phone": "12345678",
             "mobile": "888888",
             "company_name": "L'Empire",
-            "sales_contact": self.sales_user.id,
         })
         self.assertEqual(response.status_code, 200)
         updated_client = Client.objects.get(id=self.client1.id)
@@ -349,6 +566,57 @@ class ClientTest(DataTest):
         self.assertNotEqual(
             updated_client.date_created,
             updated_client.date_updated)
+
+    def test_update_a_client_management_user(self):
+        url = f"/crm/clients/{self.client1.id}/"
+        token = self.login(self.management_user)
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + token["access"])
+        self.assertEqual(self.client1.sales_contact, self.sales_user)
+        response = self.client.put(url, {
+            "first_name": "Darth",
+            "last_name": "Vador",
+            "email": "star@wars.com",
+            "phone": "12345678",
+            "mobile": "888888",
+            "company_name": "L'Empire",
+            "contact": self.sales_user2.id
+        })
+        self.assertEqual(response.status_code, 200)
+        updated_client = Client.objects.get(id=self.client1.id)
+        self.assertEqual(updated_client.sales_contact, self.sales_user2)
+
+    def test_update_a_client_management_user_providing_inexistent_contact_user(self):
+        url = f"/crm/clients/{self.client1.id}/"
+        token = self.login(self.management_user)
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + token["access"])
+        response = self.client.put(url, {
+            "first_name": "Darth",
+            "last_name": "Vador",
+            "email": "star@wars.com",
+            "phone": "12345678",
+            "mobile": "888888",
+            "company_name": "L'Empire",
+            "contact": 0,
+        })
+        self.assertEqual(response.json()['sales_contact error'],
+                         "This user doesn't exist.")
+
+    def test_update_a_client_management_user_providing_contact_user_not_sales_member(self):
+        url = f"/crm/clients/{self.client1.id}/"
+        token = self.login(self.management_user)
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + token["access"])
+        response = self.client.put(url, {
+            "first_name": "Darth",
+            "last_name": "Vador",
+            "email": "star@wars.com",
+            "phone": "12345678",
+            "mobile": "888888",
+            "company_name": "L'Empire",
+            "contact": self.support_user.id,
+        })
+        self.assertEqual(response.json()['sales_contact error'],
+                         "Please choose a user belonging to Sales team")
+
 
     def test_update_a_client_non_existent(self):
         url = "/crm/clients/0/"
@@ -367,9 +635,26 @@ class ClientTest(DataTest):
         self.assertEqual(response.json()['detail'],
                          "Sorry, client 0 doesn't exist")
 
-    def test_update_a_client_unauthorized(self):
+    def test_update_a_client_unauthorized_support_user(self):
         url = f"/crm/clients/{self.client1.id}/"
         token = self.login(self.support_user)
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + token["access"])
+        response = self.client.put(url, {
+            "first_name": "Darth",
+            "last_name": "Vador",
+            "email": "star@wars.com",
+            "phone": "12345678",
+            "mobile": "888888",
+            "company_name": "L'Empire",
+            "sales_contact": self.sales_user.id,
+        })
+        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.json()['detail'],
+                         "You do not have permission to perform this action.")
+
+    def test_update_a_client_unauthorized_sales_user(self):
+        url = f"/crm/clients/{self.client1.id}/"
+        token = self.login(self.sales_user2)
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + token["access"])
         response = self.client.put(url, {
             "first_name": "Darth",
@@ -421,6 +706,15 @@ class ContractTest(DataTest):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.data), Contract.objects.count())
 
+    def test_get_contract_list_with_incorrect_filter(self):
+        url = "/crm/contracts/?xzk=2"
+        token = self.login(self.support_user)
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + token["access"])
+        response = self.client.get(url, format="json")
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.json()['detail'],
+                         "Sorry, looks like you search for inexistent fields. Please ensure you correctly entered searched fields.")
+
     def test_get_contract_detail(self):
         url = f"/crm/contracts/{self.contract1.id}/"
         token = self.login(self.sales_user)
@@ -441,9 +735,18 @@ class ContractTest(DataTest):
         self.assertEqual(response.json()['detail'],
                          "Sorry, contract 0 doesn't exist")
 
-    def test_get_contract_detail_unauthorized(self):
+    def test_get_contract_detail_unauthorized_sales_user(self):
         url = f"/crm/contracts/{self.contract1.id}/"
         token = self.login(self.sales_user2)
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + token["access"])
+        response = self.client.get(url, format="json")
+        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.json()['detail'],
+                         "You do not have permission to perform this action.")
+
+    def test_get_contract_detail_unauthorized_support_user(self):
+        url = f"/crm/contracts/{self.contract1.id}/"
+        token = self.login(self.support_user)
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + token["access"])
         response = self.client.get(url, format="json")
         self.assertEqual(response.status_code, 403)
@@ -456,22 +759,36 @@ class ContractTest(DataTest):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + token["access"])
         contracts_count = Contract.objects.count()
         response = self.client.post(url, {
-            'client': self.client2.id,
+            'id_client': self.client2.id,
             'payment_due': self.date_p50d.strftime("%Y/%m/%d %H:%M"),
             'amount': 2500,
         }, format="json")
         self.assertEqual(Contract.objects.count(), contracts_count + 1)
         self.assertEqual(response.status_code, 201)
-        self.assertEqual(
-            Contract.objects.last().client.sales_contact,
-            self.sales_user)
+        contract = Contract.objects.last()
+        self.assertEqual(contract.client.sales_contact, self.sales_user)
+        self.assertEqual(contract.status, False)
+
+    def test_create_a_contract_status_provided(self):
+        url = "/crm/contracts/"
+        token = self.login(self.management_user)
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + token["access"])
+        response = self.client.post(url, {
+            'id_client': self.client2.id,
+            'payment_due': self.date_p50d.strftime("%Y/%m/%d %H:%M"),
+            'amount': 2500,
+            'status': True
+        }, format="json")
+        self.assertEqual(response.status_code, 201)
+        contract = Contract.objects.last()
+        self.assertEqual(contract.status, True)
 
     def test_create_a_contract_unauthorized(self):
         url = "/crm/contracts/"
         token = self.login(self.support_user)
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + token["access"])
         response = self.client.post(url, {
-            'client': self.client2.id,
+            'id_client': self.client2.id,
             'payment_due': self.date_p50d.strftime("%Y/%m/%d %H:%M"),
             'amount': 2500,
         }, format="json")
@@ -479,18 +796,55 @@ class ContractTest(DataTest):
         self.assertEqual(response.json()['detail'],
                          "You do not have permission to perform this action.")
 
+    def test_create_a_contract_sales_user_not_client_sales_contact(self):
+        url = "/crm/contracts/"
+        token = self.login(self.sales_user2)
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + token["access"])
+        response = self.client.post(url, {
+            'id_client': self.client1.id,
+            'payment_due': self.date_p50d.strftime("%Y/%m/%d %H:%M"),
+            'amount': 2500,
+        }, format="json")
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json()['id_client'][0],
+                         "Sorry, you are not the sales contact of this client")
+
     def test_create_a_contract_client_non_existent(self):
         url = "/crm/contracts/"
         token = self.login(self.sales_user2)
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + token["access"])
         response = self.client.post(url, {
-            'client': 0,
+            'id_client': 0,
             'payment_due': self.date_p50d.strftime("%Y/%m/%d %H:%M"),
             'amount': 2500,
         }, format="json")
         self.assertEqual(response.status_code, 400)
-        self.assertEqual(response.json()['client'][0],
+        self.assertEqual(response.json()['id_client'][0],
                          "Sorry, client 0 doesn't exist")
+
+    def test_create_a_contract_id_client_non_provided(self):
+        url = "/crm/contracts/"
+        token = self.login(self.sales_user2)
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + token["access"])
+        response = self.client.post(url, {
+            'payment_due': self.date_p50d.strftime("%Y/%m/%d %H:%M"),
+            'amount': 2500,
+        }, format="json")
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json()['id_client'][0],
+                         "Please enter id of client")
+
+    def test_create_a_contract_payment_due_prior_to_current_date(self):
+        url = "/crm/contracts/"
+        token = self.login(self.sales_user2)
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + token["access"])
+        response = self.client.post(url, {
+            'payment_due': self.date_a30d.strftime("%Y/%m/%d %H:%M"),
+            'amount': 2500,
+        }, format="json")
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json()['payment_due'][0],
+                         "Payment due date can't be prior to creation date")
 
     def test_update_a_contract(self):
         url = f"/crm/contracts/{self.contract1.id}/"
@@ -498,7 +852,7 @@ class ContractTest(DataTest):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + token["access"])
         self.assertEqual(self.contract1.amount, 10000)
         response = self.client.put(url, {
-            "client": self.client1.id,
+            "id_client": self.client1.id,
             "payment_due": self.date_p20d.strftime("%Y/%m/%d %H:%M"),
             "amount": 15000,
         })
@@ -514,20 +868,33 @@ class ContractTest(DataTest):
         token = self.login(self.sales_user)
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + token["access"])
         response = self.client.put(url, {
-            "client": 0,
+            "id_client": 0,
             "payment_due": self.date_p20d.strftime("%Y/%m/%d %H:%M"),
             "amount": 15000,
         })
         self.assertEqual(response.status_code, 400)
-        self.assertEqual(response.json()['client'][0],
+        self.assertEqual(response.json()['id_client'][0],
                          "Sorry, client 0 doesn't exist")
 
-    def test_update_a_contract_unauthorized(self):
+    def test_update_a_contract_unauthorized_sales_user(self):
         url = f"/crm/contracts/{self.contract1.id}/"
         token = self.login(self.sales_user2)
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + token["access"])
         response = self.client.put(url, {
-            "client": 0,
+            "id_client": 0,
+            "payment_due": self.date_p20d.strftime("%Y/%m/%d %H:%M"),
+            "amount": 15000,
+        })
+        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.json()['detail'],
+                         "You do not have permission to perform this action.")
+
+    def test_update_a_contract_unauthorized_support_user(self):
+        url = f"/crm/contracts/{self.contract1.id}/"
+        token = self.login(self.support_user)
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + token["access"])
+        response = self.client.put(url, {
+            "id_client": 0,
             "payment_due": self.date_p20d.strftime("%Y/%m/%d %H:%M"),
             "amount": 15000,
         })
@@ -572,6 +939,15 @@ class EventTest(DataTest):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.data), Event.objects.count())
 
+    def test_get_event_list_with_incorrect_filter(self):
+        url = "/crm/events/?xzk=2"
+        token = self.login(self.support_user)
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + token["access"])
+        response = self.client.get(url, format="json")
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.json()['detail'],
+                         "Sorry, looks like you search for inexistent fields. Please ensure you correctly entered searched fields.")
+
     def test_get_event_detail(self):
         url = f"/crm/events/{self.event1.id}/"
         token = self.login(self.support_user)
@@ -581,9 +957,18 @@ class EventTest(DataTest):
         self.assertEqual(response.data['name'], self.event1.name)
         self.assertEqual(response.data['attendees'], self.event1.attendees)
 
-    def test_get_event_detail_unauthorized(self):
+    def test_get_event_detail_unauthorized_sales_user(self):
         url = f"/crm/events/{self.event1.id}/"
         token = self.login(self.sales_user2)
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + token["access"])
+        response = self.client.get(url, format="json")
+        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.json()['detail'],
+                         "You do not have permission to perform this action.")
+
+    def test_get_event_detail_unauthorized_support_user(self):
+        url = f"/crm/events/{self.event1.id}/"
+        token = self.login(self.support_user2)
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + token["access"])
         response = self.client.get(url, format="json")
         self.assertEqual(response.status_code, 403)
@@ -609,15 +994,16 @@ class EventTest(DataTest):
             "contract": self.contract3.id,
             "event_status": 'Incoming',
             "attendees": 50,
+            "notes": "Beware of dogs !",
             "event_date": self.date_p20d.strftime("%Y/%m/%d %H:%M"),
         }, format="json")
         self.assertEqual(Event.objects.count(), events_count + 1)
         self.assertEqual(response.status_code, 201)
-        self.assertEqual(
-            Event.objects.last().contract.client.sales_contact,
-            self.sales_user)
+        event = Event.objects.last()
+        self.assertEqual(event.contract.client.sales_contact, self.sales_user)
+        self.assertEqual(event.notes, "Beware of dogs !")
 
-    def test_create_an_event_unauthorized(self):
+    def test_create_an_event_unauthorized_support_user(self):
         url = "/crm/events/"
         token = self.login(self.support_user)
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + token["access"])
@@ -662,6 +1048,161 @@ class EventTest(DataTest):
         self.assertEqual(response.json()['contract'][0],
                          "Sorry, contract 0 doesn't exist")
 
+    def test_create_an_event_existent_event_with_same_contract(self):
+        url = "/crm/events/"
+        token = self.login(self.sales_user2)
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + token["access"])
+        response = self.client.post(url, {
+            "name": "Event zero",
+            "contract": self.contract1.id,
+            "event_status": 'Incoming',
+            "attendees": 50,
+            "event_date": self.date_p20d.strftime("%Y/%m/%d %H:%M"),
+        }, format="json")
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json()['contract'][0],
+                         "Sorry, there's already an event associated with this contract")
+
+    def test_create_an_event_for_non_signed_contract(self):
+        url = "/crm/events/"
+        token = self.login(self.sales_user)
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + token["access"])
+        response = self.client.post(url, {
+            "name": "Event zero",
+            "contract": self.contract4.id,
+            "event_status": 'Incoming',
+            "attendees": 50,
+            "event_date": self.date_p20d.strftime("%Y/%m/%d %H:%M"),
+        }, format="json")
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json()['contract'][0],
+                         "Sorry, this contract isn't signed yet")
+
+    def test_create_an_event_error_on_event_status(self):
+        url = "/crm/events/"
+        token = self.login(self.sales_user)
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + token["access"])
+        response = self.client.post(url, {
+            "name": "Event zero",
+            "contract": self.contract3.id,
+            "event_status": 'Incomin',
+            "attendees": 50,
+            "event_date": self.date_p20d.strftime("%Y/%m/%d %H:%M"),
+        }, format="json")
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json()['event_status'][0],
+                         "Error in field <Event status>: Must be <Incoming>, <In progress> or <Closed>")
+
+    def test_create_an_event_with_event_status_in_progress(self):
+        url = "/crm/events/"
+        token = self.login(self.management_user)
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + token["access"])
+        response = self.client.post(url, {
+            "name": "Event zero",
+            "contract": self.contract3.id,
+            "support_contact": self.support_user.id,
+            "event_status": 'In progress',
+            "attendees": 50,
+            "event_date": self.date_now.strftime("%Y/%m/%d %H:%M"),
+        }, format="json")
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(
+            Event.objects.last().support_contact,
+            self.support_user
+        )
+
+    def test_create_an_event_with_event_status_closed(self):
+        url = "/crm/events/"
+        token = self.login(self.sales_user)
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + token["access"])
+        response = self.client.post(url, {
+            "name": "Event zero",
+            "contract": self.contract3.id,
+            "event_status": 'Closed',
+            "attendees": 50,
+            "event_date": self.date_now.strftime("%Y/%m/%d %H:%M"),
+        }, format="json")
+        self.assertEqual(response.status_code, 201)
+
+    def test_create_an_event_sales_user_cant_set_support_contact(self):
+        url = "/crm/events/"
+        token = self.login(self.sales_user)
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + token["access"])
+        response = self.client.post(url, {
+            "name": "Event zero",
+            "contract": self.contract3.id,
+            'support_contact': self.support_user.id,
+            "event_status": 'Closed',
+            "attendees": 50,
+            "event_date": self.date_now.strftime("%Y/%m/%d %H:%M"),
+        }, format="json")
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json()['support_contact'][0],
+                         "Only users of management team can change/add support_contact. Please dont't use this field.")
+
+    def test_create_an_event_support_contact_not_support_member(self):
+        url = "/crm/events/"
+        token = self.login(self.management_user)
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + token["access"])
+        response = self.client.post(url, {
+            "name": "Event zero",
+            "contract": self.contract3.id,
+            'support_contact': self.sales_user2.id,
+            "event_status": 'Closed',
+            "attendees": 50,
+            "event_date": self.date_now.strftime("%Y/%m/%d %H:%M"),
+        }, format="json")
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json()['support_contact'][0],
+                         f"Sorry, user {self.sales_user2.id} isn't member of support team")
+
+    def test_create_an_event_non_existent_support_contact(self):
+        url = "/crm/events/"
+        token = self.login(self.management_user)
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + token["access"])
+        response = self.client.post(url, {
+            "name": "Event zero",
+            "contract": self.contract3.id,
+            'support_contact': 0,
+            "event_status": 'Closed',
+            "attendees": 50,
+            "event_date": self.date_now.strftime("%Y/%m/%d %H:%M"),
+        }, format="json")
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json()['support_contact'][0],
+                         "Sorry, user 0 doesn't exist")
+
+    def test_create_an_event_in_progress_but_event_date_is_incoming(self):
+        url = "/crm/events/"
+        token = self.login(self.management_user)
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + token["access"])
+        response = self.client.post(url, {
+            "name": "Event zero",
+            "contract": self.contract3.id,
+            "event_status": 'In progress',
+            "attendees": 50,
+            "event_date": self.date_p20d.strftime("%Y/%m/%d %H:%M"),
+        }, format="json")
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json()['event_status'][0],
+                         "This event can't be in progress or closed since its date is later than the current date")
+
+    def test_create_an_event_incoming_but_event_date_is_passed(self):
+        url = "/crm/events/"
+        token = self.login(self.management_user)
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + token["access"])
+        response = self.client.post(url, {
+            "name": "Event zero",
+            "contract": self.contract3.id,
+            "event_status": 'Incoming',
+            "attendees": 50,
+            "event_date": self.date_a30d.strftime("%Y/%m/%d %H:%M"),
+        }, format="json")
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json()['event_status'][0],
+                         "This event can't be incoming since its date is earlier than the current date")
+
+
     def test_update_an_event(self):
         url = f"/crm/events/{self.event1.id}/"
         token = self.login(self.support_user)
@@ -682,9 +1223,24 @@ class EventTest(DataTest):
             updated_event.date_created,
             updated_event.date_updated)
 
-    def test_update_an_event_unauthorized(self):
+    def test_update_an_event_unauthorized_sales_user(self):
         url = f"/crm/events/{self.event1.id}/"
         token = self.login(self.sales_user2)
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + token["access"])
+        response = self.client.put(url, {
+            "name": "Death Star",
+            "contract": self.contract1.id,
+            "event_status": 'Incoming',
+            "attendees": 2000,
+            "event_date": self.date_p20d.strftime("%Y/%m/%d %H:%M"),
+        })
+        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.json()['detail'],
+                         "You do not have permission to perform this action.")
+
+    def test_update_an_event_unauthorized_support_user(self):
+        url = f"/crm/events/{self.event1.id}/"
+        token = self.login(self.support_user2)
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + token["access"])
         response = self.client.put(url, {
             "name": "Death Star",
@@ -711,6 +1267,21 @@ class EventTest(DataTest):
         self.assertEqual(response.status_code, 404)
         self.assertEqual(response.json()['detail'],
                          "Sorry, event 0 doesn't exist")
+
+    def test_update_an_event_existent_event_with_same_contract(self):
+        url = f"/crm/events/{self.event2.id}/"
+        token = self.login(self.support_user)
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + token["access"])
+        response = self.client.put(url, {
+            "name": "Wooky",
+            "contract": self.contract1.id,
+            "event_status": 'Incoming',
+            "attendees": 200,
+            "event_date": self.date_p20d.strftime("%Y/%m/%d %H:%M"),
+        })
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json()['contract'][0],
+                         "Sorry, there's already an event associated with this contract")
 
     def test_delete_an_event(self):
         url = f"/crm/events/{self.event2.id}/"

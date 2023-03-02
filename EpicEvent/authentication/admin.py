@@ -20,7 +20,6 @@ import datetime
 import logging
 
 login_logger = logging.getLogger("login_security")
-form_logger = logging.getLogger("form_security")
 
 
 @receiver(user_logged_out)
@@ -249,19 +248,17 @@ class ClientAdmin(admin.ModelAdmin):
 
 class ContractForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
-        try:
-            # change form
+        instance = kwargs.get("instance", None)
+        if instance:
             self.date_created = kwargs["instance"].date_created
-        except (AttributeError, KeyError) as e:
-            # add form
-            form_logger.info("use of a Contract add form "
-                             "according to %s error", type(e))
+        else:
             self.date_created = datetime.datetime.now()
         super().__init__(*args, **kwargs)
         self.fields["amount"].error_messages = {
             "required": "Amount field is required "
                         "and must be a float or  an integer !"
         }
+
 
     def clean_payment_due(self):
         Validators.is_prior_to_created_date(
@@ -270,7 +267,8 @@ class ContractForm(forms.ModelForm):
         return self.cleaned_data["payment_due"]
 
     def clean(self):
-        try:
+        status = self.cleaned_data.get("status", None)
+        if status is not None:
             if (
                 self.cleaned_data["status"] is False
                 and self.initial["status"] is True
@@ -281,14 +279,6 @@ class ContractForm(forms.ModelForm):
                     "associated with this signed contract. "
                     "You can't cancel signature !"
                 )
-        except KeyError as e:
-            # it's a create form, with no status field
-            form_logger.info(
-                "use of a Contract add form "
-                "with no status field according "
-                "to %s error",
-                type(e)
-            )
 
     def save(self, commit=True):
         contract = super().save(commit=False)

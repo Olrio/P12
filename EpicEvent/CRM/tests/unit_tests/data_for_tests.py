@@ -18,6 +18,7 @@ class Data(APITestCase):
         cls.date_now = datetime.datetime.now()
         cls.date_p20d = cls.date_now + datetime.timedelta(days=20)
         cls.date_p50d = cls.date_now + datetime.timedelta(days=50)
+        cls.date_a30d = cls.date_now - datetime.timedelta(days=30)
 
         cls.management_group = Group.objects.create(name="Management team")
         cls.sales_group = Group.objects.create(name="Sales team")
@@ -60,6 +61,15 @@ class Data(APITestCase):
         cls.support_user.set_password("toto1234")
         cls.support_user.groups.add(cls.support_group)
         cls.support_user.save()
+        cls.support_user2 = User.objects.create(
+            username='bbrother',
+            first_name='Big',
+            last_name='Brother',
+            is_staff=False,
+            is_superuser=False)
+        cls.support_user2.set_password("toto1234")
+        cls.support_user2.groups.add(cls.support_group)
+        cls.support_user2.save()
         cls.user_lambda = User.objects.create(
             username='jbody',
             first_name='Jeannot',
@@ -115,6 +125,15 @@ class Data(APITestCase):
             client=cls.client1,
             status=True,
             amount=25000,
+            payment_due=cls.date_p50d,
+            date_created=cls.date_now,
+            date_updated=cls.date_now
+        )
+
+        cls.contract4 = Contract.objects.create(
+            client=cls.client1,
+            status=False,
+            amount=2500,
             payment_due=cls.date_p50d,
             date_created=cls.date_now,
             date_updated=cls.date_now

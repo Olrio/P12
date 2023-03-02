@@ -12,19 +12,39 @@ from authentication.admin import (
 from django.contrib import admin
 from CRM.tests.unit_tests.data_for_tests import Data
 
+import logging
+
 
 class TestLogin(Data):
     def test_valid_login(self):
-        response = self.browser.login(username='egeret', password='toto1234')
+        response = self.browser.login(
+            username=self.management_user.username,
+            password='toto1234')
         self.assertTrue(response)
 
+    def test_valid_login_check_log(self):
+        with self.assertLogs(logger=logging.getLogger("login_security"), level='INFO') as log:
+            response = self.browser.post(
+                "/admin/login/",
+                {'username': self.management_user.username, 'password': 'toto1234'}
+            )
+            self.assertTrue(response)
+            self.assertIn(
+                f"INFO:login_security:user {self.management_user} connected to admin site",
+                log.output
+            )
+
     def test_invalid_login(self):
-        response = self.browser.login(username='bug', password='toto1234')
+        response = self.browser.login(
+            username='nobody',
+            password='badpassword')
         self.assertFalse(response)
 
     def test_login_error_message_invalid_credentials(self):
         response = self.browser.post(
-            "/admin/login/", {'username': 'bidon', 'password': 'bidon'})
+            "/admin/login/",
+            {'username': 'bidon', 'password': 'bidon'}
+        )
         error = response.context['form'].errors.as_data()["__all__"][0]
         self.assertEqual(
             error.message,
@@ -41,7 +61,37 @@ class TestLogin(Data):
                                         "are allowed to use this site.")
 
 
+class TestLogout(Data):
+    def test_valid_logout(self):
+        self.browser.login(
+            username=self.management_user.username,
+            password='toto1234')
+        response = self.browser.get("/admin/logout/")
+        self.assertTemplateUsed(response, 'registration/logged_out.html')
+        self.assertEqual(response.status_code, 200)
+
 class TestUsers(Data):
+    def test_main_create_user(self):
+        user = User.objects._create_user('usertest', 'passwordtest')
+        self.assertTrue(isinstance(user, User))
+
+    def test_main_create_user_no_username(self):
+        with self.assertRaises(ValueError):
+            User.objects._create_user(username=None, password='passwordtest')
+
+    def test_main_create_superuser(self):
+        superuser = User.objects.create_superuser('usertest', 'passwordtest')
+        self.assertTrue(isinstance(superuser, User))
+        self.assertTrue(superuser.is_superuser)
+
+    def test_main_create_superuser_not_staff(self):
+        with self.assertRaises(ValueError):
+            User.objects.create_superuser('usertest', 'passwordtest', is_staff=False)
+
+    def test_main_create_superuser_not_superuser(self):
+        with self.assertRaises(ValueError):
+            User.objects.create_superuser('usertest', 'passwordtest', is_superuser=False)
+
     def test_get_users(self):
         self.browser.login(username='egeret', password='toto1234')
         response = self.browser.get("/admin/authentication/user/")
@@ -282,6 +332,15 @@ class TestEvents(Data):
         }, follow=True)
         self.assertEqual(Event.objects.count(), events_count + 1)
         self.assertEqual(Event.objects.last().attendees, 200)
+
+    def test_update_event(self):
+        self.browser.login(username='egeret', password='toto1234')
+        response = self.browser.get(f"/admin/CRM/event/{self.event1.id}/change/")
+        contract_queryset = response.context['adminform'].fields['contract']._queryset
+        # self.event2 associated with self.contract2
+        # so self.contract2 is not a valid choice for self.event1.contract
+        self.assertTrue(self.contract1 in contract_queryset)
+        self.assertFalse(self.contract2 in contract_queryset)
 
     def test_event_date_vs_event_status(self):
         self.browser.login(username='egeret', password='toto1234')

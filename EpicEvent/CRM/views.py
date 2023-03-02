@@ -14,7 +14,8 @@ from .serializers import (
     ClientListSerializer,
     ContractDetailSerializer,
     ContractListSerializer,
-    EventSerializer
+    EventDetailSerializer,
+    EventListSerializer
 )
 from .permissions import (
     IsAuthenticated,
@@ -176,7 +177,8 @@ class ContractViewset(MultipleSerializerMixin, ModelViewSet):
 
 
 class EventViewset(MultipleSerializerMixin, ModelViewSet):
-    serializer_class = EventSerializer
+    serializer_class = EventListSerializer
+    detail_serializer_class = EventDetailSerializer
 
     def get_permissions(self):
         if (self.request.method == 'GET'

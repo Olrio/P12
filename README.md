@@ -176,13 +176,27 @@ Réponse (succès):
     "phone": "8889845",
     "mobile": "11254589",
     "company_name": "Westernity",
+    "sales_contact": [
+        {
+            "id": 3,
+            "last_name": "Antou",
+            "first_name": "Yves"
+        }
+    ],
     "date_created": "2023/02/25 18:21",
     "date_updated": "2023/02/25 18:21"
 }
 ```
 
+La documentation complète de l'API peut être consultée à l'adresse : https://documenter.getpostman.com/view/19438945/2s93CSpB3L
+
+
+## Journalisation
 Noter que les erreurs et exceptions sont consignées dans le fichier CRM/log/debug.log  
 L'historique des connexions au site administrateur et à l'API est conservé dans le fichier CRM/log/login.log
 
-
-
+## Testing
+L'ensemble des applications a été testé.  
+La commande à effectuer est : `coverage run manage.py test`  
+Le taux de couverture des tests est de 100 %.  
+Un rapport html des tests peut être obtenu via la commande `coverage html` qui génère un fichier `index.html` dans le répertoire `htmlcov`.  

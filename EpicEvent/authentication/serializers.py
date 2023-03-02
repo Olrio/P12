@@ -101,8 +101,7 @@ class RegisterUserSerializer(serializers.ModelSerializer):
         return value
 
     def validate(self, data):
-        if data['password1'] and data['password2']:
-            Validators.two_entries_differ(data['password1'], data['password2'])
+        Validators.two_entries_differ(data['password1'], data['password2'])
         return data
 
     def save(self, **kwargs):
@@ -164,7 +163,8 @@ class UpdateUserSerializer(serializers.ModelSerializer):
         data['first_name'] = data['first_name'].title()
         Validators.check_letters_hyphen(data['last_name'], "last_name")
         data['last_name'] = data['last_name'].title()
-        if "password1" in data:
+        if "password1" in data or "password2" in data:
+            Validators.missing_password1_or_password2(data)
             Validators.is_valid_password(data['password1'])
             Validators.two_entries_differ(data['password1'], data['password2'])
         if "team" in data:

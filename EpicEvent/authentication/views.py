@@ -1,9 +1,14 @@
+from rest_framework import serializers
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.exceptions import NotFound
 from rest_framework.response import Response
 from rest_framework_simplejwt.views import TokenViewBase
 from django.core.exceptions import ObjectDoesNotExist
 from .models import User
+from CRM.models import (
+    Client,
+    Event
+)
 from .serializers import (
     UserListSerializer,
     UserDetailSerializer,
@@ -45,12 +50,32 @@ class UserViewset(ModelViewSet):
         else:
             return Response(serializer.errors)
 
+    def perform_destroy(self, instance):
+        if Client.objects.filter(sales_contact=instance).exists():
+            clients = Client.objects.filter(sales_contact=instance)
+            raise serializers.ValidationError(
+                {
+                    "Unauthorized delete": "This user is sales contact for the following clients : "
+                                            f"{[client for client in clients]}. "
+                    "You must change these clients sales contact prior to delete this user."
+                },
+            )
+        if Event.objects.filter(support_contact=instance).exists():
+            events = Event.objects.filter(support_contact=instance)
+            raise serializers.ValidationError(
+                {
+                    "Unauthorized delete": "This user is support for the following events : "
+                                            f"{[event for event in events]}. "
+                    "You must change these events support contact prior to delete this user."
+                },
+            )
+        else:
+            instance.delete()
+
     def get_serializer(self, *args, **kwargs):
-        if self.request.method == "POST":
-            self.serializer_class = RegisterUserSerializer
-        elif self.request.method == "PUT":
+        if self.request.method == "PUT":
             self.serializer_class = UpdateUserSerializer
-        elif self.request.method == "GET" and (
+        if self.request.method == "GET" and (
                 "pk" in self.request.parser_context["kwargs"]
         ):
             self.serializer_class = UserDetailSerializer

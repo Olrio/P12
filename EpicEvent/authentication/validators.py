@@ -18,12 +18,6 @@ class Validators:
                     f"<{field}>: A phone number can contain only numbers !")
 
     @staticmethod
-    def check_is_float(data, field):
-        if type(data) is not float:
-            raise ValidationError(f"<{field}>: "
-                                  f"This field must be a float number !")
-
-    @staticmethod
     def is_valid_password(data):
         errors = list()
         alpha = False
@@ -41,6 +35,14 @@ class Validators:
                           "Your password must be at least 8 characters long!")
         if errors:
             raise ValidationError(errors)
+
+    @staticmethod
+    def missing_password1_or_password2(data):
+        if 'password1' not in data or 'password2' not in data:
+            raise ValidationError(
+                "Password error : "
+                "You must supply both password1 and password2 !"
+            )
 
     @staticmethod
     def two_entries_differ(data1, data2):
