@@ -36,7 +36,7 @@ Postgres
 Etape suivante - création de la base de données:  
 &emsp;- L'invite de commande `postgres=#` est affichée   
 &emsp;- Saisir `CREATE USER <user> WITH PASSWORD <password>;` pour créer 
-l'utilisateur principal  
+l'utilisateur principal. ATTENTION utiliser des simples guillemets `'` et non `"`
 &emsp;- Saisir `CREATE DATABASE <database> OWNER <user>;` pour créer la base de données
 &emsp;- Quitter le Shell en tapant `exit`  
 
@@ -57,7 +57,7 @@ Créer un superutilisateur qui pourra se connecter au site Django admin :
 
 
 ## Utilisation du site d'administration
-Lancer le serveur avec la commande `python manage.py runserver`
+Lancer le serveur avec la commande `python manage.py runserver --insecure`
 Ouvrir un navigateur à l'adresse `http://127.0.0.1:8000/admin/login/`
 Se logger avec les `username` et `password` du superutilisateur juste créé.
 

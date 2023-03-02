@@ -2,6 +2,7 @@ from django.contrib import admin
 from django.urls import resolve
 from django.db.models import Q
 from .models import User
+from .permissions import create_groups
 from CRM.models import (
     Client,
     Contract,
@@ -20,6 +21,7 @@ import datetime
 import logging
 
 login_logger = logging.getLogger("login_security")
+create_groups()
 
 
 @receiver(user_logged_out)
