@@ -16,6 +16,9 @@ PostgreSQL doit donc être installé.
 
 ## Installation de PostgreSQL
 
+Comme utilisateur principal (`<user>`), il est recommandé d'utiliser votre nom d'utilisateur de session Linux, Windows ou Mac.  
+
+
 **Sous Windows :**  
 &emsp;- Télécharger l'_installer_ via le site https://www.enterprisedb.com/downloads/postgres-postgresql-downloads  
 &emsp;- Installer PostgreSQL en suivant les instructions de l'assistant 
@@ -49,7 +52,10 @@ Ce fichier comporte également les informations nécessaires à l'association de
 - nom de l'utilisateur principal de la base de données `<user>`
 - mot de passe de cet utilisateur `<password>`
 
-Effectuer les migrations avec la commande `python manage.py migrate`
+Effectuer les migrations avec les commandes  
+`python manage.py makemigrations authentication`  
+`python manage.py makemigrations CRM`  
+`python manage.py migrate`  
 
 Créer un superutilisateur qui pourra se connecter au site Django admin : 
 `python manage.py createsuperuser` en fournissant son `username`et son 
