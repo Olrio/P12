@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.urls import resolve
 from django.db.models import Q
 from .models import User
-from .permissions import create_groups
+from .permissions import get_groups
 from CRM.models import (
     Client,
     Contract,
@@ -21,7 +21,6 @@ import datetime
 import logging
 
 login_logger = logging.getLogger("login_security")
-create_groups()
 
 
 @receiver(user_logged_out)
@@ -162,7 +161,9 @@ class CustomUserAdmin(BaseUserAdmin):
     ordering = ("username",)
     filter_horizontal = ("user_permissions", "groups")
 
+
     def management(self, obj):
+        get_groups()
         return obj.groups.filter(name="Management team").exists()
 
     def sales(self, obj):
