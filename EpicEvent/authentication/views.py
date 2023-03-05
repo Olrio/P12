@@ -55,18 +55,23 @@ class UserViewset(ModelViewSet):
             clients = Client.objects.filter(sales_contact=instance)
             raise serializers.ValidationError(
                 {
-                    "Unauthorized delete": "This user is sales contact for the following clients : "
-                                            f"{[client for client in clients]}. "
-                    "You must change these clients sales contact prior to delete this user."
+                    "Unauthorized delete":
+                        "This user is sales contact "
+                        "for the following clients : "
+                        f"{[client for client in clients]}. "
+                        "You must change these clients sales contact "
+                        "prior to delete this user."
                 },
             )
         if Event.objects.filter(support_contact=instance).exists():
             events = Event.objects.filter(support_contact=instance)
             raise serializers.ValidationError(
                 {
-                    "Unauthorized delete": "This user is support for the following events : "
-                                            f"{[event for event in events]}. "
-                    "You must change these events support contact prior to delete this user."
+                    "Unauthorized delete":
+                        "This user is support for the following events : "
+                        f"{[event for event in events]}. "
+                        "You must change these events support contact "
+                        "prior to delete this user."
                 },
             )
         else:

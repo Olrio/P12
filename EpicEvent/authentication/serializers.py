@@ -7,6 +7,7 @@ import logging
 
 login_logger = logging.getLogger("login_security")
 
+
 class LoginUserSerializer(TokenObtainPairSerializer):
     """
     enable to follow connexions to API

@@ -161,7 +161,6 @@ class CustomUserAdmin(BaseUserAdmin):
     ordering = ("username",)
     filter_horizontal = ("user_permissions", "groups")
 
-
     def management(self, obj):
         get_groups()
         return obj.groups.filter(name="Management team").exists()
@@ -261,7 +260,6 @@ class ContractForm(forms.ModelForm):
             "required": "Amount field is required "
                         "and must be a float or  an integer !"
         }
-
 
     def clean_payment_due(self):
         Validators.is_prior_to_created_date(

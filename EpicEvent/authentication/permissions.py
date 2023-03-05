@@ -3,8 +3,11 @@ from django.contrib.auth.models import (
     Permission
 )
 
+
 def get_groups():
-    management_group, created = Group.objects.get_or_create(name="Management team")
+    management_group, created = Group.objects.get_or_create(
+        name="Management team"
+    )
     Group.objects.get_or_create(name="Sales team")
     Group.objects.get_or_create(name="Support team")
 

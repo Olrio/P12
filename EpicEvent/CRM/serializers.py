@@ -20,7 +20,7 @@ class ClientListSerializer(serializers.ModelSerializer):
         serializer = UserListSerializer(queryset, many=True)
         # we only need sales_contact id, first_name and last_name
         for saler in serializer.data:
-            del(saler['username'])
+            del (saler['username'])
             del (saler['groups'])
         return serializer.data
 
@@ -94,7 +94,8 @@ class ClientDetailSerializer(serializers.ModelSerializer):
             if not sales_contact.groups.filter(name="Sales team").exists():
                 raise serializers.ValidationError(
                     {
-                        "sales_contact error": "Please choose a user belonging to Sales team"
+                        "sales_contact error":
+                            "Please choose a user belonging to Sales team"
                     }
                 )
         else:
@@ -119,7 +120,9 @@ class ClientDetailSerializer(serializers.ModelSerializer):
                 name="Management team").exists():
             if "contact" in validated_data:
                 try:
-                    sales_contact = User.objects.get(id=validated_data["contact"])
+                    sales_contact = User.objects.get(
+                        id=validated_data["contact"]
+                    )
                 except User.DoesNotExist:
                     raise serializers.ValidationError(
                         {
@@ -129,7 +132,8 @@ class ClientDetailSerializer(serializers.ModelSerializer):
                 if not sales_contact.groups.filter(name="Sales team").exists():
                     raise serializers.ValidationError(
                         {
-                            "sales_contact error": "Please choose a user belonging to Sales team"
+                            "sales_contact error":
+                                "Please choose a user belonging to Sales team"
                         }
                     )
                 instance.sales_contact = sales_contact
@@ -248,8 +252,16 @@ class EventListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Event
-        fields = ['pk', 'name', 'contract', 'support_contact', 'event_status', 'status',
-                  'event_date', 'attendees']
+        fields = [
+            'pk',
+            'name',
+            'contract',
+            'support_contact',
+            'event_status',
+            'status',
+            'event_date',
+            'attendees'
+        ]
         read_only_fields = ['date_created', 'date_updated', 'status']
 
 
@@ -257,13 +269,26 @@ class EventDetailSerializer(serializers.ModelSerializer):
     contract = serializers.CharField()
     support_contact = serializers.CharField(required=False)
     event_date = serializers.DateTimeField(input_formats=['%Y/%m/%d %H:%M'])
-    status = serializers.CharField(source='get_event_status_display', required=False)
+    status = serializers.CharField(
+        source='get_event_status_display', required=False
+    )
     event_status = serializers.CharField()
 
     class Meta:
         model = Event
-        fields = ['pk', 'name', 'contract', 'support_contact', 'event_status', 'status',
-                  'event_date', 'attendees', 'notes', 'date_created', 'date_updated']
+        fields = [
+            'pk',
+            'name',
+            'contract',
+            'support_contact',
+            'event_status',
+            'status',
+            'event_date',
+            'attendees',
+            'notes',
+            'date_created',
+            'date_updated'
+        ]
         read_only_fields = ['date_created', 'date_updated', 'status']
 
     def validate_contract(self, value):

@@ -23,14 +23,20 @@ class TestLogin(Data):
         self.assertTrue(response)
 
     def test_valid_login_check_log(self):
-        with self.assertLogs(logger=logging.getLogger("login_security"), level='INFO') as log:
+        with self.assertLogs(
+                logger=logging.getLogger("login_security"), level='INFO'
+        ) as log:
             response = self.browser.post(
                 "/admin/login/",
-                {'username': self.management_user.username, 'password': 'toto1234'}
+                {
+                    'username': self.management_user.username,
+                    'password': 'toto1234'
+                }
             )
             self.assertTrue(response)
             self.assertIn(
-                f"INFO:login_security:user {self.management_user} connected to admin site",
+                f"INFO:login_security:user {self.management_user} "
+                "connected to admin site",
                 log.output
             )
 
@@ -70,6 +76,7 @@ class TestLogout(Data):
         self.assertTemplateUsed(response, 'registration/logged_out.html')
         self.assertEqual(response.status_code, 200)
 
+
 class TestUsers(Data):
     def test_main_create_user(self):
         user = User.objects._create_user('usertest', 'passwordtest')
@@ -86,11 +93,15 @@ class TestUsers(Data):
 
     def test_main_create_superuser_not_staff(self):
         with self.assertRaises(ValueError):
-            User.objects.create_superuser('usertest', 'passwordtest', is_staff=False)
+            User.objects.create_superuser(
+                'usertest', 'passwordtest', is_staff=False
+            )
 
     def test_main_create_superuser_not_superuser(self):
         with self.assertRaises(ValueError):
-            User.objects.create_superuser('usertest', 'passwordtest', is_superuser=False)
+            User.objects.create_superuser(
+                'usertest', 'passwordtest', is_superuser=False
+            )
 
     def test_get_users(self):
         self.browser.login(username='egeret', password='toto1234')
@@ -335,8 +346,12 @@ class TestEvents(Data):
 
     def test_update_event(self):
         self.browser.login(username='egeret', password='toto1234')
-        response = self.browser.get(f"/admin/CRM/event/{self.event1.id}/change/")
-        contract_queryset = response.context['adminform'].fields['contract']._queryset
+        response = self.browser.get(
+            f"/admin/CRM/event/{self.event1.id}/change/"
+        )
+        contract_queryset = response.context(
+            ['adminform'].fields['contract']._queryset
+        )
         # self.event2 associated with self.contract2
         # so self.contract2 is not a valid choice for self.event1.contract
         self.assertTrue(self.contract1 in contract_queryset)

@@ -9,7 +9,6 @@ from .data_for_tests import Data
 from authentication.serializers import (
     UserListSerializer,
     UserDetailSerializer,
-    RegisterUserSerializer
 )
 
 
@@ -99,8 +98,11 @@ class UserTest(DataTest):
         list_last_names = [data['last_name'] for data in response.data]
         self.assertTrue(self.management_user.username in list_usernames)
         self.assertTrue(self.sales_user.last_name in list_last_names)
-        self.assertTrue("Sales team" in UserListSerializer().get_groups(self.sales_user))
-
+        self.assertTrue(
+            "Sales team" in UserListSerializer().get_groups(
+                self.sales_user
+            )
+        )
 
     def test_get_users_list_unauthorized(self):
         url = "/crm/users/"
@@ -122,7 +124,11 @@ class UserTest(DataTest):
         self.assertEqual(
             response.data['first_name'],
             self.support_user.first_name)
-        self.assertTrue("Support team" in UserDetailSerializer().get_groups(self.support_user))
+        self.assertTrue(
+            "Support team" in UserDetailSerializer().get_groups(
+                self.support_user
+            )
+        )
 
     def test_get_user_detail_unauthorized(self):
         url = f"/crm/users/{self.support_user.id}/"
@@ -159,7 +165,7 @@ class UserTest(DataTest):
         self.assertEqual(response.status_code, 200)
         self.assertFalse(User.objects.last().is_staff)
 
-    def test_create_a_user_with_same_last_name_and_first_name_than_existent_user(self):
+    def test_create_a_user_with_duplicatet_first_and_last_names(self):
         url = "/crm/users/"
         token = self.login(self.management_user)
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + token["access"])
@@ -287,7 +293,8 @@ class UserTest(DataTest):
         })
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.json()['non_field_errors'][0],
-                         "Password error : You must supply both password1 and password2 !")
+                         "Password error : You must supply "
+                         "both password1 and password2 !")
 
     def test_update_a_user_two_passwords_different(self):
         url = f"/crm/users/{self.support_user.id}/"
@@ -304,7 +311,8 @@ class UserTest(DataTest):
         })
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.json()['non_field_errors'][0],
-                         "Password error : Your two entries for password differ !")
+                         "Password error : Your two entries "
+                         "for password differ !")
 
     def test_update_a_user_unauthorized(self):
         url = f"/crm/users/{self.support_user.id}/"
@@ -367,11 +375,13 @@ class UserTest(DataTest):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + token["access"])
         response = self.client.delete(url)
         self.assertEqual(response.status_code, 400)
-        clients = Client.objects.filter(sales_contact = self.sales_user)
+        clients = Client.objects.filter(sales_contact=self.sales_user)
         self.assertEqual(response.json()['Unauthorized delete'],
-                         "This user is sales contact for the following clients :"
+                         "This user is sales contact "
+                         "for the following clients :"
                          f" {[client for client in clients]}. "
-                         f"You must change these clients sales contact prior to delete this user.")
+                         f"You must change these clients sales contact "
+                         f"prior to delete this user.")
 
     def test_delete_a_user_event_support_contact(self):
         url = f"/crm/users/{self.support_user.id}/"
@@ -379,11 +389,12 @@ class UserTest(DataTest):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + token["access"])
         response = self.client.delete(url)
         self.assertEqual(response.status_code, 400)
-        events = Event.objects.filter(support_contact = self.support_user)
+        events = Event.objects.filter(support_contact=self.support_user)
         self.assertEqual(response.json()['Unauthorized delete'],
                          "This user is support for the following events :"
                          f" {[event for event in events]}. "
-                         f"You must change these events support contact prior to delete this user.")
+                         f"You must change these events support contact "
+                         "prior to delete this user.")
 
 
 class ClientTest(DataTest):
@@ -406,7 +417,9 @@ class ClientTest(DataTest):
         response = self.client.get(url, format="json")
         self.assertEqual(response.status_code, 404)
         self.assertEqual(response.json()['detail'],
-                         "Sorry, looks like you search for inexistent fields. Please ensure you correctly entered searched fields.")
+                         "Sorry, looks like you search for inexistent fields. "
+                         "Please ensure you correctly entered searched fields."
+                         )
 
     def test_get_client_detail_sales_user(self):
         url = f"/crm/clients/{self.client1.id}/"
@@ -499,7 +512,7 @@ class ClientTest(DataTest):
         self.assertEqual(response.json()['sales_contact error'],
                          "Please fill 'contact' field")
 
-    def test_create_a_client_management_user_providing_inexistent_contact_user(self):
+    def test_create_a_client_providing_inexistent_contact_user(self):
         url = "/crm/clients/"
         token = self.login(self.management_user)
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + token["access"])
@@ -515,7 +528,7 @@ class ClientTest(DataTest):
         self.assertEqual(response.json()['sales_contact error'],
                          "This user doesn't exist.")
 
-    def test_create_a_client_management_user_providing_contact_user_not_sales_member(self):
+    def test_create_a_client_providing_contact_user_not_sales_member(self):
         url = "/crm/clients/"
         token = self.login(self.management_user)
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + token["access"])
@@ -585,7 +598,7 @@ class ClientTest(DataTest):
         updated_client = Client.objects.get(id=self.client1.id)
         self.assertEqual(updated_client.sales_contact, self.sales_user2)
 
-    def test_update_a_client_management_user_providing_inexistent_contact_user(self):
+    def test_update_a_client_providing_inexistent_contact_user(self):
         url = f"/crm/clients/{self.client1.id}/"
         token = self.login(self.management_user)
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + token["access"])
@@ -601,7 +614,7 @@ class ClientTest(DataTest):
         self.assertEqual(response.json()['sales_contact error'],
                          "This user doesn't exist.")
 
-    def test_update_a_client_management_user_providing_contact_user_not_sales_member(self):
+    def test_update_a_client_with_user_contact_being_not_sales_member(self):
         url = f"/crm/clients/{self.client1.id}/"
         token = self.login(self.management_user)
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + token["access"])
@@ -616,7 +629,6 @@ class ClientTest(DataTest):
         })
         self.assertEqual(response.json()['sales_contact error'],
                          "Please choose a user belonging to Sales team")
-
 
     def test_update_a_client_non_existent(self):
         url = "/crm/clients/0/"
@@ -713,7 +725,9 @@ class ContractTest(DataTest):
         response = self.client.get(url, format="json")
         self.assertEqual(response.status_code, 404)
         self.assertEqual(response.json()['detail'],
-                         "Sorry, looks like you search for inexistent fields. Please ensure you correctly entered searched fields.")
+                         "Sorry, looks like you search for inexistent fields. "
+                         "Please ensure you correctly entered searched fields."
+                         )
 
     def test_get_contract_detail(self):
         url = f"/crm/contracts/{self.contract1.id}/"
@@ -946,7 +960,9 @@ class EventTest(DataTest):
         response = self.client.get(url, format="json")
         self.assertEqual(response.status_code, 404)
         self.assertEqual(response.json()['detail'],
-                         "Sorry, looks like you search for inexistent fields. Please ensure you correctly entered searched fields.")
+                         "Sorry, looks like you search for inexistent fields. "
+                         "Please ensure you correctly entered searched fields."
+                         )
 
     def test_get_event_detail(self):
         url = f"/crm/events/{self.event1.id}/"
@@ -1061,7 +1077,8 @@ class EventTest(DataTest):
         }, format="json")
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.json()['contract'][0],
-                         "Sorry, there's already an event associated with this contract")
+                         "Sorry, there's already an event "
+                         "associated with this contract")
 
     def test_create_an_event_for_non_signed_contract(self):
         url = "/crm/events/"
@@ -1091,7 +1108,8 @@ class EventTest(DataTest):
         }, format="json")
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.json()['event_status'][0],
-                         "Error in field <Event status>: Must be <Incoming>, <In progress> or <Closed>")
+                         "Error in field <Event status>: "
+                         "Must be <Incoming>, <In progress> or <Closed>")
 
     def test_create_an_event_with_event_status_in_progress(self):
         url = "/crm/events/"
@@ -1138,7 +1156,9 @@ class EventTest(DataTest):
         }, format="json")
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.json()['support_contact'][0],
-                         "Only users of management team can change/add support_contact. Please dont't use this field.")
+                         "Only users of management team "
+                         "can change/add support_contact. "
+                         "Please dont't use this field.")
 
     def test_create_an_event_support_contact_not_support_member(self):
         url = "/crm/events/"
@@ -1154,7 +1174,8 @@ class EventTest(DataTest):
         }, format="json")
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.json()['support_contact'][0],
-                         f"Sorry, user {self.sales_user2.id} isn't member of support team")
+                         f"Sorry, user {self.sales_user2.id} "
+                         f"isn't member of support team")
 
     def test_create_an_event_non_existent_support_contact(self):
         url = "/crm/events/"
@@ -1185,7 +1206,8 @@ class EventTest(DataTest):
         }, format="json")
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.json()['event_status'][0],
-                         "This event can't be in progress or closed since its date is later than the current date")
+                         "This event can't be in progress or closed since "
+                         "its date is later than the current date")
 
     def test_create_an_event_incoming_but_event_date_is_passed(self):
         url = "/crm/events/"
@@ -1200,8 +1222,8 @@ class EventTest(DataTest):
         }, format="json")
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.json()['event_status'][0],
-                         "This event can't be incoming since its date is earlier than the current date")
-
+                         "This event can't be incoming since "
+                         "its date is earlier than the current date")
 
     def test_update_an_event(self):
         url = f"/crm/events/{self.event1.id}/"
@@ -1281,7 +1303,8 @@ class EventTest(DataTest):
         })
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.json()['contract'][0],
-                         "Sorry, there's already an event associated with this contract")
+                         "Sorry, there's already an event "
+                         "associated with this contract")
 
     def test_delete_an_event(self):
         url = f"/crm/events/{self.event2.id}/"
