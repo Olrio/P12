@@ -349,8 +349,8 @@ class TestEvents(Data):
         response = self.browser.get(
             f"/admin/CRM/event/{self.event1.id}/change/"
         )
-        contract_queryset = response.context(
-            ['adminform'].fields['contract']._queryset
+        contract_queryset = (
+            response.context['adminform'].fields['contract']._queryset
         )
         # self.event2 associated with self.contract2
         # so self.contract2 is not a valid choice for self.event1.contract
