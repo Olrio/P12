@@ -206,3 +206,6 @@ L'ensemble des applications a été testé.
 La commande à effectuer est : `coverage run manage.py test`  
 Le taux de couverture des tests est de 100 %.  
 Un rapport html des tests peut être obtenu via la commande `coverage html` qui génère un fichier `index.html` dans le répertoire `htmlcov`.  
+
+## Conformité PEP8
+La conformité des scripts aux recommandations de la PEP8 peut être vérifiée au moyen de la commande `flake8 --exclude=*migration*`  
